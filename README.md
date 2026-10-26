@@ -48,6 +48,24 @@ Regen: `npm run fetch:cota`
 ```bash
 npm run dev
 npm run build
+npm run check              # build + wrangler deploy --dry-run
+npm run deploy             # build + wrangler deploy (manual)
 npm run fetch:cota
 npm run generate:fixture   # legacy Bahrain synthetic
 ```
+
+## Deployment
+
+**Live:** [https://citetrace.welchsoftware.net](https://citetrace.welchsoftware.net)
+
+Pushing to **`master`** runs [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml): `npm run build` (static export → `out/`) then `wrangler deploy` to Cloudflare Workers Assets.
+
+Required GitHub repository secrets (same names as DropToPhone / the company site):
+
+| Secret | Purpose |
+|--------|---------|
+| `CLOUDFLARE_API_TOKEN` | Wrangler deploy |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account |
+| `CLOUDFLARE_ZONE_ID` | Optional — purge CDN for `citetrace.welchsoftware.net` after deploy |
+
+Add them under **Settings → Secrets and variables → Actions** on this repo (reuse the Welch Cloudflare token that already deploys other `*.welchsoftware.net` products).

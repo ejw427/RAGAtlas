@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ContextRail } from "@/components/session/ContextRail";
 import { TelemetryStage } from "@/components/session/TelemetryStage";
 import { RagRail } from "@/components/session/RagRail";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
+  allowedLapNumbers,
   compareTargetLap,
   defaultDriverId,
   defaultLapNumber,
@@ -30,25 +31,47 @@ import { animateValue } from "@/lib/motion";
 import type { CiteTarget } from "@/lib/types";
 import { PRODUCT, STUDIO } from "@/lib/brand";
 
-export function SessionShell({
-  initialLap,
-  initialDriverId,
-  initialCiteId,
-  initialQuery,
-}: {
-  initialLap: number;
-  initialDriverId?: string;
-  initialCiteId?: string;
-  initialQuery?: string;
-}) {
+function resolveSessionParams(searchParams: URLSearchParams) {
+  const drivers = getDrivers();
+  const driverParam = searchParams.get("driver") ?? "";
+  const byCode = drivers.find(
+    (d) => d.code.toLowerCase() === driverParam.toLowerCase(),
+  );
+  const byId = drivers.find((d) => d.id === driverParam);
+  const driverId = byCode?.id ?? byId?.id ?? defaultDriverId();
+
+  const allowed = allowedLapNumbers(driverId);
+  const fallback = defaultLapNumber(driverId);
+  const lap = Number(searchParams.get("lap") ?? String(fallback));
+  const initialLap =
+    Number.isFinite(lap) && allowed.includes(lap) ? lap : fallback;
+
+  return {
+    driverId,
+    initialLap,
+    initialCiteId: searchParams.get("citeId") ?? undefined,
+    initialQuery: searchParams.get("q") ?? undefined,
+  };
+}
+
+export function SessionShell() {
   const pack = getSessionPack();
   const drivers = getDrivers();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [driverId, setDriverId] = useState(
-    initialDriverId ?? defaultDriverId(),
+  const boot = useMemo(
+    () => resolveSessionParams(searchParams),
+    // Boot once from the landing URL; later updates go through pushUrl.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   );
-  const [lapNumber, setLapNumber] = useState(initialLap);
+
+  const initialCiteId = boot.initialCiteId;
+  const initialQuery = boot.initialQuery;
+
+  const [driverId, setDriverId] = useState(boot.driverId);
+  const [lapNumber, setLapNumber] = useState(boot.initialLap);
   const [compare, setCompare] = useState(false);
   const [plotChannelIds, setPlotChannelIds] = useState(defaultPlotIds);
   const [playheadM, setPlayheadM] = useState(1800);

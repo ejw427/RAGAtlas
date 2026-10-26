@@ -1,0 +1,29 @@
+/**
+ * CiteTrace — Cloudflare Workers Assets
+ * Production: https://citetrace.welchsoftware.net
+ *
+ * Subdomain only — do not claim welchsoftware.net / www (company site Worker).
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "citetrace",
+	"compatibility_date": "2025-10-08",
+	"assets": {
+		"directory": "./out",
+		"not_found_handling": "404-page"
+	},
+	"observability": {
+		"enabled": true
+	},
+	/**
+	 * DNS for welchsoftware.net must already be on this Cloudflare account.
+	 * https://developers.cloudflare.com/workers/configuration/routing/custom-domains/
+	 */
+	"routes": [
+		{
+			"pattern": "citetrace.welchsoftware.net",
+			"custom_domain": true
+		}
+	],
+	"upload_source_maps": true
+}
