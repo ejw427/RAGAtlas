@@ -56,14 +56,21 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
         run: |
-          set -euo pipefail
+          set -uo pipefail
           if [ -z "${CLOUDFLARE_ZONE_ID:-}" ]; then
             echo "::warning::CLOUDFLARE_ZONE_ID secret is not set — skipping CDN purge."
             exit 0
           fi
-          RESPONSE=$(curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache" \
+          # Soft-fail: deploy already succeeded. Token may lack Zone.Cache Purge.
+          HTTP=$(curl -sS -o /tmp/cf-purge.json -w "%{http_code}" -X POST \
+            "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache" \
             -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
             -H "Content-Type: application/json" \
-            --data '{"hosts":["citetrace.welchsoftware.net"]}')
-          echo "${RESPONSE}" | jq -e '.success == true' > /dev/null
-          echo "Purged CDN cache for citetrace.welchsoftware.net"
+            --data '{"hosts":["citetrace.welchsoftware.net"]}' || true)
+          if [ "${HTTP}" = "200" ] && jq -e '.success == true' /tmp/cf-purge.json > /dev/null 2>&1; then
+            echo "Purged CDN cache for citetrace.welchsoftware.net"
+          else
+            echo "::warning::CDN purge skipped or failed (HTTP ${HTTP}). Deploy is still live — grant Cache Purge on the API token if you want purge."
+            cat /tmp/cf-purge.json 2>/dev/null || true
+          fi
+          exit 0
