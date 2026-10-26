@@ -35,7 +35,10 @@ Open [http://127.0.0.1:43127](http://127.0.0.1:43127).
 2. Use **Lap** for the whole lap, or S1–S3 for sector focus
 3. Ask: `Why did brake temp spike in S3 on lap 10?`
 4. Click cite → playhead locks on synthetic 942°C peak over real brake zone
-5. Switch drivers; Compare vs LEC Soft / Hard baseline
+5. Ask more of the corpus: front vs rear (688°C vs 942°C), trail vs stab (71.7 bar), Soft tyre heat (128°C), ST trap (+5 vs Hard), track cool (−3.3°C), Soft-fit pit (lap 9), or LEC radio (0/12 clips)
+6. Switch drivers; Compare vs LEC Soft / Hard baseline
+
+Regen overlays without re-fetching car_data: `npm run enrich:cota`
 
 ## Data
 
@@ -56,9 +59,10 @@ npm run generate:fixture   # legacy Bahrain synthetic
 
 ## Deployment
 
-**Live:** [https://citetrace.welchsoftware.net](https://citetrace.welchsoftware.net)
+**Live:** [https://citetrace.welchsoftware.net](https://citetrace.welchsoftware.net)  
+**Portfolio card:** [welchsoftware.net/projects/citetrace](https://www.welchsoftware.net/projects/citetrace)
 
-Pushing to **`master`** runs [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml): `npm run build` (static export → `out/`) then `wrangler deploy` to Cloudflare Workers Assets.
+Pushing to **`master`** runs [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml): `npm run build` (static export → `out/`) then `wrangler deploy` to Cloudflare Workers Assets. Keep experiments on a branch — every `master` push updates the live demo.
 
 Required GitHub repository secrets (same names as DropToPhone / the company site):
 
@@ -67,5 +71,17 @@ Required GitHub repository secrets (same names as DropToPhone / the company site
 | `CLOUDFLARE_API_TOKEN` | Wrangler deploy |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account |
 | `CLOUDFLARE_ZONE_ID` | Optional — purge CDN for `citetrace.welchsoftware.net` after deploy |
+| `CF_WEB_ANALYTICS_TOKEN` | Optional — Cloudflare Web Analytics beacon |
 
-Add them under **Settings → Secrets and variables → Actions** on this repo (reuse the Welch Cloudflare token that already deploys other `*.welchsoftware.net` products).
+## Job applications
+
+Use these links (not the private GitHub repo):
+
+| Where | What to paste |
+|-------|----------------|
+| Resume / LinkedIn / email | `https://citetrace.welchsoftware.net` |
+| Portfolio context | `https://www.welchsoftware.net/projects/citetrace` |
+| Deep-link demo | `https://citetrace.welchsoftware.net/session?driver=LEC&lap=10` |
+
+**Pitch:** Waveforms are table stakes. Grounded answers are the job.  
+**Ask:** `Why did brake temp spike in S3 on lap 10?` → click cite → playhead locks.

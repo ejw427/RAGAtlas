@@ -6,6 +6,7 @@
 #   CLOUDFLARE_ACCOUNT_ID
 # Optional:
 #   CLOUDFLARE_ZONE_ID — purge CDN for citetrace.welchsoftware.net after deploy
+#   CF_WEB_ANALYTICS_TOKEN — Cloudflare Web Analytics site token for the subdomain
 
 name: Deploy
 
@@ -43,6 +44,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          NEXT_PUBLIC_CF_WEB_ANALYTICS_TOKEN: ${{ secrets.CF_WEB_ANALYTICS_TOKEN }}
 
       - name: Deploy
         uses: cloudflare/wrangler-action@v4

@@ -2,7 +2,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DisclaimerFooter } from "@/components/DisclaimerFooter";
 import {
+  DEMO_ASK,
+  DEMO_STEPS,
+  LIVE_URL,
   METHOD_HEADLINE,
+  PORTFOLIO_URL,
   PRODUCT,
   STUDIO,
   TAGLINE,
@@ -139,6 +143,41 @@ export default function AboutPage() {
           Independent work. Not affiliated with Formula 1 teams, commercial
           telemetry vendors, Formula 1, or the FIA.
         </p>
+        <p className="mt-3 font-mono text-[0.65rem] text-[var(--mute)]">
+          Live:{" "}
+          <a
+            href={LIVE_URL}
+            className="text-[var(--signal)] underline-offset-2 hover:underline"
+          >
+            {LIVE_URL.replace(/^https:\/\//, "")}
+          </a>
+          {" · "}
+          <a
+            href={PORTFOLIO_URL}
+            className="text-[var(--signal)] underline-offset-2 hover:underline"
+          >
+            Portfolio card
+          </a>
+        </p>
+
+        {/* 90-second demo */}
+        <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
+          <h2 className="font-display text-xl font-semibold">
+            90-second demo
+          </h2>
+          <p className="text-[var(--mist)] leading-relaxed">
+            Hiring-manager skim path. Money-shot ask:{" "}
+            <span className="font-mono text-[var(--chalk)]">{DEMO_ASK}</span>
+          </p>
+          <ol className="list-decimal space-y-2 pl-5 text-[var(--mist)]">
+            {DEMO_STEPS.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+          <Button asChild size="sm" className="mt-2">
+            <Link href="/session?driver=LEC&lap=10">Open COTA session</Link>
+          </Button>
+        </section>
 
         {/* Corpus strip */}
         <section className="mt-8" aria-label="Session corpus">
@@ -206,6 +245,26 @@ export default function AboutPage() {
               hint="Playhead eases to synthetic 942°C peak on the real heavy zone"
             />
             <DemoChip
+              href="/session?driver=LEC&lap=10&citeId=cite_front_brake&q=Why%20is%20the%20front%20brake%20cooler%20than%20the%20rear%20on%20lap%2010%3F"
+              label="Front vs rear"
+              hint="Synthetic FL peaks at 688°C under the rear 942°C duct flag"
+            />
+            <DemoChip
+              href="/session?driver=LEC&lap=10&citeId=cite_pressure&q=Was%20the%20S3%20stop%20a%20late%20stab%20or%20a%20trail%3F"
+              label="Trail, not a stab"
+              hint="Brake pressure peaks at 71.7 bar while speed is still high"
+            />
+            <DemoChip
+              href="/session?driver=LEC&lap=10&citeId=cite_tyre&q=How%20hot%20was%20the%20Soft%20tyre%20through%20S2%3F"
+              label="Soft tyre heat"
+              hint="Synthetic FL tyre 128°C in S2 vs Hard 105°C"
+            />
+            <DemoChip
+              href="/session?driver=LEC&lap=10&citeId=cite_trap_st&q=What%20was%20the%20Soft%20speed%20trap%20vs%20Hard%3F"
+              label="Speed trap +5"
+              hint="OpenF1 ST 319 vs Hard 314 km/h"
+            />
+            <DemoChip
               href="/session?driver=LEC&lap=10&citeId=cite_delta_soft&q=Where%20did%20Soft%20gain%20vs%20the%20Hard%20push%3F"
               label="Soft vs Hard delta"
               hint="OpenF1 sector story — Soft flyer vs Hard push"
@@ -269,10 +328,11 @@ export default function AboutPage() {
               <span className="text-[var(--chalk)]">
                 OpenF1 subset + labeled overlays
               </span>{" "}
-              — real broadcast car_data for the field; synthetic{" "}
-              <code className="text-[var(--chalk)]">brake_temp</code> / oil /
-              coolant where public feeds have no ATLAS-class plant channels —
-              provenance is explicit in the chrome.
+              — real broadcast car_data, pits, weather series, and team radio
+              for the field; synthetic rear/front brake temp, brake pressure,
+              tyre surface, steering, long-g, fuel flow, oil, and coolant where
+              public feeds have no ATLAS-class plant channels — provenance is
+              explicit in the chrome.
             </li>
             <li>
               <span className="text-[var(--chalk)]">Distance-domain stage</span>{" "}
