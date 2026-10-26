@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CiteChip } from "@/components/session/CiteChip";
@@ -20,17 +20,20 @@ export function RagRail({
   pulsingCiteId,
   onCite,
   initialQuery,
+  autoAsk = false,
 }: {
   selectedCiteId: string | null;
   pulsingCiteId: string | null;
   onCite: (cite: CiteTarget) => void;
   initialQuery?: string;
+  autoAsk?: boolean;
 }) {
   const [query, setQuery] = useState(
-    initialQuery ?? "Why did brake temp spike in S3 on lap 12?",
+    initialQuery ?? "Why did brake temp spike in S3 on lap 10?",
   );
   const [answer, setAnswer] = useState<RagAnswer>(EMPTY);
   const seeds = seedQueries();
+  const autoAsked = useRef(false);
 
   const submit = async (q: string) => {
     const trimmed = q.trim();
@@ -49,6 +52,13 @@ export function RagRail({
     setAnswer(answerQuery(trimmed));
   };
 
+  useEffect(() => {
+    if (!autoAsk || !initialQuery?.trim() || autoAsked.current) return;
+    autoAsked.current = true;
+    const t = window.setTimeout(() => void submit(initialQuery), 200);
+    return () => window.clearTimeout(t);
+  }, [autoAsk, initialQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <aside className="flex h-full min-h-0 flex-col gap-3 overflow-auto bg-[var(--rail)] p-3 md:border-l md:border-[var(--hairline)]">
       <p className="font-mono text-[0.62rem] uppercase tracking-[0.14em] text-[var(--mute)]">
@@ -65,7 +75,7 @@ export function RagRail({
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Why did brake temp spike in S3 on lap 12?"
+          placeholder="Why did brake temp spike in S3 on lap 10?"
           aria-label="Session query"
           className="min-w-0 flex-1 text-[0.8rem]"
         />
@@ -75,7 +85,7 @@ export function RagRail({
       </form>
 
       <div className="flex flex-wrap gap-1.5">
-        {seeds.slice(0, 3).map((s) => (
+        {seeds.slice(0, 4).map((s) => (
           <button
             key={s}
             type="button"
@@ -145,7 +155,7 @@ export function RagRail({
       </div>
 
       <p className="mt-auto text-[0.65rem] leading-snug text-[var(--mute)]">
-        Deterministic QaMap over mock notes & channel docs — fail closed when
+        Deterministic QaMap over session notes & channel docs — fail closed when
         the session window cannot support the claim.
       </p>
     </aside>

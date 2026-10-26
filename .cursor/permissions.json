@@ -1,0 +1,18 @@
+{
+  "terminalAllowlist": [
+    "npm",
+    "npm run",
+    "npm ci",
+    "npm install",
+    "powershell",
+    "pwsh",
+    "cmd",
+    "npx"
+  ],
+  "autoRun": {
+    "allow_instructions": [
+      "Allow local Next.js rebuild and run: npm run build, npm run dev, and the scripts under scripts/ for start/stop on port 43127.",
+      "Allow reading and killing processes listening on localhost port 43127 for the RAGAtlas stop-dev-server script."
+    ]
+  }
+}

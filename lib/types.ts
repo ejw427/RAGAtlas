@@ -1,6 +1,7 @@
 export type SectorIndex = 1 | 2 | 3;
 export type SessionType = "fp1" | "fp2" | "fp3" | "quali" | "race";
 export type SourceClass = "shaped_like_openf1" | "synthetic_atlas_like";
+export type RateBand = "high" | "mid" | "low";
 
 export interface Meeting {
   id: string;
@@ -21,6 +22,16 @@ export interface SessionWeather {
   rainfall: number;
   windSpeedMps?: number;
   windDirectionDeg?: number;
+  pressureHpa?: number;
+}
+
+export interface StintInfo {
+  driverNumber?: number;
+  stintNumber: number;
+  lapStart: number;
+  lapEnd: number;
+  compound: string;
+  tyreAgeAtStart?: number;
 }
 
 export interface Session {
@@ -48,6 +59,7 @@ export interface Lap {
   id: string;
   sessionId: string;
   driverId?: string;
+  driverNumber?: number;
   number: number;
   timeMs: number;
   sectorsMs: [number, number, number];
@@ -56,6 +68,12 @@ export interface Lap {
   distanceEndM: number;
   isBaseline?: boolean;
   tags?: string[];
+  openf1?: {
+    i1_speed?: number;
+    i2_speed?: number;
+    st_speed?: number;
+    date_start?: string;
+  };
 }
 
 export interface Sector {
@@ -72,13 +90,27 @@ export interface Channel {
   displayName?: string;
   unit: string;
   rateHz: number;
+  rateBand?: RateBand;
   valueType?: string;
   description: string;
   colorToken: string;
   sourceClass?: SourceClass;
+  /** Public ATLAS-style qualified name (docs example), not a live config id */
+  atlasStyleId?: string;
   openf1Field?: string;
   fastf1Field?: string;
   plotDefault?: boolean;
+  typicalRange?: { min: number; max: number };
+  alarmHintC?: number;
+}
+
+export interface FailureMode {
+  id: string;
+  title: string;
+  symptoms: string[];
+  channelHints: string[];
+  actions: string[];
+  exampleCiteIds: string[];
 }
 
 export interface DistanceSeries {
@@ -152,14 +184,30 @@ export interface SessionPack {
     shapedLike: string[];
     notRedistributedFrom: string[];
     circuitFactsSource: string;
+    atlasDocs?: string[];
+    fetchedFrom?: string;
+    fetchedAt?: string;
+    openf1?: {
+      meeting_key: number;
+      session_key: number;
+      driver_number: number;
+      lap_numbers: number[];
+    };
   };
   meta: {
     synthetic: boolean;
+    openf1Subset?: boolean;
+    syntheticOverlayChannels?: string[];
     convention: string;
     credits: string[];
     venueLengthM: number;
     sampleHzApprox: number;
+    ratesHz?: Partial<Record<RateBand, number>>;
     pointCountTarget?: number;
+    channelCount?: number;
+    driverCount?: number;
+    lapCount?: number;
+    lapTimeMsRef?: Record<string, number>;
   };
   meeting: Meeting;
   session: Session;
@@ -169,6 +217,7 @@ export interface SessionPack {
   drivers: Driver[];
   primaryDriverId?: string;
   compound?: string;
+  stints?: StintInfo[];
   laps: Lap[];
   samples: ChannelSample[];
   trackXY: TrackXY;

@@ -5,21 +5,25 @@
       "title": "Rear brake duct restriction",
       "symptoms": [
         "brake_temp >900°C in heavy zone",
-        "hot soak after in-lap"
+        "hot soak after in-lap",
+        "oil_pressure soft under sustained heavy (correlate, not root cause)"
       ],
       "channelHints": [
         "brake_temp",
         "brake",
-        "speed"
+        "speed",
+        "oil_pressure"
       ],
       "actions": [
         "Inspect tape / blanking",
         "Compare vs baseline lap",
-        "Review cooling note before Quali"
+        "Review cooling note before Quali",
+        "Confirm oil dip tracks brake energy, not pump"
       ],
       "exampleCiteIds": [
         "cite_brake_spike",
-        "cite_duct_note"
+        "cite_duct_note",
+        "cite_oil_s3"
       ]
     }
   ]

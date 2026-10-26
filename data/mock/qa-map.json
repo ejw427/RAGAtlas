@@ -2,18 +2,18 @@
   "queries": [
     {
       "id": "qa_brake_spike",
-      "exactQuery": "Why did brake temp spike in S3 on lap 12?",
+      "exactQuery": "Why did brake temp spike in S3 on lap 10?",
       "patterns": [
         "brake temp",
         "brake_temp",
         "spike",
         "s3",
         "sector 3",
-        "lap 12",
+        "lap 10",
         "why did brake"
       ],
-      "claim": "Brake temperature peaks at 942°C mid–Sector 3 on lap 12, coincident with a sustained heavy brake zone and an engineer note flagging a rear duct check.",
-      "rationale": "Channel peak aligns with the S3 brake zone window (~3080–3180 m) and the linked debrief note.",
+      "claim": "On the Soft flyer (L10), synthetic ATLAS-like brake_temp peaks at 942°C in the heaviest brake zone (S3), aligned with an engineer duct-check note — overlaid on real OpenF1 brake/speed traces from 2026 COTA FP2.",
+      "rationale": "Peak sits in the OpenF1-derived heavy-brake window on L10; duct note cites the same distance band.",
       "citeIds": [
         "cite_brake_spike",
         "cite_duct_note"
@@ -22,19 +22,24 @@
     },
     {
       "id": "qa_time_loss",
-      "exactQuery": "Where did we lose time to lap 11?",
+      "exactQuery": "Where did Soft gain vs the Hard push?",
       "patterns": [
+        "soft",
+        "hard",
+        "gain",
         "lose time",
         "time loss",
         "lost time",
         "delta",
-        "lap 11",
-        "vs lap 11"
+        "lap 7",
+        "vs lap 7",
+        "faster"
       ],
-      "claim": "Lap 12 is +0.182 s vs lap 11, with the larger sector deficit in S2.",
-      "rationale": "Sector times and speed overlay vs L11 localize the loss before the S3 brake event.",
+      "claim": "L10 Soft is ~1.2 s quicker than L7 Hard, with a large share of the advantage through S2 on the OpenF1 sector times.",
+      "rationale": "Real OpenF1 lap/sector times for LEC FP2; speed/rpm overlays vs L7 localize the Soft gain.",
       "citeIds": [
-        "cite_delta_s2"
+        "cite_delta_soft",
+        "cite_rpm_s2"
       ],
       "noHit": false
     },
@@ -46,11 +51,61 @@
         "duct",
         "blanking"
       ],
-      "claim": "Session notes call for watching rear brake temps and opening duct if push-lap peaks exceed ~850°C.",
-      "rationale": "Retrieved from engineer notes tagged cooling / brakes.",
+      "claim": "Session notes call for a rear duct check if Soft push-lap brake_temp peaks exceed ~850°C in the heavy zone.",
+      "rationale": "Retrieved from engineer notes tagged cooling / brakes (synthetic ATLAS overlay guidance).",
       "citeIds": [
         "cite_duct_note",
-        "cite_cooling_note"
+        "cite_soft_note"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_oil",
+      "exactQuery": "What happened to oil pressure in the S3 heavy?",
+      "patterns": [
+        "oil pressure",
+        "oil_pressure",
+        "oil soft",
+        "oil dip"
+      ],
+      "claim": "Synthetic oil_pressure softens under the L10 S3 heavy — still above abort; correlate with brake energy on the OpenF1 brake channel, not a pump fault.",
+      "rationale": "Low-rate Engine.OilPressure-style overlay + duct/cooling note in the same window.",
+      "citeIds": [
+        "cite_oil_s3",
+        "cite_oil_note"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_track_limits",
+      "exactQuery": "Any track limits issues for Leclerc?",
+      "patterns": [
+        "track limits",
+        "deleted",
+        "t19",
+        "turn 19"
+      ],
+      "claim": "Race control deleted an earlier LEC lap time for track limits at Turn 19 — the RE note flags keeping the car inside at stadium exit.",
+      "rationale": "Grounded in OpenF1 race_control messages from 2026 COTA FP2 plus the session note.",
+      "citeIds": [
+        "cite_track_limits"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_failure",
+      "exactQuery": "Which failure mode matches the brake spike?",
+      "patterns": [
+        "failure mode",
+        "duct restriction",
+        "blanking",
+        "what failed"
+      ],
+      "claim": "Corpus failure mode “Rear brake duct restriction” matches >900°C peaks in the heavy zone plus the duct/cooling notes.",
+      "rationale": "Failure-mode channelHints include brake_temp / brake / speed; cites bind the spike and duct note.",
+      "citeIds": [
+        "cite_brake_spike",
+        "cite_duct_note"
       ],
       "noHit": false
     },

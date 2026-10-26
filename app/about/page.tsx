@@ -1,128 +1,373 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DisclaimerFooter } from "@/components/DisclaimerFooter";
-import { getSessionPack } from "@/lib/session";
+import {
+  METHOD_HEADLINE,
+  PRODUCT,
+  STUDIO,
+  TAGLINE,
+  WEDGE,
+} from "@/lib/brand";
+import { corpusSummary } from "@/lib/rag";
+import { getChannels, getSessionPack } from "@/lib/session";
+import { cn } from "@/lib/utils";
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-[5.5rem] border border-[var(--hairline)] bg-[var(--panel)] px-2.5 py-2">
+      <p className="font-mono text-[0.55rem] uppercase tracking-[0.12em] text-[var(--mute)]">
+        {label}
+      </p>
+      <p className="mt-0.5 font-mono text-[0.85rem] text-[var(--chalk)]">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function DemoChip({
+  href,
+  label,
+  hint,
+}: {
+  href: string;
+  label: string;
+  hint: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="block border border-[var(--hairline)] bg-[var(--panel)] px-3 py-2.5 transition hover:border-[var(--hairline-strong)] hover:bg-[var(--signal-dim)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+    >
+      <span className="font-mono text-[0.72rem] text-[var(--signal)]">
+        {label}
+      </span>
+      <span className="mt-0.5 block text-[0.72rem] leading-snug text-[var(--mist)]">
+        {hint}
+      </span>
+    </Link>
+  );
+}
+
+function FlowNode({
+  label,
+  sub,
+  accent,
+}: {
+  label: string;
+  sub: string;
+  accent?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "min-w-[6.5rem] flex-1 border px-2.5 py-2 text-center",
+        accent
+          ? "border-[var(--signal)] bg-[var(--signal-dim)]"
+          : "border-[var(--hairline)] bg-[var(--panel)]",
+      )}
+    >
+      <p
+        className={cn(
+          "font-mono text-[0.68rem]",
+          accent ? "text-[var(--signal)]" : "text-[var(--chalk)]",
+        )}
+      >
+        {label}
+      </p>
+      <p className="mt-0.5 text-[0.6rem] leading-snug text-[var(--mute)]">
+        {sub}
+      </p>
+    </div>
+  );
+}
+
+function FlowArrow() {
+  return (
+    <span
+      className="hidden shrink-0 self-center font-mono text-[var(--mute)] sm:inline"
+      aria-hidden
+    >
+      →
+    </span>
+  );
+}
 
 export default function AboutPage() {
   const pack = getSessionPack();
+  const corpus = corpusSummary();
+  const channels = getChannels();
+  const rates = corpus.ratesHz;
+  const rateLabel = rates
+    ? `${rates.high ?? "—"}/${rates.mid ?? "—"}/${rates.low ?? "—"} Hz`
+    : "—";
 
   return (
     <main className="min-h-dvh bg-[var(--void)]">
       <header className="border-b border-[var(--hairline)] bg-[var(--panel)] px-6 py-4">
         <div className="mx-auto flex max-w-[800px] items-center justify-between gap-4">
-          <Link
-            href="/"
-            className="font-display text-lg font-bold tracking-tight"
-          >
-            RAG<span className="text-[var(--signal)]">Atlas</span>
-          </Link>
+          <div>
+            <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-[var(--mute)]">
+              {STUDIO}
+            </p>
+            <Link
+              href="/"
+              className="font-display text-lg font-bold tracking-tight"
+            >
+              Cite<span className="text-[var(--signal)]">Trace</span>
+            </Link>
+          </div>
           <Button asChild size="sm">
-            <Link href="/session?lap=12">Open session</Link>
+            <Link href="/session?driver=LEC&lap=10">Open session</Link>
           </Button>
         </div>
       </header>
 
       <article className="mx-auto max-w-[800px] px-6 py-12">
         <p className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-[var(--signal)]">
-          Method
+          {STUDIO} · Method
         </p>
         <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-          Knowledge layer beside the traces
+          {PRODUCT}: {METHOD_HEADLINE}
         </h1>
+        <p className="mt-2 font-display text-lg text-[var(--chalk)]">{WEDGE}</p>
+        <p className="mt-1 text-[var(--mist)]">{TAGLINE}</p>
         <p className="mt-4 text-[var(--mist)] leading-relaxed">
-          RAGAtlas is a skunkworks portfolio prototype steered toward two public
-          job briefs:{" "}
-          <strong className="font-medium text-[var(--chalk)]">
-            Lead Software Engineer — Performance Technology
-          </strong>{" "}
-          (Williams Racing JD, Grove — expired vacancy used as target) and{" "}
-          <strong className="font-medium text-[var(--chalk)]">
-            Field Application Engineer — Software
-          </strong>{" "}
-          (Motion Applied / ATLAS ecosystem). It shows React/TypeScript craft,
-          time-series workspace UX, and evidence-bound session retrieval — not a
-          chatbot toy. Independent work — not affiliated with Williams Racing,
-          Motion Applied, Formula 1, or the FIA.
+          {PRODUCT} is a {STUDIO} portfolio prototype: React/TypeScript craft for
+          dense time-series workspaces, multi-store session literacy (samples +
+          metadata + notes), and evidence-bound retrieval — not a chatbot toy.
+          Independent work. Not affiliated with Formula 1 teams, commercial
+          telemetry vendors, Formula 1, or the FIA.
         </p>
 
-        <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
-          <h2 className="font-display text-xl font-semibold">What you are seeing</h2>
-          <ul className="list-disc space-y-2 pl-5 text-[var(--mist)]">
-            <li>
-              <span className="text-[var(--chalk)]">Live-style dashboard</span> —
-              lap/sector chrome, multi-channel waveforms, playhead scrub, circuit
-              schematic, compare overlay (Speed vs L11), debrief timeline.
-            </li>
-            <li>
-              <span className="text-[var(--chalk)]">Session RAG</span> —
-              deterministic QaMap over notes, channel docs, and cite windows;
-              cite click locks the telemetry stage (pulse → ease → cyan band).
-            </li>
-            <li>
-              <span className="text-[var(--chalk)]">Fail closed</span> — out-of-window
-              questions (e.g. championship standings) return an honest no-hit.
-            </li>
-          </ul>
+        {/* Corpus strip */}
+        <section className="mt-8" aria-label="Session corpus">
+          <p className="mb-2 font-mono text-[0.6rem] uppercase tracking-[0.12em] text-[var(--mute)]">
+            Live corpus · {corpus.yearHint} {corpus.sessionLabel} ·{" "}
+            {corpus.venue}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Stat label="Drivers" value={String(corpus.drivers)} />
+            <Stat label="Laps" value={String(corpus.laps)} />
+            <Stat label="Channels" value={String(corpus.channelParams)} />
+            <Stat
+              label="OpenF1 / overlay"
+              value={`${corpus.openf1Channels} / ${corpus.overlayChannels}`}
+            />
+            <Stat label="Series" value={String(corpus.sampleSeries)} />
+            <Stat label="Rates" value={rateLabel} />
+            <Stat
+              label="Track"
+              value={`${corpus.lengthM?.toLocaleString() ?? "—"} m`}
+            />
+            <Stat label="Cites" value={String(corpus.cites)} />
+          </div>
         </section>
 
+        {/* Problem → product */}
         <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
           <h2 className="font-display text-xl font-semibold">
-            Hiring-manager framing
+            Problem → product
           </h2>
           <p className="text-[var(--mist)] leading-relaxed">
-            <span className="text-[var(--chalk)]">Williams Lead (Perf Tech):</span>{" "}
-            architecture clarity, React/TS density, multi-store literacy
-            (time-series samples + session metadata + document notes), and
-            performance-user empathy — citations scrub the plot for Aero / VD /
-            Vehicle Performance–style questions.
+            Session Q&amp;A without grounding invents physics: a fluent answer
+            that cannot point at a channel window, note, or sector is worse than
+            silence for performance users.
           </p>
           <p className="text-[var(--mist)] leading-relaxed">
-            <span className="text-[var(--chalk)]">Motion Applied FAE Software:</span>{" "}
-            ATLAS-shaped vocabulary (session, lap, channel, compare, notes), a
-            teachable 90s demo, and a knowledge-base corpus engineers wish
-            customers had. Pipeline language (Kafka → SQL Race / Parquet →
-            Viewer) appears only as industry pattern — not a live bus in this
-            app.
-          </p>
-          <p className="text-[var(--mist)] leading-relaxed">
-            Shared wedge:{" "}
+            {PRODUCT} binds every claim to a cite — then locks the playhead and
+            paints an evidence band on the traces. Out-of-window questions
+            fail closed. The wedge is not “AI on telemetry”; it is{" "}
             <span className="text-[var(--chalk)]">
-              evidence-bound session RAG beside ATLAS-class telemetry
+              evidence beside the traces
             </span>
-            . Waveforms alone are table stakes.
+            .
           </p>
         </section>
 
+        {/* 90s demo */}
+        <section className="mt-10 space-y-4 border-t border-[var(--hairline)] pt-8">
+          <h2 className="font-display text-xl font-semibold">
+            What you can do in 90 seconds
+          </h2>
+          <ol className="list-decimal space-y-2 pl-5 text-[var(--mist)]">
+            <li>Open the COTA session — LEC Soft flyer by default</li>
+            <li>
+              Use <span className="text-[var(--chalk)]">Lap</span> for the whole
+              lap, or S1–S3 for sector focus; scrub the playhead
+            </li>
+            <li>Ask a grounded question → claim + cites → click a cite → lock</li>
+            <li>Switch drivers; Compare vs Soft flyer / Hard baseline</li>
+          </ol>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <DemoChip
+              href="/session?driver=LEC&lap=10&citeId=cite_brake_spike"
+              label="Cite lock · brake spike"
+              hint="Playhead eases to synthetic 942°C peak on the real heavy zone"
+            />
+            <DemoChip
+              href="/session?driver=LEC&lap=10&citeId=cite_delta_soft&q=Where%20did%20Soft%20gain%20vs%20the%20Hard%20push%3F"
+              label="Soft vs Hard delta"
+              hint="OpenF1 sector story — Soft flyer vs Hard push"
+            />
+            <DemoChip
+              href="/session?driver=LEC&lap=7&citeId=cite_track_limits&q=Any%20track%20limits%20issues%20for%20Leclerc%3F"
+              label="Track limits · T19"
+              hint="Race-control grounded note from the FP2 session"
+            />
+            <DemoChip
+              href="/session?driver=LEC&lap=10&q=Who%20is%20the%20championship%20leader%3F"
+              label="Honest no-hit"
+              hint="Championship standings — fail closed, no invented claim"
+            />
+          </div>
+          <Button asChild>
+            <Link href="/session?driver=LEC&lap=10">Open COTA session</Link>
+          </Button>
+        </section>
+
+        {/* System shape */}
+        <section className="mt-10 space-y-4 border-t border-[var(--hairline)] pt-8">
+          <h2 className="font-display text-xl font-semibold">System shape</h2>
+          <p className="text-[var(--mist)] leading-relaxed">
+            One session pack, three stores, one retrieval path. Cites are first-class
+            objects — not chat footnotes.
+          </p>
+          <div
+            className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-stretch sm:gap-x-2 sm:gap-y-2"
+            role="img"
+            aria-label="Samples, metadata, and notes feed a deterministic QaMap that produces a cite, which locks the telemetry stage"
+          >
+            <FlowNode label="Samples" sub="car_data · overlays" />
+            <FlowArrow />
+            <FlowNode label="Metadata" sub="laps · weather · stints" />
+            <FlowArrow />
+            <FlowNode label="Notes" sub="events · debrief" />
+            <FlowArrow />
+            <FlowNode label="QaMap" sub="deterministic" accent />
+            <FlowArrow />
+            <FlowNode label="Cite → stage" sub="playhead + band" accent />
+          </div>
+          <p className="font-mono text-[0.65rem] text-[var(--mute)]">
+            {corpus.notes} notes · {corpus.events} events · {corpus.cites} cites ·{" "}
+            {channels.length} channel docs
+          </p>
+        </section>
+
+        {/* Engineering judgment */}
         <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
-          <h2 className="font-display text-xl font-semibold">What we do not fake</h2>
+          <h2 className="font-display text-xl font-semibold">
+            Engineering judgment
+          </h2>
           <ul className="list-disc space-y-2 pl-5 text-[var(--mist)]">
-            <li>Williams / Motion Applied employment, offers, or partnerships</li>
-            <li>Live SECU, paddock RF, factory VPN, or real team channel maps</li>
-            <li>ATLAS Viewer UI clone, logos, Automation API / SQL Race credentials</li>
-            <li>Kafka/Docker as a runtime dependency for this portfolio slice</li>
-            <li>Redistributed FastF1 caches, OpenF1 session dumps, or iRacing IBT samples</li>
+            <li>
+              <span className="text-[var(--chalk)]">Deterministic QaMap</span> —
+              the money-shot demo never flakes; honesty over LLM theater for a
+              portfolio walkthrough.
+            </li>
+            <li>
+              <span className="text-[var(--chalk)]">
+                OpenF1 subset + labeled overlays
+              </span>{" "}
+              — real broadcast car_data for the field; synthetic{" "}
+              <code className="text-[var(--chalk)]">brake_temp</code> / oil /
+              coolant where public feeds have no ATLAS-class plant channels —
+              provenance is explicit in the chrome.
+            </li>
+            <li>
+              <span className="text-[var(--chalk)]">Distance-domain stage</span>{" "}
+              — whole-lap and sector focus, playhead scrub, compare overlays;
+              matches how engineers argue about the lap.
+            </li>
+            <li>
+              <span className="text-[var(--chalk)]">Field + depth</span> — best
+              flyer for all {corpus.drivers} cars; LEC Hard / Soft / long-run
+              trio for Soft-vs-Hard narrative depth.
+            </li>
           </ul>
         </section>
 
+        {/* Craft signals */}
+        <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
+          <h2 className="font-display text-xl font-semibold">Craft signals</h2>
+          <ul className="list-disc space-y-2 pl-5 text-[var(--mist)]">
+            <li>
+              <span className="text-[var(--chalk)]">React / TypeScript UX</span>{" "}
+              — dense pit-wall chrome, SVG waveforms, keyboard-focusable controls.
+            </li>
+            <li>
+              <span className="text-[var(--chalk)]">Multi-store literacy</span>{" "}
+              — samples, session metadata, and notes as one grounded corpus.
+            </li>
+            <li>
+              <span className="text-[var(--chalk)]">Telemetry vocabulary</span>{" "}
+              — session, lap, channel, compare, notes, events — shaped like public
+              ATLAS docs without cloning vendor UI.
+            </li>
+            <li>
+              <span className="text-[var(--chalk)]">Provenance labeling</span> —
+              OpenF1 vs synthetic overlay called out in-product; fail-closed when
+              the window cannot support the claim.
+            </li>
+          </ul>
+        </section>
+
+        {/* Stack */}
+        <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
+          <h2 className="font-display text-xl font-semibold">Stack</h2>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              "Next.js App Router",
+              "TypeScript",
+              "Tailwind",
+              "SVG stage",
+              "In-process QaMap",
+              "OpenF1 fetch script",
+              "Static session pack",
+            ].map((s) => (
+              <span
+                key={s}
+                className="border border-[var(--hairline)] bg-[var(--panel)] px-2 py-1 font-mono text-[0.65rem] text-[var(--mist)]"
+              >
+                {s}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* Honesty last */}
         <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
           <h2 className="font-display text-xl font-semibold">Data honesty</h2>
           <p className="rounded-sm border border-[var(--hairline)] bg-[var(--panel)] px-4 py-3 font-mono text-[0.75rem] text-[var(--signal)]">
-            SYNTHETIC DATA · shaped like public timing schemas · not live F1
+            OPENF1 SUBSET · 2026 US GP FP2 (COTA) · synthetic ATLAS overlays · not
+            SECU
           </p>
           <p className="text-[var(--mist)] leading-relaxed">
-            Fixtures ship as static JSON under{" "}
-            <code className="text-[var(--chalk)]">data/mock/</code>. Plot trio:{" "}
-            <code className="text-[var(--chalk)]">brake_temp</code> (synthetic
-            ATLAS-like), <code className="text-[var(--chalk)]">throttle</code> /{" "}
-            <code className="text-[var(--chalk)]">speed</code> (OpenF1/FastF1-shaped).
-            Bahrain GP length <strong className="text-[var(--chalk)]">5412 m</strong>;
-            sector bounds <code className="text-[var(--chalk)]">[0, 1850, 3050, 5412]</code>{" "}
-            so ~3120 m sits in S3. Samples are original synthetic series — not
-            copyrighted dumps. Session concepts inspired by{" "}
-            <span className="text-[var(--chalk)]">public ATLAS documentation</span>;
-            this is not ATLAS software.
+            Pack{" "}
+            <code className="text-[var(--chalk)]">cota-2026-fp2.json</code> —
+            {corpus.drivers} drivers (best flying lap) plus LEC Hard/Soft/long-run.
+            Real OpenF1 car_data, location path, weather, stints, race control.
+            Overlays:{" "}
+            {(pack.meta.syntheticOverlayChannels ?? []).join(", ")}. Regen with{" "}
+            <code className="text-[var(--chalk)]">npm run fetch:cota</code>. Not
+            ATLAS software.
           </p>
-          <ul className="list-disc space-y-1 pl-5 text-sm text-[var(--mute)]">
+          <h3 className="pt-2 font-display text-base font-semibold text-[var(--chalk)]">
+            What we do not fake
+          </h3>
+          <ul className="list-disc space-y-1.5 pl-5 text-[var(--mist)]">
+            <li>Employment, offers, or partnerships with any team or vendor</li>
+            <li>Live SECU, paddock RF, factory VPN, or real team channel maps</li>
+            <li>
+              Vendor Viewer UI clones, logos, or Automation / SQL Race credentials
+            </li>
+            <li>Kafka/Docker as a runtime dependency for this portfolio slice</li>
+            <li>
+              Full redistributed FastF1 caches, OpenF1 session dumps, or iRacing
+              IBT samples
+            </li>
+          </ul>
+          <ul className="mt-4 list-disc space-y-1 pl-5 text-sm text-[var(--mute)]">
             {pack.meta.credits.map((c) => (
               <li key={c}>{c}</li>
             ))}
@@ -132,31 +377,12 @@ export default function AboutPage() {
           </ul>
         </section>
 
-        <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
-          <h2 className="font-display text-xl font-semibold">Stack</h2>
-          <p className="text-[var(--mist)]">
-            Next.js App Router · TypeScript · Tailwind · shadcn/ui primitives
-            (Button, Input, Sheet) restyled to Carbon Pit Wall tokens · Oxanium /
-            Sora / IBM Plex Mono · inline SVG traces & schematic · in-process
-            QaMap (no API keys).
-          </p>
-        </section>
-
-        <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
-          <h2 className="font-display text-xl font-semibold">90s demo spine</h2>
-          <ol className="list-decimal space-y-2 pl-5 text-[var(--mist)]">
-            <li>Land on the hero → Open session</li>
-            <li>Trace draw-on; scrub toward S3</li>
-            <li>
-              Ask: <em>Why did brake temp spike in S3 on lap 12?</em>
-            </li>
-            <li>Claim + two cites → click cite → playhead locks on 942°C</li>
-          </ol>
-        </section>
-
-        <div className="mt-12 flex flex-wrap gap-4">
+        <div className="mt-12 flex flex-wrap gap-4 border-t border-[var(--hairline)] pt-8">
           <Button asChild>
-            <Link href="/session?lap=12&citeId=cite_brake_spike">
+            <Link href="/session?driver=LEC&lap=10">Open the COTA session</Link>
+          </Button>
+          <Button asChild variant="rail">
+            <Link href="/session?driver=LEC&lap=10&citeId=cite_brake_spike">
               Jump to cite lock
             </Link>
           </Button>
@@ -164,6 +390,9 @@ export default function AboutPage() {
             <Link href="/">Back to landing</Link>
           </Button>
         </div>
+        <p className="mt-4 font-mono text-[0.62rem] text-[var(--mute)]">
+          Built by {STUDIO} as an independent portfolio piece · {PRODUCT}
+        </p>
       </article>
 
       <DisclaimerFooter />

@@ -87,25 +87,29 @@ export function TrackSchematic({
           strokeWidth="18"
           strokeLinejoin="round"
         />
-        {sectorPaths.map((sec) => (
-          <path
-            key={sec.id}
-            d={sec.path}
-            fill="none"
-            strokeWidth={activeSector === sec.label ? 14 : 8}
-            strokeLinejoin="round"
-            className={cn(
-              activeSector === sec.label
-                ? "stroke-[var(--signal)] opacity-80"
-                : "stroke-[var(--hairline-strong)]",
-            )}
-            style={
-              activeSector === sec.label
-                ? { filter: "drop-shadow(0 0 6px rgba(198,255,74,0.35))" }
-                : undefined
-            }
-          />
-        ))}
+        {sectorPaths.map((sec) => {
+          const wholeLap = activeSector === "Lap";
+          const active = wholeLap || activeSector === sec.label;
+          return (
+            <path
+              key={sec.id}
+              d={sec.path}
+              fill="none"
+              strokeWidth={active ? 14 : 8}
+              strokeLinejoin="round"
+              className={cn(
+                active
+                  ? "stroke-[var(--signal)] opacity-80"
+                  : "stroke-[var(--hairline-strong)]",
+              )}
+              style={
+                active
+                  ? { filter: "drop-shadow(0 0 6px rgba(198,255,74,0.35))" }
+                  : undefined
+              }
+            />
+          );
+        })}
         {evidenceArc && (
           <path
             d={evidenceArc}
@@ -125,6 +129,9 @@ export function TrackSchematic({
         />
       </svg>
       <div className="mt-1 flex gap-2 font-mono text-[0.6rem] text-[var(--mute)]">
+        <span className={cn(activeSector === "Lap" && "text-[var(--signal)]")}>
+          Lap
+        </span>
         {pack.sectors.map((s) => (
           <span
             key={s.id}

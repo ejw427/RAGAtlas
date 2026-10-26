@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Oxanium, Sora } from "next/font/google";
+import { PRODUCT, STUDIO, TAGLINE } from "@/lib/brand";
 import "./globals.css";
 
 const oxanium = Oxanium({
@@ -21,9 +22,8 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RAGAtlas — Ask the lap. Trust the trace.",
-  description:
-    "Portfolio prototype: session RAG grounded in sectors, channels, and engineer notes — beside ATLAS-shaped telemetry, not a clone.",
+  title: `${PRODUCT} — ${STUDIO}`,
+  description: `${TAGLINE} ${STUDIO} portfolio: evidence-bound session RAG on 2026 COTA FP2 telemetry beside ATLAS-shaped overlays.`,
 };
 
 export default function RootLayout({

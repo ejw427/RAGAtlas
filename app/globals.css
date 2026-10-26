@@ -18,6 +18,8 @@
   --trace-amber: #ffb020;
   --trace-brake: #ff4d5e;
   --trace-throttle: #7dffb3;
+  --trace-violet: #b39dff;
+  --trace-mist: #9aa7b8;
   --ok: #c6ff4a;
   --warn: #ffb020;
   --fault: #ff4d5e;
@@ -59,6 +61,28 @@ body {
   }
 }
 
+@keyframes hero-track-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes hero-dash-crawl {
+  to {
+    stroke-dashoffset: -112;
+  }
+}
+
+.hero-track-draw {
+  stroke-dasharray: 4200;
+  stroke-dashoffset: 4200;
+  animation: hero-track-draw 1.6s var(--ease) forwards;
+}
+
+.hero-dash {
+  animation: hero-dash-crawl 18s linear infinite;
+}
+
 .cite-pulse {
   animation: cite-pulse 0.55s var(--ease) 1;
 }
@@ -77,6 +101,11 @@ body {
     stroke-dasharray: none !important;
     stroke-dashoffset: 0 !important;
     animation: none !important;
+  }
+  .hero-track-draw,
+  .hero-dash {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
   }
   .playhead-ease {
     transition: none !important;

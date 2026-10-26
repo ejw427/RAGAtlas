@@ -93,10 +93,25 @@ export function seedQueries(): string[] {
 
 export function corpusSummary() {
   const pack = getSessionPack();
+  const channelIds = new Set(pack.samples.map((s) => s.channelId));
+  const overlay = pack.meta.syntheticOverlayChannels ?? [];
+  const openf1Channels = [...channelIds].filter(
+    (id) => !overlay.includes(id),
+  ).length;
   return {
+    venue: pack.meeting.venue,
+    sessionLabel: pack.session.label,
+    yearHint: pack.meeting.date?.slice(0, 4),
+    drivers: pack.meta.driverCount ?? pack.drivers.length,
+    laps: pack.meta.lapCount ?? pack.laps.length,
     notes: pack.notes.length,
-    channels: getSessionPack().samples.length,
+    channelParams: channelIds.size,
+    openf1Channels,
+    overlayChannels: overlay.length,
+    sampleSeries: pack.samples.length,
     events: pack.events.length,
     cites: pack.cites.length,
+    ratesHz: pack.meta.ratesHz,
+    lengthM: pack.meeting.lapDistanceM ?? pack.meta.venueLengthM,
   };
 }

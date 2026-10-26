@@ -1,23 +1,18 @@
-# RAGAtlas
+# CiteTrace — Welch Software
 
 **Ask the lap. Trust the trace.**
 
-Portfolio prototype: a **knowledge + narrative layer** over ATLAS-shaped session telemetry — session RAG that cites notes/channels/lap windows, **and** a live-style engineering workspace (waveforms, playhead, circuit schematic, compare, debrief timeline).
+[Welch Software](./) portfolio prototype: a **knowledge + narrative layer** over ATLAS-shaped session telemetry — session RAG that cites notes/channels/lap windows, **and** a live-style engineering workspace (waveforms, playhead, circuit schematic, compare, debrief timeline).
 
-> **SYNTHETIC DATA** · Shaped like public timing schemas · No live motorsport feeds · No API keys  
-> Independent portfolio piece — **not affiliated with Williams Racing, Motion Applied, Formula 1, or the FIA.**  
+> **2026 COTA FP2** · OpenF1 public subset + synthetic ATLAS thermal overlays · No SECU / team feeds  
+> Independent — **not affiliated with Formula 1 teams, commercial telemetry vendors, Formula 1, or the FIA.**  
 > Concepts inspired by public [ATLAS](https://www.motionapplied.com/brands/atlas/) documentation.
+
+Formerly sketched as “RAGAtlas”; product name is **CiteTrace** (cite → evidence, trace → telemetry) under the **Welch Software** studio label.
 
 ## Portfolio intent (not an employment claim)
 
-Steered toward two public JDs (see team docs `target-roles.md`):
-
-| Role | What the demo shows |
-|------|---------------------|
-| **Lead SWE — Performance Technology** (Williams Racing, Grove) | React/TS craft, dense time-series UX, multi-store literacy (samples + metadata + notes), fail-closed RAG, performance-user empathy |
-| **FAE — Software** (Motion Applied / ATLAS) | ATLAS-shaped vocabulary, teachable cite→lock demo, knowledge-base corpus, honest no-hit / grounding states |
-
-**Gaps we do not fake:** employment, live Kafka/SECU, team channel maps, ATLAS credentials, redistributed FastF1/OpenF1 dumps, or iRacing ATLAS Express samples.
+Shows React/TS craft for dense time-series UX, multi-store literacy (samples + metadata + notes), fail-closed session RAG, ATLAS-shaped vocabulary, and a teachable cite→lock demo — usable across motorsport software / performance-engineering conversations without tying the site to a single vacancy.
 
 ## Quick start
 
@@ -30,48 +25,29 @@ Open [http://127.0.0.1:43127](http://127.0.0.1:43127).
 
 | Route | Purpose |
 |-------|---------|
-| `/` | Landing hero |
-| `/session?lap=12` | Workspace |
-| `/session?lap=12&citeId=cite_brake_spike` | Citation focus (same shell) |
+| `/` | Landing — COTA night hero + real track path |
+| `/session?driver=LEC&lap=10` | Workspace (22-car switcher; Lap / S1–S3 focus) |
 | `/about` | Method, disclaimer, credits |
 
 ## 90-second demo
 
-1. Land → **Open session**
-2. Trace draw-on; scrub playhead toward S3
-3. Ask: `Why did brake temp spike in S3 on lap 12?`
-4. Click `L12 · S3 · brake_temp` → pulse → playhead eases → cyan band → **942°C @ 3120m**
-5. Optional no-hit: `Who is the championship leader?`
+1. Land → **Open COTA session**
+2. Use **Lap** for the whole lap, or S1–S3 for sector focus
+3. Ask: `Why did brake temp spike in S3 on lap 10?`
+4. Click cite → playhead locks on synthetic 942°C peak over real brake zone
+5. Switch drivers; Compare vs LEC Soft / Hard baseline
 
 ## Data
 
-Mock pack: Bahrain FP2 · fictional VER path · Soft · laps 11–13 · track **5412 m**.
+2026 United States GP · Circuit of the Americas · FP2 · **all 22 drivers** · 5513 m.
 
-| Channel | Class | Role |
-|---------|-------|------|
-| `brake_temp` | synthetic ATLAS-like | Spike story (942°C @ ~3120 m, S3) |
-| `throttle`, `speed` | OpenF1 / FastF1-shaped | Broadcast-parity plot companions |
-| `brake` | OpenF1-shaped bool | Heavy-zone logic (not default plot) |
-
-Sector bounds (approximate-for-demo): `[0, 1850, 3050, 5412]` — keeps ~3120 m in S3.
-
-**Credits / shape inspiration (offline at demo time):**
-
-- [OpenF1](https://openf1.org/docs/) — `car_data` field conventions
-- [FastF1](https://github.com/theOehrly/Fast-F1) (MIT) — telemetry column conventions
-- Public Bahrain GP length / circuit facts
-
-Fixtures: `data/mock/`. RAG: deterministic `qa-map.json` (money shot never flakes).
-
-## Stack
-
-Next.js (App Router) · TypeScript · Tailwind · shadcn/ui (Button, Input, Sheet) · Oxanium / Sora / IBM Plex Mono · SVG traces
+Regen: `npm run fetch:cota`
 
 ## Scripts
 
 ```bash
-npm run dev      # development server
-npm run build    # production build
-npm run start    # serve production build
-npm run lint     # eslint
+npm run dev
+npm run build
+npm run fetch:cota
+npm run generate:fixture   # legacy Bahrain synthetic
 ```

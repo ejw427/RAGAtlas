@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { getSample, lapDistanceM, stageChannels } from "@/lib/session";
+import {
+  formatChannelValue,
+  getChannel,
+  getSample,
+  lapDistanceM,
+  stageChannels,
+} from "@/lib/session";
 import { interpolateAt, peakInWindow } from "@/lib/utils";
 import { prefersReducedMotion } from "@/lib/motion";
 import type { CiteTarget } from "@/lib/types";
@@ -11,6 +17,8 @@ const COLOR: Record<string, string> = {
   "trace-throttle": "var(--trace-throttle)",
   "trace-cyan": "var(--trace-cyan)",
   "trace-amber": "var(--trace-amber)",
+  "trace-violet": "var(--trace-violet)",
+  "trace-mist": "var(--trace-mist)",
 };
 
 export function TelemetryStage({
@@ -21,6 +29,7 @@ export function TelemetryStage({
   evidence,
   activeCite,
   drawKey,
+  plotChannelIds,
 }: {
   lapId: string;
   compareLapId: string | null;
@@ -29,8 +38,9 @@ export function TelemetryStage({
   evidence: { startM: number; endM: number } | null;
   activeCite: CiteTarget | null;
   drawKey: string;
+  plotChannelIds: string[];
 }) {
-  const channels = stageChannels();
+  const channels = stageChannels(plotChannelIds);
   const uid = useId();
   const svgRef = useRef<SVGSVGElement>(null);
   const [drawn, setDrawn] = useState(false);
@@ -43,22 +53,21 @@ export function TelemetryStage({
       prefersReducedMotion() ? 0 : 50,
     );
     return () => window.clearTimeout(t);
-  }, [drawKey]);
+  }, [drawKey, plotChannelIds.join("|")]);
 
   const plots = useMemo(() => {
     return channels.map((ch, idx) => {
       const sample = getSample(ch.id, lapId);
-      const compare =
-        compareLapId && ch.id === "speed"
-          ? getSample(ch.id, compareLapId)
-          : undefined;
+      const compare = compareLapId
+        ? getSample(ch.id, compareLapId)
+        : undefined;
       return { ch, sample, compare, row: idx };
     });
   }, [channels, lapId, compareLapId]);
 
   const W = 640;
-  const rowH = 72;
-  const H = rowH * plots.length + 28;
+  const rowH = plots.length > 4 ? 56 : 72;
+  const H = rowH * Math.max(plots.length, 1) + 28;
   const padL = 44;
   const padR = 12;
   const plotW = W - padL - padR;
@@ -94,22 +103,25 @@ export function TelemetryStage({
     onPlayhead(m);
   };
 
-  const brakeSample = getSample("brake_temp", lapId);
+  const peakChannelId =
+    activeCite?.channelId && getSample(activeCite.channelId, lapId)
+      ? activeCite.channelId
+      : "brake_temp";
+  const peakSample = getSample(peakChannelId, lapId);
   const peak =
-    evidence && brakeSample
-      ? peakInWindow(brakeSample.series, evidence.startM, evidence.endM)
+    evidence && peakSample
+      ? peakInWindow(peakSample.series, evidence.startM, evidence.endM)
       : null;
 
   const readoutChannel =
     activeCite?.channelId && getSample(activeCite.channelId, lapId)
       ? activeCite.channelId
-      : "brake_temp";
+      : (channels[0]?.id ?? "brake_temp");
   const readoutSample = getSample(readoutChannel, lapId);
+  const readoutCh = getChannel(readoutChannel);
   const readoutVal = readoutSample
     ? interpolateAt(readoutSample.series, playheadM)
     : null;
-  const unit =
-    channels.find((c) => c.id === readoutChannel)?.unit ?? "";
 
   return (
     <div className="flex min-h-0 flex-col gap-2">
@@ -121,13 +133,17 @@ export function TelemetryStage({
               style={{ background: COLOR[ch.colorToken] ?? "var(--chalk)" }}
             />
             {ch.displayName ?? ch.name}
+            <span className="text-[var(--mute)]">{ch.rateHz}Hz</span>
           </span>
         ))}
+        {compareLapId && (
+          <span className="text-[var(--mute)]">· compare overlay</span>
+        )}
         <span className="ml-auto text-[var(--trace-cyan)]">
-          {readoutVal != null
-            ? `${readoutVal.toFixed(readoutChannel === "brake_temp" ? 0 : 1)}${unit ? ` ${unit}` : ""} @ ${Math.round(playheadM)}m`
+          {readoutVal != null && readoutCh
+            ? `${formatChannelValue(readoutCh, readoutVal)} @ ${Math.round(playheadM)}m`
             : "—"}
-          {peak && evidence && (
+          {peak && evidence && peakChannelId === "brake_temp" && (
             <span className="ml-2 text-[var(--fault)]">
               peak {peak.value.toFixed(0)}°C
             </span>

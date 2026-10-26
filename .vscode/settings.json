@@ -1,0 +1,33 @@
+{
+	"task.allowAutomaticTasks": "on",
+	"workbench.browser.openLocalhostLinks": true,
+	"workbench.statusBar.visible": true,
+	"VsCodeTaskButtons.showCounter": true,
+	"VsCodeTaskButtons.tasks": [
+		{
+			"label": "$(debug-restart) Rebuild",
+			"task": "RUN CLEAN",
+			"alignment": "right",
+			"tooltip": "Stop Next.js, npm run build, restart dev server on 43127, open embedded browser"
+		},
+		{
+			"label": "$(play) Run",
+			"task": "RUN",
+			"alignment": "right",
+			"tooltip": "Ensure Next.js on 127.0.0.1:43127 and open embedded browser"
+		},
+		{
+			"label": "$(package) Build",
+			"task": "BUILD",
+			"alignment": "right",
+			"tooltip": "npm run build"
+		},
+		{
+			"label": "$(primitive-square) Stop",
+			"task": "STOP",
+			"alignment": "right",
+			"tooltip": "Stop dev server on port 43127",
+			"color": "warning"
+		}
+	]
+}

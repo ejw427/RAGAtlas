@@ -1,0 +1,110 @@
+{
+	"version": "2.0.0",
+	"inputs": [
+		{
+			"id": "openDevAppBrowser",
+			"type": "command",
+			"command": "workbench.action.openBrowserEditor",
+			"args": {
+				"url": "http://127.0.0.1:43127/",
+				"reuseExistingUrlTab": true
+			}
+		}
+	],
+	"tasks": [
+		{
+			"label": "BUILD",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "build"],
+			"problemMatcher": ["$tsc"],
+			"group": "build"
+		},
+		{
+			"label": "RUN WEB",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "dev", "--", "-p", "43127", "-H", "127.0.0.1"],
+			"isBackground": true,
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "devServers"
+			},
+			"problemMatcher": {
+				"owner": "nextjs",
+				"pattern": {
+					"regexp": "."
+				},
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": ".",
+					"endsPattern": "(Ready in|Local:\\s+http://(localhost|127\\.0\\.0\\.1):43127)"
+				}
+			}
+		},
+		{
+			"label": "ENSURE DEV SERVER",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"${workspaceFolder}/scripts/ensure-dev-server.ps1"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "OPEN INTEGRATED BROWSER TAB",
+			"type": "shell",
+			"command": "echo ${input:openDevAppBrowser}",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "silent",
+				"echo": false,
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": false,
+				"close": true
+			}
+		},
+		{
+			"label": "OPEN SIMPLE BROWSER",
+			"dependsOn": ["ENSURE DEV SERVER", "OPEN INTEGRATED BROWSER TAB"],
+			"dependsOrder": "sequence",
+			"problemMatcher": []
+		},
+		{
+			"label": "RUN",
+			"dependsOn": ["OPEN SIMPLE BROWSER"],
+			"dependsOrder": "sequence",
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "STOP",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"${workspaceFolder}/scripts/stop-dev-server.ps1"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "RUN CLEAN",
+			"dependsOn": ["STOP", "BUILD", "RUN WEB", "OPEN INTEGRATED BROWSER TAB"],
+			"dependsOrder": "sequence",
+			"problemMatcher": [],
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			}
+		}
+	]
+}
