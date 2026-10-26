@@ -25,6 +25,24 @@ export interface SessionWeather {
   pressureHpa?: number;
 }
 
+export interface WeatherSample extends SessionWeather {
+  date: string;
+}
+
+export interface PitStop {
+  date: string;
+  driverNumber: number;
+  lapNumber: number;
+  laneDurationS?: number | null;
+  stopDurationS?: number | null;
+}
+
+export interface TeamRadioClip {
+  date: string;
+  driverNumber: number;
+  recordingUrl?: string;
+}
+
 export interface StintInfo {
   driverNumber?: number;
   stintNumber: number;
@@ -45,6 +63,12 @@ export interface Session {
   distanceM: number;
   startedAt: string;
   weather?: SessionWeather;
+  weatherSpan?: {
+    trackStartC: number;
+    trackEndC: number;
+    airStartC: number;
+    airEndC: number;
+  };
 }
 
 export interface Driver {
@@ -100,6 +124,10 @@ export interface Channel {
   openf1Field?: string;
   fastf1Field?: string;
   plotDefault?: boolean;
+  /** Stage row order (lower first) */
+  plotOrder?: number;
+  /** Short axis label on the telemetry stage */
+  shortName?: string;
   typicalRange?: { min: number; max: number };
   alarmHintC?: number;
 }
@@ -160,6 +188,8 @@ export interface CiteTarget {
   channelId: string | null;
   noteId?: string;
   window: { startM: number; endM: number };
+  /** Playhead target when the window midpoint is the wrong lock point */
+  focusM?: number;
   label: string;
   summary: string;
 }
@@ -218,6 +248,9 @@ export interface SessionPack {
   primaryDriverId?: string;
   compound?: string;
   stints?: StintInfo[];
+  pits?: PitStop[];
+  teamRadio?: TeamRadioClip[];
+  weatherSeries?: WeatherSample[];
   laps: Lap[];
   samples: ChannelSample[];
   trackXY: TrackXY;

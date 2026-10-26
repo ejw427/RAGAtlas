@@ -20,6 +20,12 @@
   --trace-throttle: #7dffb3;
   --trace-violet: #b39dff;
   --trace-mist: #9aa7b8;
+  --trace-front: #ff8a4a;
+  --trace-pressure: #8eb6ff;
+  --trace-tyre: #e8c547;
+  --trace-steer: #5ad0c0;
+  --trace-glong: #d48cff;
+  --trace-fuel: #c4a484;
   --ok: #c6ff4a;
   --warn: #ffb020;
   --fault: #ff4d5e;
@@ -91,6 +97,33 @@ body {
   stroke-dasharray: 1400;
   stroke-dashoffset: 1400;
   animation: draw-stroke 0.85s var(--ease) forwards;
+}
+
+.stage-shell {
+  border: 1px solid var(--hairline);
+  background:
+    radial-gradient(
+      120% 80% at 50% 0%,
+      rgba(58, 215, 255, 0.05),
+      transparent 55%
+    ),
+    linear-gradient(180deg, #121820 0%, #0b0f14 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(232, 238, 245, 0.05),
+    0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.stage-grid {
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(232, 238, 245, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232, 238, 245, 0.03) 1px, transparent 1px);
+  background-size: 100% 36px, 56px 100%;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.2));
+}
+
+.playhead-ease {
+  transition: opacity 120ms var(--ease);
 }
 
 @media (prefers-reduced-motion: reduce) {

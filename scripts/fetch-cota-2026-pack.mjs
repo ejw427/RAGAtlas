@@ -8,6 +8,7 @@
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { enrichSessionPack } from "./enrich-pack.mjs";
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const root = join(__dir, "..");
@@ -866,11 +867,13 @@ const pack = {
   timeline,
 };
 
+enrichSessionPack(pack);
+
 mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, JSON.stringify(pack));
 console.log(
   `Wrote ${outPath} (${(Buffer.byteLength(JSON.stringify(pack)) / 1024).toFixed(1)} KiB)`,
 );
 console.log(
-  `Drivers with samples: ${pack.meta.driverCount} · laps: ${pack.meta.lapCount} · samples: ${samples.length}`,
+  `Drivers with samples: ${pack.meta.driverCount} · laps: ${pack.meta.lapCount} · samples: ${pack.samples.length}`,
 );

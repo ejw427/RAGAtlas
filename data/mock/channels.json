@@ -1,21 +1,26 @@
 {
   "channels": [
     {
-      "id": "brake_temp",
-      "app": "Brakes",
-      "name": "brake_temp",
-      "displayName": "Brake temp (rear ref)",
-      "unit": "°C",
-      "rateHz": 10,
-      "rateBand": "mid",
+      "id": "speed",
+      "app": "Chassis",
+      "name": "speed",
+      "displayName": "Speed",
+      "unit": "km/h",
+      "rateHz": 20,
+      "rateBand": "high",
       "valueType": "float",
-      "colorToken": "trace-brake",
-      "sourceClass": "synthetic_atlas_like",
-      "atlasStyleId": "Brakes.Rear.Temperature",
-      "description": "Synthetic rear brake temperature reference. Stands in for ATLAS-class thermal parameters (see public SECU Stream API brake-temp examples).",
-      "typicalRange": { "min": 200, "max": 1000 },
-      "alarmHintC": 900,
-      "plotDefault": true
+      "colorToken": "trace-cyan",
+      "sourceClass": "shaped_like_openf1",
+      "description": "Ground speed. Matches OpenF1 car_data.speed / FastF1 Speed.",
+      "typicalRange": {
+        "min": 0,
+        "max": 330
+      },
+      "openf1Field": "speed",
+      "fastf1Field": "Speed",
+      "shortName": "Spd",
+      "plotDefault": true,
+      "plotOrder": 0
     },
     {
       "id": "throttle",
@@ -29,26 +34,14 @@
       "colorToken": "trace-throttle",
       "sourceClass": "shaped_like_openf1",
       "description": "Pedal position 0–100. OpenF1/FastF1 use the same unit; value 104 means unavailable in those feeds — not used in demo traces.",
-      "typicalRange": { "min": 0, "max": 100 },
+      "typicalRange": {
+        "min": 0,
+        "max": 100
+      },
       "openf1Field": "throttle",
-      "plotDefault": true
-    },
-    {
-      "id": "speed",
-      "app": "Chassis",
-      "name": "speed",
-      "displayName": "Speed",
-      "unit": "km/h",
-      "rateHz": 20,
-      "rateBand": "high",
-      "valueType": "float",
-      "colorToken": "trace-cyan",
-      "sourceClass": "shaped_like_openf1",
-      "description": "Ground speed. Matches OpenF1 car_data.speed / FastF1 Speed.",
-      "typicalRange": { "min": 0, "max": 330 },
-      "openf1Field": "speed",
-      "fastf1Field": "Speed",
-      "plotDefault": true
+      "shortName": "Thr",
+      "plotDefault": true,
+      "plotOrder": 1
     },
     {
       "id": "brake",
@@ -62,10 +55,57 @@
       "colorToken": "trace-amber",
       "sourceClass": "shaped_like_openf1",
       "description": "Broadcast-style brake pressure proxy (0/100). Used for heavy-zone logic; optional plot.",
-      "typicalRange": { "min": 0, "max": 100 },
+      "typicalRange": {
+        "min": 0,
+        "max": 100
+      },
       "openf1Field": "brake",
       "fastf1Field": "Brake",
-      "plotDefault": false
+      "shortName": "Brk",
+      "plotDefault": true,
+      "plotOrder": 2
+    },
+    {
+      "id": "brake_pressure",
+      "app": "Driver",
+      "name": "brake_pressure",
+      "displayName": "Brake pressure",
+      "shortName": "Press",
+      "unit": "bar",
+      "rateHz": 20,
+      "rateBand": "high",
+      "valueType": "float",
+      "colorToken": "trace-pressure",
+      "sourceClass": "synthetic_atlas_like",
+      "description": "Synthetic brake-pressure shape derived from OpenF1 brake (0/100) and speed. Shows a trail through the stop. Not a published SECU example parameter and not a team sensor.",
+      "typicalRange": {
+        "min": 0,
+        "max": 120
+      },
+      "plotDefault": true,
+      "plotOrder": 3
+    },
+    {
+      "id": "n_gear",
+      "app": "Driver",
+      "name": "n_gear",
+      "displayName": "Gear",
+      "unit": "",
+      "rateHz": 20,
+      "rateBand": "high",
+      "valueType": "int",
+      "colorToken": "trace-mist",
+      "sourceClass": "shaped_like_openf1",
+      "description": "Selected gear 1–8 (0 = N). OpenF1 n_gear / FastF1 nGear.",
+      "typicalRange": {
+        "min": 0,
+        "max": 8
+      },
+      "openf1Field": "n_gear",
+      "fastf1Field": "nGear",
+      "shortName": "Gear",
+      "plotDefault": true,
+      "plotOrder": 4
     },
     {
       "id": "rpm",
@@ -80,27 +120,15 @@
       "sourceClass": "shaped_like_openf1",
       "atlasStyleId": "Engine.Rpm",
       "description": "Engine speed. OpenF1 car_data.rpm / FastF1 RPM; ATLAS SECU examples use Engine.Rpm.",
-      "typicalRange": { "min": 0, "max": 12000 },
+      "typicalRange": {
+        "min": 0,
+        "max": 12000
+      },
       "openf1Field": "rpm",
       "fastf1Field": "RPM",
-      "plotDefault": false
-    },
-    {
-      "id": "n_gear",
-      "app": "Driver",
-      "name": "n_gear",
-      "displayName": "Gear",
-      "unit": "",
-      "rateHz": 20,
-      "rateBand": "high",
-      "valueType": "int",
-      "colorToken": "trace-mist",
-      "sourceClass": "shaped_like_openf1",
-      "description": "Selected gear 1–8 (0 = N). OpenF1 n_gear / FastF1 nGear.",
-      "typicalRange": { "min": 0, "max": 8 },
-      "openf1Field": "n_gear",
-      "fastf1Field": "nGear",
-      "plotDefault": false
+      "shortName": "RPM",
+      "plotDefault": true,
+      "plotOrder": 5
     },
     {
       "id": "drs",
@@ -114,10 +142,119 @@
       "colorToken": "trace-cyan",
       "sourceClass": "shaped_like_openf1",
       "description": "DRS status code (OpenF1/FastF1 mapping: 8 eligible, 10/12/14 on).",
-      "typicalRange": { "min": 0, "max": 14 },
+      "typicalRange": {
+        "min": 0,
+        "max": 14
+      },
       "openf1Field": "drs",
       "fastf1Field": "DRS",
-      "plotDefault": false
+      "shortName": "DRS",
+      "plotDefault": true,
+      "plotOrder": 6
+    },
+    {
+      "id": "steering",
+      "app": "Driver",
+      "name": "steering",
+      "displayName": "Steering",
+      "shortName": "Steer",
+      "unit": "°",
+      "rateHz": 10,
+      "rateBand": "mid",
+      "valueType": "float",
+      "colorToken": "trace-steer",
+      "sourceClass": "synthetic_atlas_like",
+      "description": "Synthetic steering-angle proxy from OpenF1 location curvature on the Soft flyer (fallback elsewhere). Not a SECU steer channel.",
+      "typicalRange": {
+        "min": -30,
+        "max": 30
+      },
+      "plotDefault": true,
+      "plotOrder": 7
+    },
+    {
+      "id": "g_long",
+      "app": "Chassis",
+      "name": "g_long",
+      "displayName": "Longitudinal g",
+      "shortName": "gX",
+      "unit": "g",
+      "rateHz": 20,
+      "rateBand": "high",
+      "valueType": "float",
+      "colorToken": "trace-glong",
+      "sourceClass": "synthetic_atlas_like",
+      "description": "Synthetic longitudinal acceleration derived from OpenF1 ground speed. Negative in the heavy brake. Not an IMU feed.",
+      "typicalRange": {
+        "min": -5,
+        "max": 2.5
+      },
+      "plotDefault": true,
+      "plotOrder": 8
+    },
+    {
+      "id": "brake_temp",
+      "app": "Brakes",
+      "name": "brake_temp",
+      "displayName": "Brake temp (rear ref)",
+      "unit": "°C",
+      "rateHz": 10,
+      "rateBand": "mid",
+      "valueType": "float",
+      "colorToken": "trace-brake",
+      "sourceClass": "synthetic_atlas_like",
+      "atlasStyleId": "Brakes.Rear.Temperature",
+      "description": "Synthetic rear brake temperature reference. Stands in for ATLAS-class thermal parameters (see public SECU Stream API brake-temp examples).",
+      "typicalRange": {
+        "min": 200,
+        "max": 1000
+      },
+      "alarmHintC": 900,
+      "shortName": "Rear",
+      "plotDefault": true,
+      "plotOrder": 9
+    },
+    {
+      "id": "brake_temp_fl",
+      "app": "Brakes",
+      "name": "brake_temp_fl",
+      "displayName": "Brake temp FL",
+      "shortName": "FL",
+      "unit": "°C",
+      "rateHz": 5,
+      "rateBand": "mid",
+      "valueType": "float",
+      "colorToken": "trace-front",
+      "sourceClass": "synthetic_atlas_like",
+      "atlasStyleId": "Brakes.FrontLeft.Temperature",
+      "description": "Synthetic front-left disc temperature. Uses the public ATLAS SECU example identifier and its 700°C warning — not a team sensor. Stays cooler than the rear overlay so a duct bias is visible.",
+      "typicalRange": {
+        "min": 0,
+        "max": 800
+      },
+      "alarmHintC": 700,
+      "plotDefault": true,
+      "plotOrder": 10
+    },
+    {
+      "id": "tyre_surf_fl",
+      "app": "Tyres",
+      "name": "tyre_surf_fl",
+      "displayName": "Tyre surf FL",
+      "shortName": "Tyre",
+      "unit": "°C",
+      "rateHz": 5,
+      "rateBand": "mid",
+      "valueType": "float",
+      "colorToken": "trace-tyre",
+      "sourceClass": "synthetic_atlas_like",
+      "description": "Synthetic front-left tyre surface temperature. Soft flyer runs hotter through S2 than the Hard push. Not a team tyre sensor.",
+      "typicalRange": {
+        "min": 60,
+        "max": 140
+      },
+      "plotDefault": true,
+      "plotOrder": 11
     },
     {
       "id": "oil_pressure",
@@ -131,9 +268,14 @@
       "colorToken": "trace-amber",
       "sourceClass": "synthetic_atlas_like",
       "atlasStyleId": "Engine.OilPressure",
+      "shortName": "Oil",
       "description": "Synthetic oil pressure. Named after the public ATLAS SECU Stream API Engine.OilPressure example — not team data.",
-      "typicalRange": { "min": 0, "max": 10 },
-      "plotDefault": false
+      "typicalRange": {
+        "min": 0,
+        "max": 10
+      },
+      "plotDefault": true,
+      "plotOrder": 12
     },
     {
       "id": "coolant_temp",
@@ -147,9 +289,35 @@
       "colorToken": "trace-mist",
       "sourceClass": "synthetic_atlas_like",
       "atlasStyleId": "Engine.Temperature",
+      "shortName": "Cool",
       "description": "Synthetic coolant temperature. Shaped like ATLAS SECU Engine.Temperature example parameter.",
-      "typicalRange": { "min": -40, "max": 150 },
-      "plotDefault": false
+      "typicalRange": {
+        "min": -40,
+        "max": 150
+      },
+      "plotDefault": true,
+      "plotOrder": 13
+    },
+    {
+      "id": "fuel_flow",
+      "app": "Engine",
+      "name": "fuel_flow",
+      "displayName": "Fuel flow",
+      "shortName": "Fuel",
+      "unit": "kg/h",
+      "rateHz": 2,
+      "rateBand": "low",
+      "valueType": "float",
+      "colorToken": "trace-fuel",
+      "sourceClass": "synthetic_atlas_like",
+      "atlasStyleId": "Engine.FuelFlow",
+      "description": "Synthetic fuel-flow demand shaped from OpenF1 throttle × rpm. Named after public ATLAS FuelFlow vocabulary — not a team fuel meter.",
+      "typicalRange": {
+        "min": 0,
+        "max": 110
+      },
+      "plotDefault": true,
+      "plotOrder": 14
     }
   ]
 }

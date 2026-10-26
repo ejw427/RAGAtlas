@@ -26,10 +26,10 @@ import {
   lapDistanceM,
   sectorLabel,
 } from "@/lib/session";
-import { formatLapTime, formatSector, cn } from "@/lib/utils";
+import { formatLapTime, formatSector, cn, peakInWindow } from "@/lib/utils";
 import { animateValue } from "@/lib/motion";
 import type { CiteTarget } from "@/lib/types";
-import { PRODUCT, STUDIO } from "@/lib/brand";
+import { DEMO_ASK, PRODUCT, STUDIO, WEDGE } from "@/lib/brand";
 
 function resolveSessionParams(searchParams: URLSearchParams) {
   const drivers = getDrivers();
@@ -83,7 +83,27 @@ export function SessionShell() {
   const [pulsingCiteId, setPulsingCiteId] = useState<string | null>(null);
   const [activeSector, setActiveSector] = useState<string | null>("Lap");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [coachOpen, setCoachOpen] = useState(true);
   const lengthM = lapDistanceM();
+
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem("citetrace-coach-dismissed") === "1") {
+        setCoachOpen(false);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const dismissCoach = () => {
+    setCoachOpen(false);
+    try {
+      window.localStorage.setItem("citetrace-coach-dismissed", "1");
+    } catch {
+      /* ignore */
+    }
+  };
 
   const driver = getDriver(driverId);
   const driverLaps = getLapsForDriver(driverId);
@@ -145,7 +165,22 @@ export function SessionShell() {
         cite.channelId && cite.lapId
           ? getSample(cite.channelId, cite.lapId)
           : undefined;
-      const peak = spikeSample?.spike?.peakDistanceM ?? mid;
+      const seriesPeak = spikeSample
+        ? peakInWindow(
+            spikeSample.series,
+            cite.window.startM,
+            cite.window.endM,
+          )
+        : null;
+      const stepChannel =
+        cite.channelId === "n_gear" ||
+        cite.channelId === "drs" ||
+        cite.channelId === "brake";
+      const peak =
+        cite.focusM ??
+        spikeSample?.spike?.peakDistanceM ??
+        (stepChannel ? mid : seriesPeak?.distanceM) ??
+        mid;
 
       animateValue(playheadM, peak, 550, (v) => {
         setPlayheadM(v);
@@ -231,17 +266,15 @@ export function SessionShell() {
     : "Compare";
 
   return (
-    <div className="flex min-h-dvh flex-col bg-[var(--void)]">
-      <header className="flex flex-wrap items-center gap-2 border-b border-[var(--hairline)] bg-[var(--panel)] px-3 py-2 font-mono text-[0.72rem]">
+    <div className="flex h-dvh max-h-dvh flex-col overflow-hidden bg-[var(--void)]">
+      <header className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-[var(--hairline)] bg-[var(--panel)] px-3 py-1.5 font-mono text-[0.7rem]">
         <Link
           href="/"
-          className="font-display text-sm font-semibold tracking-tight text-[var(--chalk)] hover:text-[var(--signal)]"
+          className="font-display text-[0.95rem] font-semibold tracking-tight text-[var(--chalk)] hover:text-[var(--signal)]"
         >
           Cite<span className="text-[var(--signal)]">Trace</span>
         </Link>
-        <span className="hidden text-[var(--mute)] sm:inline">
-          {STUDIO}
-        </span>
+        <span className="hidden text-[var(--mute)] sm:inline">{STUDIO}</span>
         <span className="text-[var(--mute)]">/</span>
         <span className="text-[var(--chalk)]">
           {pack.meeting.venue.split(" ").slice(0, 3).join(" ")}{" "}
@@ -252,7 +285,7 @@ export function SessionShell() {
           <select
             value={driverId}
             onChange={(e) => selectDriver(e.target.value)}
-            className="min-h-8 border border-[var(--hairline)] bg-[var(--asphalt)] px-2 text-[var(--chalk)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+            className="min-h-7 border border-[var(--hairline)] bg-[var(--asphalt)] px-2 text-[var(--chalk)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
             aria-label="Select driver"
           >
             {drivers.map((d) => (
@@ -264,7 +297,9 @@ export function SessionShell() {
             ))}
           </select>
         </label>
-        <span className="uppercase text-[var(--mist)]">{compoundTag}</span>
+        <span className="uppercase tracking-wide text-[var(--mist)]">
+          {compoundTag}
+        </span>
         {weather && (
           <span className="hidden text-[var(--mute)] xl:inline">
             air {weather.airTemperatureC.toFixed(1)}°C · track{" "}
@@ -276,29 +311,31 @@ export function SessionShell() {
             ? `Δ L7 ${formatLapDelta(lap.deltaToBaselineMs)}`
             : deltaBest}
         </span>
-        <span className="rounded-sm bg-[var(--signal-dim)] px-1.5 py-0.5 text-[0.58rem] uppercase tracking-wider text-[var(--signal)]">
+        <span className="rounded-sm bg-[var(--signal-dim)] px-1.5 py-0.5 text-[0.55rem] uppercase tracking-wider text-[var(--signal)]">
           {pack.meta.driverCount ?? drivers.length} cars · OpenF1
         </span>
       </header>
 
-      <div className="flex flex-wrap items-center gap-2 border-b border-[var(--hairline)] bg-[var(--asphalt)] px-3 py-2">
-        <span className="font-mono text-[0.65rem] text-[var(--mute)]">Lap</span>
+      <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-[var(--hairline)] bg-[var(--asphalt)] px-3 py-1.5">
+        <span className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-[var(--mute)]">
+          Lap
+        </span>
         {driverLaps.map((l) => (
           <button
             key={l.id}
             type="button"
             onClick={() => selectLap(l.number)}
             className={cn(
-              "min-h-8 border border-[var(--hairline)] px-2.5 font-mono text-[0.72rem] text-[var(--mist)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
+              "min-h-7 border border-[var(--hairline)] px-2 font-mono text-[0.68rem] text-[var(--mist)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
               l.number === lapNumber &&
-                "bg-[var(--signal-dim)] text-[var(--signal)] shadow-[inset_0_-2px_0_var(--signal)]",
+                "border-[var(--signal)]/40 bg-[var(--signal-dim)] text-[var(--signal)] shadow-[inset_0_-2px_0_var(--signal)]",
             )}
             title={l.tags?.join(" · ")}
           >
             {l.number}
           </button>
         ))}
-        <span className="ml-2 font-mono text-[0.65rem] text-[var(--mute)]">
+        <span className="ml-2 font-mono text-[0.6rem] uppercase tracking-[0.12em] text-[var(--mute)]">
           Focus
         </span>
         <button
@@ -310,9 +347,9 @@ export function SessionShell() {
             setSelectedCite(null);
           }}
           className={cn(
-            "min-h-8 border border-[var(--hairline)] px-2.5 font-mono text-[0.72rem] text-[var(--mist)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
+            "min-h-7 border border-[var(--hairline)] px-2 font-mono text-[0.68rem] text-[var(--mist)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
             activeSector === "Lap" &&
-              "bg-[var(--signal-dim)] text-[var(--signal)] shadow-[inset_0_-2px_0_var(--signal)]",
+              "border-[var(--signal)]/40 bg-[var(--signal-dim)] text-[var(--signal)] shadow-[inset_0_-2px_0_var(--signal)]",
           )}
           title="Whole lap — full distance window"
         >
@@ -329,15 +366,15 @@ export function SessionShell() {
               setSelectedCite(null);
             }}
             className={cn(
-              "min-h-8 border border-[var(--hairline)] px-2.5 font-mono text-[0.72rem] text-[var(--mist)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
+              "min-h-7 border border-[var(--hairline)] px-2 font-mono text-[0.68rem] text-[var(--mist)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
               activeSector === s.label &&
-                "bg-[var(--signal-dim)] text-[var(--signal)] shadow-[inset_0_-2px_0_var(--signal)]",
+                "border-[var(--signal)]/40 bg-[var(--signal-dim)] text-[var(--signal)] shadow-[inset_0_-2px_0_var(--signal)]",
             )}
           >
             {s.label}
           </button>
         ))}
-        <label className="ml-2 flex min-h-8 cursor-pointer items-center gap-2 font-mono text-[0.68rem] text-[var(--mist)]">
+        <label className="ml-2 flex min-h-7 cursor-pointer items-center gap-2 font-mono text-[0.65rem] text-[var(--mist)]">
           <input
             type="checkbox"
             checked={compare}
@@ -350,18 +387,49 @@ export function SessionShell() {
           type="button"
           variant="rail"
           size="sm"
-          className="ml-auto"
+          className="ml-auto h-7"
           onClick={explainSpike}
         >
           Explain spike
         </Button>
-        <span className="hidden font-mono text-[0.65rem] text-[var(--mute)] sm:inline">
+        <span className="hidden font-mono text-[0.62rem] text-[var(--mute)] lg:inline">
           {formatLapTime(lap.timeMs)} · S1 {formatSector(lap.sectorsMs[0])} · S2{" "}
           {formatSector(lap.sectorsMs[1])} · S3 {formatSector(lap.sectorsMs[2])}
         </span>
       </div>
 
-      <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-[240px_minmax(0,1fr)_260px]">
+      {coachOpen && (
+        <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b border-[var(--signal)]/25 bg-[var(--signal-dim)] px-3 py-1.5 font-mono text-[0.62rem] text-[var(--chalk)]">
+          <span className="text-[var(--signal)]">90s proof</span>
+          <span className="text-[var(--mist)]">
+            Ask → click Evidence → playhead locks.{" "}
+            <span className="text-[var(--trace-amber)]">OVL</span> = synthetic
+            overlay · <span className="text-[var(--mute)]">OF1</span> = OpenF1.
+          </span>
+          <span className="hidden text-[var(--mute)] lg:inline">{WEDGE}</span>
+          <button
+            type="button"
+            onClick={() => {
+              dismissCoach();
+              explainSpike();
+            }}
+            className="min-h-6 border border-[var(--signal)]/40 bg-[var(--asphalt)] px-2 text-[var(--signal)] hover:bg-[var(--panel)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+          >
+            Run money shot
+          </button>
+          <button
+            type="button"
+            onClick={dismissCoach}
+            className="ml-auto text-[var(--mute)] hover:text-[var(--mist)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+            aria-label="Dismiss coach"
+          >
+            Dismiss
+          </button>
+          <span className="sr-only">{DEMO_ASK}</span>
+        </div>
+      )}
+
+      <div className="hidden min-h-0 flex-1 overflow-hidden md:grid md:grid-cols-[200px_minmax(0,1fr)_228px] xl:grid-cols-[212px_minmax(0,1fr)_248px]">
         <ContextRail
           lapId={lapId}
           playheadM={playheadM}
@@ -375,8 +443,9 @@ export function SessionShell() {
           plotChannelIds={plotChannelIds}
           onTogglePlot={togglePlot}
           emphasizeBrake={driverId === pack.primaryDriverId}
+          driverNumber={driver.number}
         />
-        <main className="flex min-h-0 flex-col bg-[var(--asphalt)] p-3">
+        <main className="flex min-h-0 flex-col overflow-hidden bg-[var(--asphalt)] p-2.5 xl:p-3">
           <TelemetryStage
             lapId={lapId}
             compareLapId={compareLapId}
@@ -411,6 +480,7 @@ export function SessionShell() {
             }}
             plotChannelIds={plotChannelIds}
             onTogglePlot={togglePlot}
+            driverNumber={driver.number}
           />
         </div>
         <main className="min-h-[45vh] flex-1 bg-[var(--asphalt)] p-2">
@@ -448,7 +518,7 @@ export function SessionShell() {
         </div>
       </div>
 
-      <footer className="border-t border-[var(--hairline)] px-3 py-1.5 text-[0.6rem] text-[var(--mute)]">
+      <footer className="shrink-0 border-t border-[var(--hairline)] px-3 py-1 text-[0.58rem] text-[var(--mute)]">
         {STUDIO} · {PRODUCT} · {pack.meta.driverCount ?? 22} drivers · OpenF1
         subset + overlays · No SECU ·{" "}
         <Link href="/about" className="text-[var(--trace-cyan)]">

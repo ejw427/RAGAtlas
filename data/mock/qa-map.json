@@ -21,6 +21,229 @@
       "noHit": false
     },
     {
+      "id": "qa_front_brake",
+      "exactQuery": "Why is the front brake cooler than the rear on lap 10?",
+      "patterns": [
+        "front brake",
+        "brake_temp_fl",
+        "cooler than the rear",
+        "front left",
+        "front-left",
+        "asymmetry"
+      ],
+      "claim": "On the Soft flyer, synthetic front-left brake temp peaks at 688°C in the same S3 heavy where rear brake_temp hits 942°C. Front stays under the public ATLAS example warning of 700°C — the split fits a rear duct, not a whole-axle cooling loss.",
+      "rationale": "Both overlays share the OpenF1 heavy-brake window. Front uses the documented Brakes.FrontLeft.Temperature warning; rear is the 942°C duct flag.",
+      "citeIds": [
+        "cite_front_brake",
+        "cite_front_note",
+        "cite_brake_spike"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_pressure",
+      "exactQuery": "Was the S3 stop a late stab or a trail?",
+      "patterns": [
+        "brake pressure",
+        "brake_pressure",
+        "late stab",
+        "trail"
+      ],
+      "claim": "Synthetic brake_pressure peaks at 71.7 bar at 3689 m while speed is still 213 km/h, then falls to 37.5 bar by the release at 97 km/h. That is a trail shaped from the OpenF1 brake (held at 100) times speed — not a late stab.",
+      "rationale": "OpenF1 brake is only 0/100. The overlay rises at the start of the application and decays as speed bleeds.",
+      "citeIds": [
+        "cite_pressure",
+        "cite_pressure_note"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_drs",
+      "exactQuery": "Where did DRS open on the Soft flyer?",
+      "patterns": [
+        "drs open",
+        "where did drs",
+        "drag reduction",
+        "drs"
+      ],
+      "claim": "It didn't. OpenF1 drs is 0 on every sample in this FP2 pack. On LEC's fastest stretch (2870–3660 m) the car still reaches 332 km/h with DRS off.",
+      "rationale": "The drs channel is flat zero for the whole field pack. The cite locks the Soft-flyer speed peak so the off state sits on the straight where an opening would show.",
+      "citeIds": [
+        "cite_drs"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_gear",
+      "exactQuery": "Which gear did he hold on the longest straight?",
+      "patterns": [
+        "longest straight",
+        "which gear",
+        "n_gear",
+        "held 8",
+        "gear"
+      ],
+      "claim": "OpenF1 n_gear holds 8th for 726 m on the Soft flyer, from 2986 m to 3712 m — through the end of S2 and into the S3 brake.",
+      "rationale": "Longest constant gear at or above 6th on L10. The window crosses the S2/S3 boundary.",
+      "citeIds": [
+        "cite_gear"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_coolant",
+      "exactQuery": "Did coolant soak after the heavy brake?",
+      "patterns": [
+        "coolant soak",
+        "coolant_temp",
+        "coolant",
+        "soak"
+      ],
+      "claim": "No soak step. Synthetic coolant_temp drifts from 94.1°C at the start of the lap to 98.2°C at the line. Through the S3 heavy it only moves 96.6→96.8°C, then 96.8→98.2°C after — a steady climb, not a post-brake spike.",
+      "rationale": "Low-rate Engine.Temperature-style overlay. The heavy window does not add a step above the lap drift.",
+      "citeIds": [
+        "cite_coolant",
+        "cite_coolant_note"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_tyre",
+      "exactQuery": "How hot was the Soft tyre through S2?",
+      "patterns": [
+        "tyre",
+        "tire",
+        "tyre_surf",
+        "soft tyre",
+        "tyre heat"
+      ],
+      "claim": "Synthetic tyre_surf_fl peaks at 128°C through S2 on the Soft flyer vs 105°C on the Hard push — hotter Soft surface overlay on the same OpenF1 speed/throttle window.",
+      "rationale": "S2 peak comparison Soft L10 vs Hard L7 on the synthetic tyre surface channel.",
+      "citeIds": [
+        "cite_tyre",
+        "cite_tyre_note"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_steer",
+      "exactQuery": "Where is the biggest steering input on lap 10?",
+      "patterns": [
+        "steering",
+        "steer",
+        "biggest steering",
+        "steering input"
+      ],
+      "claim": "Synthetic steering peaks at 26° near 583 m on the Soft flyer, derived from OpenF1 location curvature — not a SECU steer sensor.",
+      "rationale": "Absolute peak on the steering overlay away from the start/finish join.",
+      "citeIds": [
+        "cite_steer"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_g_long",
+      "exactQuery": "What longitudinal g did the S3 heavy produce?",
+      "patterns": [
+        "longitudinal",
+        "g_long",
+        "long-g",
+        "deceleration",
+        "how many g"
+      ],
+      "claim": "Synthetic g_long troughs at −1.97 g in the S3 heavy (derived from OpenF1 speed), aligned with the brake-pressure trail window.",
+      "rationale": "Speed-derived long-g in the same heavy as the duct thermal story.",
+      "citeIds": [
+        "cite_g_long",
+        "cite_pressure"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_fuel",
+      "exactQuery": "Where was fuel flow highest on the Soft flyer?",
+      "patterns": [
+        "fuel flow",
+        "fuel_flow",
+        "fuel demand",
+        "fuel"
+      ],
+      "claim": "Synthetic fuel_flow (ATLAS FuelFlow-style) peaks at 110 kg/h through S2 on throttle — shaped from OpenF1 throttle × rpm, not a team fuel meter.",
+      "rationale": "S2 window on Soft flyer where throttle demand is sustained.",
+      "citeIds": [
+        "cite_fuel"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_trap",
+      "exactQuery": "What was the Soft speed trap vs Hard?",
+      "patterns": [
+        "speed trap",
+        "st_speed",
+        "trap speed",
+        "i1_speed",
+        "i2_speed"
+      ],
+      "claim": "OpenF1 speed trap: Soft flyer st_speed 319 km/h vs Hard 314 km/h (Δ +5). Intermediate traps on Soft: I1 221 / I2 183 km/h.",
+      "rationale": "Lap-level OpenF1 trap fields already on the Soft and Hard pack laps.",
+      "citeIds": [
+        "cite_trap_st",
+        "cite_trap_note"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_weather",
+      "exactQuery": "Did the track cool during FP2?",
+      "patterns": [
+        "track cool",
+        "weather",
+        "track temperature",
+        "track temp"
+      ],
+      "claim": "Yes. OpenF1 weather series shows track temperature falling 42.4→39.1°C over FP2 (Δ −3.3°C). Air stays ~29.7–29.3°C. Soft flyer ran mid-session.",
+      "rationale": "Downsampled OpenF1 /weather for session 11390.",
+      "citeIds": [
+        "cite_weather"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_pit",
+      "exactQuery": "When did Leclerc fit Softs?",
+      "patterns": [
+        "fit soft",
+        "softs",
+        "pit stop",
+        "when did",
+        "stint"
+      ],
+      "claim": "OpenF1 stint map puts LEC Soft stint 2 on laps 9–11. He pitted on lap 9 (lane 311.8 s) ahead of that Soft stint — the L10 flyer sits inside it.",
+      "rationale": "OpenF1 /stints + /pit for driver 16.",
+      "citeIds": [
+        "cite_pit",
+        "cite_stint"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_radio",
+      "exactQuery": "Any team radio for Leclerc in FP2?",
+      "patterns": [
+        "team radio",
+        "radio for",
+        "radio clip",
+        "team radio for leclerc"
+      ],
+      "claim": "OpenF1 published 12 team-radio clips for this FP2; 0 are for car 16 (LEC). No LEC audio in the public subset.",
+      "rationale": "OpenF1 /team_radio for session 11390 — honest empty for LEC.",
+      "citeIds": [
+        "cite_radio"
+      ],
+      "noHit": false
+    },
+    {
       "id": "qa_time_loss",
       "exactQuery": "Where did Soft gain vs the Hard push?",
       "patterns": [
@@ -101,10 +324,12 @@
         "blanking",
         "what failed"
       ],
-      "claim": "Corpus failure mode “Rear brake duct restriction” matches >900°C peaks in the heavy zone plus the duct/cooling notes.",
-      "rationale": "Failure-mode channelHints include brake_temp / brake / speed; cites bind the spike and duct note.",
+      "claim": "Corpus failure mode “Rear brake duct restriction” matches a rear peak of 942°C while front-left stays at 688°C in the same heavy, plus the duct note. Brake pressure trails with speed, so the spike is not a late stab.",
+      "rationale": "Failure-mode hints now include brake_temp_fl and brake_pressure beside brake_temp, brake, and speed.",
       "citeIds": [
         "cite_brake_spike",
+        "cite_front_brake",
+        "cite_pressure",
         "cite_duct_note"
       ],
       "noHit": false

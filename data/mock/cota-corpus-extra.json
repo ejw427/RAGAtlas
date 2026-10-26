@@ -1,0 +1,878 @@
+{
+  "fetchedAt": "2026-10-26T23:04:37.077Z",
+  "sessionKey": 11390,
+  "pits": [
+    {
+      "date": "2026-10-23T21:00:05.504000+00:00",
+      "driverNumber": 10,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:00:09.234000+00:00",
+      "driverNumber": 41,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:00:14.638000+00:00",
+      "driverNumber": 30,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:00:19.544000+00:00",
+      "driverNumber": 3,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:00:24.827000+00:00",
+      "driverNumber": 87,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:00:31.734000+00:00",
+      "driverNumber": 23,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:00:37.108000+00:00",
+      "driverNumber": 16,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:00:40.562000+00:00",
+      "driverNumber": 31,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:00:42.155000+00:00",
+      "driverNumber": 43,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:00:44.187000+00:00",
+      "driverNumber": 5,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:00:47.890000+00:00",
+      "driverNumber": 18,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:01:09.767000+00:00",
+      "driverNumber": 44,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:01:14.410000+00:00",
+      "driverNumber": 81,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:01:31.598000+00:00",
+      "driverNumber": 14,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:01:37.177000+00:00",
+      "driverNumber": 55,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:01:40.257000+00:00",
+      "driverNumber": 77,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:01:47.106000+00:00",
+      "driverNumber": 12,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:01:48.731000+00:00",
+      "driverNumber": 1,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:01:51.463000+00:00",
+      "driverNumber": 63,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:02:18.399000+00:00",
+      "driverNumber": 27,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:02:24.032000+00:00",
+      "driverNumber": 6,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:04:02.999000+00:00",
+      "driverNumber": 11,
+      "lapNumber": 1,
+      "laneDurationS": null,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:07:28.152000+00:00",
+      "driverNumber": 5,
+      "lapNumber": 4,
+      "laneDurationS": 18.8,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:11:00.740000+00:00",
+      "driverNumber": 30,
+      "lapNumber": 4,
+      "laneDurationS": 288.3,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:13:43.249000+00:00",
+      "driverNumber": 87,
+      "lapNumber": 7,
+      "laneDurationS": 30.3,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:13:52.645000+00:00",
+      "driverNumber": 5,
+      "lapNumber": 7,
+      "laneDurationS": 18.8,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:16:59.068000+00:00",
+      "driverNumber": 12,
+      "lapNumber": 4,
+      "laneDurationS": 514.2,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:19:41.732000+00:00",
+      "driverNumber": 6,
+      "lapNumber": 6,
+      "laneDurationS": 432.3,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:21:23.692000+00:00",
+      "driverNumber": 63,
+      "lapNumber": 8,
+      "laneDurationS": 253,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:21:38.850000+00:00",
+      "driverNumber": 3,
+      "lapNumber": 8,
+      "laneDurationS": 448.5,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:21:42.658000+00:00",
+      "driverNumber": 43,
+      "lapNumber": 7,
+      "laneDurationS": 466.3,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:22:04.516000+00:00",
+      "driverNumber": 16,
+      "lapNumber": 9,
+      "laneDurationS": 311.8,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:22:12.536000+00:00",
+      "driverNumber": 14,
+      "lapNumber": 7,
+      "laneDurationS": 522.5,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:22:20.667000+00:00",
+      "driverNumber": 30,
+      "lapNumber": 7,
+      "laneDurationS": 319.2,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:22:31.386000+00:00",
+      "driverNumber": 44,
+      "lapNumber": 8,
+      "laneDurationS": 356.1,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:22:39.354000+00:00",
+      "driverNumber": 41,
+      "lapNumber": 10,
+      "laneDurationS": 231.9,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:22:42.870000+00:00",
+      "driverNumber": 10,
+      "lapNumber": 8,
+      "laneDurationS": 460.2,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:23:07.339000+00:00",
+      "driverNumber": 87,
+      "lapNumber": 9,
+      "laneDurationS": 345.9,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:23:09.620000+00:00",
+      "driverNumber": 18,
+      "lapNumber": 10,
+      "laneDurationS": 298.3,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:23:32.948000+00:00",
+      "driverNumber": 1,
+      "lapNumber": 8,
+      "laneDurationS": 423,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:24:13.808000+00:00",
+      "driverNumber": 81,
+      "lapNumber": 9,
+      "laneDurationS": 392.6,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:24:30.698000+00:00",
+      "driverNumber": 31,
+      "lapNumber": 9,
+      "laneDurationS": 427.9,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:24:53.652000+00:00",
+      "driverNumber": 55,
+      "lapNumber": 10,
+      "laneDurationS": 283.1,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:26:13.542000+00:00",
+      "driverNumber": 27,
+      "lapNumber": 9,
+      "laneDurationS": 488.2,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:26:17.416000+00:00",
+      "driverNumber": 6,
+      "lapNumber": 9,
+      "laneDurationS": 29.8,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:26:48.807000+00:00",
+      "driverNumber": 12,
+      "lapNumber": 7,
+      "laneDurationS": 257.3,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:27:27.354000+00:00",
+      "driverNumber": 23,
+      "lapNumber": 10,
+      "laneDurationS": 502.6,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:28:11.567000+00:00",
+      "driverNumber": 63,
+      "lapNumber": 11,
+      "laneDurationS": 46.7,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:28:15.180000+00:00",
+      "driverNumber": 5,
+      "lapNumber": 10,
+      "laneDurationS": 510.3,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:29:45.782000+00:00",
+      "driverNumber": 10,
+      "lapNumber": 11,
+      "laneDurationS": 28.9,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:29:51.705000+00:00",
+      "driverNumber": 44,
+      "lapNumber": 11,
+      "laneDurationS": 46.1,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:29:58.158000+00:00",
+      "driverNumber": 77,
+      "lapNumber": 8,
+      "laneDurationS": 834.4,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:30:52.549000+00:00",
+      "driverNumber": 11,
+      "lapNumber": 9,
+      "laneDurationS": 624.7,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:31:18.078000+00:00",
+      "driverNumber": 31,
+      "lapNumber": 12,
+      "laneDurationS": 42.4,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:33:16.390000+00:00",
+      "driverNumber": 16,
+      "lapNumber": 12,
+      "laneDurationS": 340.5,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:34:52.007000+00:00",
+      "driverNumber": 5,
+      "lapNumber": 13,
+      "laneDurationS": 29.4,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:39:08.665000+00:00",
+      "driverNumber": 77,
+      "lapNumber": 12,
+      "laneDurationS": 50.2,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:39:29.566000+00:00",
+      "driverNumber": 12,
+      "lapNumber": 10,
+      "laneDurationS": 404.5,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:39:54.699000+00:00",
+      "driverNumber": 1,
+      "lapNumber": 13,
+      "laneDurationS": 363.2,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:40:34.414000+00:00",
+      "driverNumber": 30,
+      "lapNumber": 13,
+      "laneDurationS": 361.4,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:40:41.101000+00:00",
+      "driverNumber": 41,
+      "lapNumber": 16,
+      "laneDurationS": 357.9,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:41:03.509000+00:00",
+      "driverNumber": 3,
+      "lapNumber": 11,
+      "laneDurationS": 843.6,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:41:10.698000+00:00",
+      "driverNumber": 87,
+      "lapNumber": 15,
+      "laneDurationS": 320.5,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:41:44.354000+00:00",
+      "driverNumber": 6,
+      "lapNumber": 12,
+      "laneDurationS": 599.2,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:41:49.167000+00:00",
+      "driverNumber": 10,
+      "lapNumber": 14,
+      "laneDurationS": 342.2,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:41:57.463000+00:00",
+      "driverNumber": 63,
+      "lapNumber": 15,
+      "laneDurationS": 332.8,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:42:23.254000+00:00",
+      "driverNumber": 44,
+      "lapNumber": 14,
+      "laneDurationS": 428.4,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:42:48.507000+00:00",
+      "driverNumber": 81,
+      "lapNumber": 15,
+      "laneDurationS": 400.8,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:42:53.938000+00:00",
+      "driverNumber": 23,
+      "lapNumber": 15,
+      "laneDurationS": 345.5,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:43:12.668000+00:00",
+      "driverNumber": 27,
+      "lapNumber": 14,
+      "laneDurationS": 423.9,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:43:15.653000+00:00",
+      "driverNumber": 55,
+      "lapNumber": 16,
+      "laneDurationS": 348.5,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:44:31.624000+00:00",
+      "driverNumber": 31,
+      "lapNumber": 15,
+      "laneDurationS": 451.2,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:45:12.993000+00:00",
+      "driverNumber": 18,
+      "lapNumber": 17,
+      "laneDurationS": 468.9,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:45:23.984000+00:00",
+      "driverNumber": 14,
+      "lapNumber": 15,
+      "laneDurationS": 364.1,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:45:33.078000+00:00",
+      "driverNumber": 5,
+      "lapNumber": 16,
+      "laneDurationS": 308.5,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:46:10.450000+00:00",
+      "driverNumber": 43,
+      "lapNumber": 21,
+      "laneDurationS": 24.9,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:46:51.841000+00:00",
+      "driverNumber": 77,
+      "lapNumber": 14,
+      "laneDurationS": 235.4,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:49:48.705000+00:00",
+      "driverNumber": 11,
+      "lapNumber": 16,
+      "laneDurationS": 302.8,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:54:22.526000+00:00",
+      "driverNumber": 63,
+      "lapNumber": 22,
+      "laneDurationS": 18.7,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:56:41.755000+00:00",
+      "driverNumber": 44,
+      "lapNumber": 22,
+      "laneDurationS": 24.5,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:56:47.583000+00:00",
+      "driverNumber": 81,
+      "lapNumber": 23,
+      "laneDurationS": 25.4,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:57:11.072000+00:00",
+      "driverNumber": 1,
+      "lapNumber": 23,
+      "laneDurationS": 24.1,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:58:12.266000+00:00",
+      "driverNumber": 63,
+      "lapNumber": 24,
+      "laneDurationS": 27.3,
+      "stopDurationS": null
+    },
+    {
+      "date": "2026-10-23T21:59:16.480000+00:00",
+      "driverNumber": 27,
+      "lapNumber": 23,
+      "laneDurationS": 33.4,
+      "stopDurationS": null
+    }
+  ],
+  "teamRadio": [
+    {
+      "date": "2026-10-23T20:56:51.306000+00:00",
+      "driverNumber": 11,
+      "recordingUrl": "https://livetiming.formula1.com/static/2026/2026-10-25_United_States_Grand_Prix/2026-10-23_Practice_2/TeamRadio/PER_11_20261023_155645.mp3"
+    },
+    {
+      "date": "2026-10-23T21:04:27.748000+00:00",
+      "driverNumber": 6,
+      "recordingUrl": "https://livetiming.formula1.com/static/2026/2026-10-25_United_States_Grand_Prix/2026-10-23_Practice_2/TeamRadio/HAD_6_20261023_160404.mp3"
+    },
+    {
+      "date": "2026-10-23T21:07:31.261000+00:00",
+      "driverNumber": 12,
+      "recordingUrl": "https://livetiming.formula1.com/static/2026/2026-10-25_United_States_Grand_Prix/2026-10-23_Practice_2/TeamRadio/ANT_12_20261023_160657.mp3"
+    },
+    {
+      "date": "2026-10-23T21:08:01.890000+00:00",
+      "driverNumber": 1,
+      "recordingUrl": "https://livetiming.formula1.com/static/2026/2026-10-25_United_States_Grand_Prix/2026-10-23_Practice_2/TeamRadio/NOR_1_20261023_160742.mp3"
+    },
+    {
+      "date": "2026-10-23T21:26:19.541000+00:00",
+      "driverNumber": 6,
+      "recordingUrl": "https://livetiming.formula1.com/static/2026/2026-10-25_United_States_Grand_Prix/2026-10-23_Practice_2/TeamRadio/HAD_6_20261023_162536.mp3"
+    },
+    {
+      "date": "2026-10-23T21:31:22.463000+00:00",
+      "driverNumber": 6,
+      "recordingUrl": "https://livetiming.formula1.com/static/2026/2026-10-25_United_States_Grand_Prix/2026-10-23_Practice_2/TeamRadio/HAD_6_20261023_163040.mp3"
+    },
+    {
+      "date": "2026-10-23T21:33:25.838000+00:00",
+      "driverNumber": 55,
+      "recordingUrl": "https://livetiming.formula1.com/static/2026/2026-10-25_United_States_Grand_Prix/2026-10-23_Practice_2/TeamRadio/SAI_55_20261023_163301.mp3"
+    },
+    {
+      "date": "2026-10-23T21:35:26.225000+00:00",
+      "driverNumber": 14,
+      "recordingUrl": "https://livetiming.formula1.com/static/2026/2026-10-25_United_States_Grand_Prix/2026-10-23_Practice_2/TeamRadio/ALO_14_20261023_163454.mp3"
+    },
+    {
+      "date": "2026-10-23T21:41:02.163000+00:00",
+      "driverNumber": 31,
+      "recordingUrl": "https://livetiming.formula1.com/static/2026/2026-10-25_United_States_Grand_Prix/2026-10-23_Practice_2/TeamRadio/OCO_31_20261023_164030.mp3"
+    },
+    {
+      "date": "2026-10-23T21:52:40.316000+00:00",
+      "driverNumber": 1,
+      "recordingUrl": "https://livetiming.formula1.com/static/2026/2026-10-25_United_States_Grand_Prix/2026-10-23_Practice_2/TeamRadio/NOR_1_20261023_165229.mp3"
+    },
+    {
+      "date": "2026-10-23T21:54:42.171000+00:00",
+      "driverNumber": 23,
+      "recordingUrl": "https://livetiming.formula1.com/static/2026/2026-10-25_United_States_Grand_Prix/2026-10-23_Practice_2/TeamRadio/ALB_23_20261023_165408.mp3"
+    },
+    {
+      "date": "2026-10-23T21:55:44.854000+00:00",
+      "driverNumber": 44,
+      "recordingUrl": "https://livetiming.formula1.com/static/2026/2026-10-25_United_States_Grand_Prix/2026-10-23_Practice_2/TeamRadio/HAM_44_20261023_165532.mp3"
+    }
+  ],
+  "weatherSeries": [
+    {
+      "date": "2026-10-23T20:46:22.505000+00:00",
+      "airTemperatureC": 29.7,
+      "trackTemperatureC": 42.4,
+      "humidityPct": 23.3,
+      "rainfall": 0,
+      "windSpeedMps": 1.9,
+      "windDirectionDeg": 110,
+      "pressureHpa": 999.6
+    },
+    {
+      "date": "2026-10-23T20:50:22.544000+00:00",
+      "airTemperatureC": 29.7,
+      "trackTemperatureC": 42.5,
+      "humidityPct": 23.9,
+      "rainfall": 0,
+      "windSpeedMps": 2.6,
+      "windDirectionDeg": 153,
+      "pressureHpa": 999.6
+    },
+    {
+      "date": "2026-10-23T20:54:22.545000+00:00",
+      "airTemperatureC": 29.7,
+      "trackTemperatureC": 42.8,
+      "humidityPct": 24,
+      "rainfall": 0,
+      "windSpeedMps": 2,
+      "windDirectionDeg": 127,
+      "pressureHpa": 999.5
+    },
+    {
+      "date": "2026-10-23T20:58:22.557000+00:00",
+      "airTemperatureC": 29.7,
+      "trackTemperatureC": 43.2,
+      "humidityPct": 24.4,
+      "rainfall": 0,
+      "windSpeedMps": 1.3,
+      "windDirectionDeg": 125,
+      "pressureHpa": 999.5
+    },
+    {
+      "date": "2026-10-23T21:02:22.599000+00:00",
+      "airTemperatureC": 29.6,
+      "trackTemperatureC": 41.6,
+      "humidityPct": 24.2,
+      "rainfall": 0,
+      "windSpeedMps": 2.1,
+      "windDirectionDeg": 123,
+      "pressureHpa": 999.6
+    },
+    {
+      "date": "2026-10-23T21:06:22.589000+00:00",
+      "airTemperatureC": 29.7,
+      "trackTemperatureC": 41.4,
+      "humidityPct": 24.7,
+      "rainfall": 0,
+      "windSpeedMps": 4.2,
+      "windDirectionDeg": 123,
+      "pressureHpa": 999.5
+    },
+    {
+      "date": "2026-10-23T21:10:22.548000+00:00",
+      "airTemperatureC": 29.6,
+      "trackTemperatureC": 41.7,
+      "humidityPct": 24.9,
+      "rainfall": 0,
+      "windSpeedMps": 2.5,
+      "windDirectionDeg": 125,
+      "pressureHpa": 999.6
+    },
+    {
+      "date": "2026-10-23T21:14:22.575000+00:00",
+      "airTemperatureC": 29.8,
+      "trackTemperatureC": 42.4,
+      "humidityPct": 24.5,
+      "rainfall": 0,
+      "windSpeedMps": 1.1,
+      "windDirectionDeg": 137,
+      "pressureHpa": 999.5
+    },
+    {
+      "date": "2026-10-23T21:18:22.620000+00:00",
+      "airTemperatureC": 29.9,
+      "trackTemperatureC": 41,
+      "humidityPct": 23.6,
+      "rainfall": 0,
+      "windSpeedMps": 4.8,
+      "windDirectionDeg": 143,
+      "pressureHpa": 999.5
+    },
+    {
+      "date": "2026-10-23T21:22:22.667000+00:00",
+      "airTemperatureC": 29.8,
+      "trackTemperatureC": 41.2,
+      "humidityPct": 24.1,
+      "rainfall": 0,
+      "windSpeedMps": 2.4,
+      "windDirectionDeg": 134,
+      "pressureHpa": 999.5
+    },
+    {
+      "date": "2026-10-23T21:26:22.682000+00:00",
+      "airTemperatureC": 29.6,
+      "trackTemperatureC": 41,
+      "humidityPct": 24.3,
+      "rainfall": 0,
+      "windSpeedMps": 2.6,
+      "windDirectionDeg": 149,
+      "pressureHpa": 999.5
+    },
+    {
+      "date": "2026-10-23T21:30:22.691000+00:00",
+      "airTemperatureC": 29.9,
+      "trackTemperatureC": 40.8,
+      "humidityPct": 23.6,
+      "rainfall": 0,
+      "windSpeedMps": 3.9,
+      "windDirectionDeg": 135,
+      "pressureHpa": 999.6
+    },
+    {
+      "date": "2026-10-23T21:34:22.692000+00:00",
+      "airTemperatureC": 29.5,
+      "trackTemperatureC": 40.9,
+      "humidityPct": 25,
+      "rainfall": 0,
+      "windSpeedMps": 2.3,
+      "windDirectionDeg": 134,
+      "pressureHpa": 999.4
+    },
+    {
+      "date": "2026-10-23T21:38:22.706000+00:00",
+      "airTemperatureC": 29.6,
+      "trackTemperatureC": 40.6,
+      "humidityPct": 24.9,
+      "rainfall": 0,
+      "windSpeedMps": 2.3,
+      "windDirectionDeg": 142,
+      "pressureHpa": 999.4
+    },
+    {
+      "date": "2026-10-23T21:42:22.754000+00:00",
+      "airTemperatureC": 29.5,
+      "trackTemperatureC": 40.5,
+      "humidityPct": 24.8,
+      "rainfall": 0,
+      "windSpeedMps": 2.5,
+      "windDirectionDeg": 147,
+      "pressureHpa": 999.5
+    },
+    {
+      "date": "2026-10-23T21:46:22.762000+00:00",
+      "airTemperatureC": 29.5,
+      "trackTemperatureC": 40.4,
+      "humidityPct": 24.6,
+      "rainfall": 0,
+      "windSpeedMps": 1.1,
+      "windDirectionDeg": 137,
+      "pressureHpa": 999.4
+    },
+    {
+      "date": "2026-10-23T21:50:22.936000+00:00",
+      "airTemperatureC": 29.5,
+      "trackTemperatureC": 40.2,
+      "humidityPct": 24.7,
+      "rainfall": 0,
+      "windSpeedMps": 3.1,
+      "windDirectionDeg": 153,
+      "pressureHpa": 999.3
+    },
+    {
+      "date": "2026-10-23T21:54:23.092000+00:00",
+      "airTemperatureC": 29.5,
+      "trackTemperatureC": 39.9,
+      "humidityPct": 25,
+      "rainfall": 0,
+      "windSpeedMps": 2.5,
+      "windDirectionDeg": 149,
+      "pressureHpa": 999.3
+    },
+    {
+      "date": "2026-10-23T21:58:23.103000+00:00",
+      "airTemperatureC": 29.4,
+      "trackTemperatureC": 39.6,
+      "humidityPct": 25.4,
+      "rainfall": 0,
+      "windSpeedMps": 2.6,
+      "windDirectionDeg": 140,
+      "pressureHpa": 999.4
+    },
+    {
+      "date": "2026-10-23T22:02:23.109000+00:00",
+      "airTemperatureC": 29.5,
+      "trackTemperatureC": 39.7,
+      "humidityPct": 25.2,
+      "rainfall": 0,
+      "windSpeedMps": 2.7,
+      "windDirectionDeg": 146,
+      "pressureHpa": 999.3
+    },
+    {
+      "date": "2026-10-23T22:06:23.100000+00:00",
+      "airTemperatureC": 29.5,
+      "trackTemperatureC": 39.8,
+      "humidityPct": 25,
+      "rainfall": 0,
+      "windSpeedMps": 1.6,
+      "windDirectionDeg": 136,
+      "pressureHpa": 999.3
+    },
+    {
+      "date": "2026-10-23T22:10:23.121000+00:00",
+      "airTemperatureC": 29.3,
+      "trackTemperatureC": 39.1,
+      "humidityPct": 25,
+      "rainfall": 0,
+      "windSpeedMps": 2.1,
+      "windDirectionDeg": 153,
+      "pressureHpa": 999.4
+    }
+  ]
+}

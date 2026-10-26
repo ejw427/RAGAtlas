@@ -10,7 +10,8 @@
     "check": "npm run build && wrangler deploy --dry-run",
     "deploy": "npm run build && wrangler deploy",
     "generate:fixture": "node scripts/generate-bahrain-pack.mjs",
-    "fetch:cota": "node scripts/fetch-cota-2026-pack.mjs"
+    "fetch:cota": "node scripts/fetch-cota-2026-pack.mjs",
+    "enrich:cota": "node scripts/run-enrich-cota.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.3.1",

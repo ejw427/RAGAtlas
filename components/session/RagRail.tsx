@@ -45,9 +45,9 @@ export function RagRail({
       status: "loading",
       query: trimmed,
       cites: [],
-      message: "Grounding against channels and notes…",
+      message: "Matching QaMap patterns (deterministic)…",
     });
-    const delay = prefersReducedMotion() ? 120 : 900;
+    const delay = prefersReducedMotion() ? 40 : 280;
     await new Promise((r) => setTimeout(r, delay));
     setAnswer(answerQuery(trimmed));
   };
@@ -61,9 +61,14 @@ export function RagRail({
 
   return (
     <aside className="flex h-full min-h-0 flex-col gap-3 overflow-auto bg-[var(--rail)] p-3 md:border-l md:border-[var(--hairline)]">
-      <p className="font-mono text-[0.62rem] uppercase tracking-[0.14em] text-[var(--mute)]">
-        Ask the session
-      </p>
+      <div>
+        <p className="font-mono text-[0.62rem] uppercase tracking-[0.14em] text-[var(--mute)]">
+          Ask the session
+        </p>
+        <p className="mt-1 rounded-sm border border-[var(--signal)]/25 bg-[var(--signal-dim)] px-2 py-1 font-mono text-[0.58rem] leading-snug text-[var(--signal)]">
+          Deterministic QaMap · fail closed — not an LLM
+        </p>
+      </div>
 
       <form
         className="flex gap-2"
@@ -84,8 +89,8 @@ export function RagRail({
         </Button>
       </form>
 
-      <div className="flex flex-wrap gap-1.5">
-        {seeds.slice(0, 4).map((s) => (
+      <div className="flex max-h-36 flex-wrap gap-1.5 overflow-auto">
+        {seeds.map((s) => (
           <button
             key={s}
             type="button"
@@ -93,9 +98,10 @@ export function RagRail({
               setQuery(s);
               void submit(s);
             }}
+            title={s}
             className="border border-[var(--hairline)] px-2 py-1 text-left font-mono text-[0.58rem] text-[var(--mute)] hover:border-[var(--hairline-strong)] hover:text-[var(--mist)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
           >
-            {s.length > 42 ? `${s.slice(0, 40)}…` : s}
+            {s.length > 56 ? `${s.slice(0, 54)}…` : s}
           </button>
         ))}
         <button
@@ -105,7 +111,7 @@ export function RagRail({
             setQuery(q);
             void submit(q);
           }}
-          className="border border-[var(--hairline)] px-2 py-1 font-mono text-[0.58rem] text-[var(--mute)] hover:text-[var(--mist)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+          className="border border-[var(--warn)]/35 px-2 py-1 font-mono text-[0.58rem] text-[var(--warn)] hover:bg-[var(--warn)]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
         >
           No-hit probe
         </button>
@@ -113,7 +119,16 @@ export function RagRail({
 
       <div className="min-h-[8rem] border-t border-[var(--hairline)] pt-3">
         {answer.status === "empty" && (
-          <p className="text-[0.8rem] text-[var(--mist)]">{answer.message}</p>
+          <div className="space-y-2">
+            <p className="text-[0.78rem] leading-snug text-[var(--mist)]">
+              {answer.message}
+            </p>
+            <ol className="list-decimal space-y-1 pl-4 font-mono text-[0.62rem] text-[var(--mute)]">
+              <li>Ask the money-shot (or tap a seed)</li>
+              <li>Click an Evidence cite</li>
+              <li>Playhead locks on the band</li>
+            </ol>
+          </div>
         )}
         {answer.status === "loading" && (
           <p className="font-mono text-[0.75rem] text-[var(--trace-cyan)]">
@@ -138,7 +153,7 @@ export function RagRail({
             )}
             <div className="space-y-1.5">
               <p className="font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--mute)]">
-                Evidence
+                Evidence · click to lock playhead
               </p>
               {answer.cites.map((cite) => (
                 <CiteChip
@@ -154,9 +169,9 @@ export function RagRail({
         )}
       </div>
 
-      <p className="mt-auto text-[0.65rem] leading-snug text-[var(--mute)]">
-        Deterministic QaMap over session notes & channel docs — fail closed when
-        the session window cannot support the claim.
+      <p className="mt-auto text-[0.62rem] leading-snug text-[var(--mute)]">
+        Pattern map over notes & channel docs — silence when the session cannot
+        support the claim. Method: /about
       </p>
     </aside>
   );

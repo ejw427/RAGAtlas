@@ -93,20 +93,36 @@ export function getEvents(): SessionEvent[] {
   return pack.events;
 }
 
-/** Default stage plots from channel docs (`plotDefault`). */
+function byPlotOrder(a: Channel, b: Channel): number {
+  return (a.plotOrder ?? 99) - (b.plotOrder ?? 99);
+}
+
+/** Stage plots — selected ids, else every `plotDefault` channel in plotOrder. */
 export function stageChannels(selectedIds?: string[]): Channel[] {
   if (selectedIds?.length) {
     return selectedIds
       .map((id) => channelDocs.find((c) => c.id === id))
-      .filter((c): c is Channel => Boolean(c));
+      .filter((c): c is Channel => Boolean(c))
+      .sort(byPlotOrder);
   }
-  const defaults = channelDocs.filter((c) => c.plotDefault !== false);
-  const preferred = defaults.filter((c) => c.plotDefault === true);
-  return preferred.length ? preferred : defaults.slice(0, 3);
+  const preferred = channelDocs
+    .filter((c) => c.plotDefault === true)
+    .sort(byPlotOrder);
+  if (preferred.length) return preferred;
+  return [...channelDocs].sort(byPlotOrder);
 }
 
 export function defaultPlotIds(): string[] {
   return stageChannels().map((c) => c.id);
+}
+
+/** Synthetic ATLAS-shaped overlay (not OpenF1 car_data). */
+export function isOverlayChannel(ch: Channel): boolean {
+  return ch.sourceClass === "synthetic_atlas_like";
+}
+
+export function sourceBadge(ch: Channel): "OVL" | "OF1" {
+  return isOverlayChannel(ch) ? "OVL" : "OF1";
 }
 
 export function sectorLabel(sector: CiteTarget["sector"]): string | null {
@@ -164,8 +180,17 @@ export function formatChannelValue(ch: Channel, value: number): string {
   if (ch.id === "brake_temp" || ch.unit === "°C") {
     return `${value.toFixed(0)}${ch.unit ? ` ${ch.unit}` : ""}`;
   }
+  if (ch.id === "brake_pressure" || ch.unit === "kg/h") {
+    return `${value.toFixed(1)} ${ch.unit}`;
+  }
   if (ch.unit === "bar") {
     return `${value.toFixed(2)} ${ch.unit}`;
+  }
+  if (ch.unit === "g") {
+    return `${value.toFixed(2)} ${ch.unit}`;
+  }
+  if (ch.unit === "°" && ch.id === "steering") {
+    return `${value.toFixed(1)}°`;
   }
   if (ch.unit === "%") {
     return `${value.toFixed(0)}${ch.unit}`;
