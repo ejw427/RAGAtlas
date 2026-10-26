@@ -29,7 +29,14 @@ import {
 import { formatLapTime, formatSector, cn, peakInWindow } from "@/lib/utils";
 import { animateValue } from "@/lib/motion";
 import type { CiteTarget } from "@/lib/types";
-import { DEMO_ASK, PRODUCT, STUDIO, WEDGE } from "@/lib/brand";
+import {
+  DEMO_ASK,
+  LIVE_URL,
+  PORTFOLIO_URL,
+  PRODUCT,
+  STUDIO,
+  WEDGE,
+} from "@/lib/brand";
 
 function resolveSessionParams(searchParams: URLSearchParams) {
   const drivers = getDrivers();
@@ -520,10 +527,22 @@ export function SessionShell() {
 
       <footer className="shrink-0 border-t border-[var(--hairline)] px-3 py-1 text-[0.58rem] text-[var(--mute)]">
         {STUDIO} · {PRODUCT} · {pack.meta.driverCount ?? 22} drivers · OpenF1
-        subset + overlays · No SECU ·{" "}
+        subset + overlays · No SECU
+        {pack.meta.ratesHz
+          ? ` · ${pack.meta.ratesHz.high ?? "—"}/${pack.meta.ratesHz.mid ?? "—"}/${pack.meta.ratesHz.low ?? "—"} Hz pack`
+          : ""}{" "}
+        ·{" "}
         <Link href="/about" className="text-[var(--trace-cyan)]">
           Method
         </Link>
+        {" · "}
+        <a href={LIVE_URL} className="text-[var(--trace-cyan)]">
+          Live
+        </a>
+        {" · "}
+        <a href={PORTFOLIO_URL} className="text-[var(--trace-cyan)]">
+          Portfolio
+        </a>
       </footer>
     </div>
   );

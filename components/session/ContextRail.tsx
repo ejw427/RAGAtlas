@@ -14,6 +14,7 @@ import {
 import { interpolateAt, cn } from "@/lib/utils";
 import { TrackSchematic } from "@/components/session/TrackSchematic";
 import { Timeline } from "@/components/session/Timeline";
+import { ProvenanceStrip } from "@/components/session/ProvenanceStrip";
 import type { Channel } from "@/lib/types";
 
 const COLOR: Record<string, string> = {
@@ -91,6 +92,26 @@ export function ContextRail({
         playheadM={playheadM}
         evidence={evidence}
       />
+
+      {failure && (
+        <div className="border border-[var(--warn)]/35 bg-[var(--panel)] p-2">
+          <p className="font-mono text-[0.55rem] uppercase tracking-[0.12em] text-[var(--warn)]">
+            Failure mode · teach
+          </p>
+          <p className="mt-0.5 text-[0.72rem] font-medium text-[var(--chalk)]">
+            {failure.title}
+          </p>
+          <p className="mt-1 text-[0.6rem] leading-snug text-[var(--mist)]">
+            {failure.symptoms[0]}
+          </p>
+          <p className="mt-1 text-[0.58rem] leading-snug text-[var(--mute)]">
+            Hints: {failure.channelHints.slice(0, 4).join(", ")}
+            {failure.channelHints.length > 4 ? "…" : ""}
+          </p>
+        </div>
+      )}
+
+      <ProvenanceStrip />
 
       <div>
         <div className="mb-1 flex items-baseline justify-between gap-2">
@@ -283,20 +304,6 @@ export function ContextRail({
           ))}
         </ul>
       </div>
-
-      {failure && (
-        <div className="border border-[var(--hairline)] bg-[var(--panel)] p-2">
-          <p className="font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--warn)]">
-            Failure mode
-          </p>
-          <p className="mt-0.5 text-[0.72rem] text-[var(--chalk)]">
-            {failure.title}
-          </p>
-          <p className="mt-1 text-[0.62rem] leading-snug text-[var(--mute)]">
-            Hints: {failure.channelHints.join(", ")}
-          </p>
-        </div>
-      )}
 
       <Timeline activeCiteId={activeCiteId} onSelect={onTimelineCite} />
 

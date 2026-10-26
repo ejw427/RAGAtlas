@@ -220,8 +220,12 @@ export interface SessionPack {
     openf1?: {
       meeting_key: number;
       session_key: number;
-      driver_number: number;
-      lap_numbers: number[];
+      primary_driver_number?: number;
+      driver_number?: number;
+      lap_numbers?: number[];
+      drivers_with_samples?: number[];
+      laps_per_primary?: number[];
+      field_policy?: string;
     };
   };
   meta: {

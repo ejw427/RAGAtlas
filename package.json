@@ -2,6 +2,12 @@
   "name": "citetrace",
   "version": "0.1.0",
   "private": true,
+  "description": "Welch Software portfolio: CiteTrace — evidence-bound session RAG over 2026 COTA FP2 OpenF1 telemetry + labeled ATLAS-shaped overlays. Ask the lap. Trust the trace.",
+  "homepage": "https://citetrace.welchsoftware.net",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ejw427/RAGAtlas.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

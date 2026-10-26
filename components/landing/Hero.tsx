@@ -135,6 +135,9 @@ export function Hero() {
             <Link href="/session?driver=LEC&lap=10">Open COTA session</Link>
           </Button>
           <Button asChild variant="ghost">
+            <Link href="#how-it-works">How it works</Link>
+          </Button>
+          <Button asChild variant="ghost">
             <Link href="/about">Method</Link>
           </Button>
         </div>

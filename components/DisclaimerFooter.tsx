@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PRODUCT, STUDIO } from "@/lib/brand";
+import { LIVE_URL, PORTFOLIO_URL, PRODUCT, STUDIO } from "@/lib/brand";
 
 export function DisclaimerFooter({ compact = false }: { compact?: boolean }) {
   return (
@@ -10,7 +10,7 @@ export function DisclaimerFooter({ compact = false }: { compact?: boolean }) {
           : "border-t border-[var(--hairline)] px-6 py-8 text-sm text-[var(--mute)]"
       }
     >
-      <div className="mx-auto flex max-w-[1120px] flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mx-auto flex max-w-[1120px] flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <p>
           <span className="text-[var(--chalk)]">{STUDIO}</span> · {PRODUCT} —
           independent portfolio prototype. Not affiliated with Formula 1 teams,
@@ -18,14 +18,28 @@ export function DisclaimerFooter({ compact = false }: { compact?: boolean }) {
           subset + synthetic ATLAS-style overlays · No SECU / team feeds ·
           Concepts inspired by public ATLAS documentation.
         </p>
-        {!compact && (
-          <Link
-            href="/about"
-            className="shrink-0 text-[var(--trace-cyan)] hover:text-[var(--signal)]"
+        <div className="flex shrink-0 flex-col gap-1 font-mono text-[0.7rem] sm:items-end">
+          <a
+            href={LIVE_URL}
+            className="text-[var(--trace-cyan)] hover:text-[var(--signal)]"
           >
-            Method & credits
-          </Link>
-        )}
+            {LIVE_URL.replace(/^https:\/\//, "")}
+          </a>
+          <a
+            href={PORTFOLIO_URL}
+            className="text-[var(--trace-cyan)] hover:text-[var(--signal)]"
+          >
+            Portfolio card
+          </a>
+          {!compact && (
+            <Link
+              href="/about"
+              className="text-[var(--trace-cyan)] hover:text-[var(--signal)]"
+            >
+              Method & credits
+            </Link>
+          )}
+        </div>
       </div>
     </footer>
   );
