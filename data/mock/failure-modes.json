@@ -1,0 +1,26 @@
+{
+  "modes": [
+    {
+      "id": "fm_duct",
+      "title": "Rear brake duct restriction",
+      "symptoms": [
+        "brake_temp >900°C in heavy zone",
+        "hot soak after in-lap"
+      ],
+      "channelHints": [
+        "brake_temp",
+        "brake",
+        "speed"
+      ],
+      "actions": [
+        "Inspect tape / blanking",
+        "Compare vs baseline lap",
+        "Review cooling note before Quali"
+      ],
+      "exampleCiteIds": [
+        "cite_brake_spike",
+        "cite_duct_note"
+      ]
+    }
+  ]
+}

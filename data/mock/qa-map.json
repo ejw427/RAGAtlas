@@ -1,0 +1,73 @@
+{
+  "queries": [
+    {
+      "id": "qa_brake_spike",
+      "exactQuery": "Why did brake temp spike in S3 on lap 12?",
+      "patterns": [
+        "brake temp",
+        "brake_temp",
+        "spike",
+        "s3",
+        "sector 3",
+        "lap 12",
+        "why did brake"
+      ],
+      "claim": "Brake temperature peaks at 942°C mid–Sector 3 on lap 12, coincident with a sustained heavy brake zone and an engineer note flagging a rear duct check.",
+      "rationale": "Channel peak aligns with the S3 brake zone window (~3080–3180 m) and the linked debrief note.",
+      "citeIds": [
+        "cite_brake_spike",
+        "cite_duct_note"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_time_loss",
+      "exactQuery": "Where did we lose time to lap 11?",
+      "patterns": [
+        "lose time",
+        "time loss",
+        "lost time",
+        "delta",
+        "lap 11",
+        "vs lap 11"
+      ],
+      "claim": "Lap 12 is +0.182 s vs lap 11, with the larger sector deficit in S2.",
+      "rationale": "Sector times and speed overlay vs L11 localize the loss before the S3 brake event.",
+      "citeIds": [
+        "cite_delta_s2"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_cooling",
+      "exactQuery": "Any notes on cooling in this stint?",
+      "patterns": [
+        "cooling",
+        "duct",
+        "blanking"
+      ],
+      "claim": "Session notes call for watching rear brake temps and opening duct if push-lap peaks exceed ~850°C.",
+      "rationale": "Retrieved from engineer notes tagged cooling / brakes.",
+      "citeIds": [
+        "cite_duct_note",
+        "cite_cooling_note"
+      ],
+      "noHit": false
+    },
+    {
+      "id": "qa_nohit",
+      "exactQuery": "Who is the championship leader?",
+      "patterns": [
+        "championship",
+        "constructor standings",
+        "who won",
+        "standings"
+      ],
+      "claim": "",
+      "rationale": "",
+      "citeIds": [],
+      "noHit": true,
+      "noHitMessage": "No grounded evidence in this session window."
+    }
+  ]
+}

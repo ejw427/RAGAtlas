@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --void: #05070a;
+  --asphalt: #0b0f14;
+  --panel: #121820;
+  --rail: #182030;
+  --hairline: rgba(232, 238, 245, 0.08);
+  --hairline-strong: rgba(232, 238, 245, 0.16);
+  --chalk: #e8eef5;
+  --mist: #9aa7b8;
+  --mute: #6b7788;
+  --signal: #c6ff4a;
+  --signal-dim: rgba(198, 255, 74, 0.14);
+  --trace-cyan: #3ad7ff;
+  --trace-amber: #ffb020;
+  --trace-brake: #ff4d5e;
+  --trace-throttle: #7dffb3;
+  --ok: #c6ff4a;
+  --warn: #ffb020;
+  --fault: #ff4d5e;
+  --focus-ring: #3ad7ff;
+  --glow-signal: 0 0 24px rgba(198, 255, 74, 0.25);
+  --scrub: rgba(58, 215, 255, 0.35);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--void);
+  color: var(--chalk);
+}
+
+body {
+  font-family: var(--font-ui), "Sora", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(198, 255, 74, 0.28);
+  color: var(--chalk);
+}
+
+@keyframes cite-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(198, 255, 74, 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgba(198, 255, 74, 0);
+  }
+}
+
+@keyframes draw-stroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.cite-pulse {
+  animation: cite-pulse 0.55s var(--ease) 1;
+}
+
+.trace-draw {
+  stroke-dasharray: 1400;
+  stroke-dashoffset: 1400;
+  animation: draw-stroke 0.85s var(--ease) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cite-pulse {
+    animation: none;
+  }
+  .trace-draw {
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
+  }
+  .playhead-ease {
+    transition: none !important;
+  }
+}
