@@ -1,11 +1,17 @@
 "use client";
 
+import { CarSilhouette } from "@/components/identity/CarSilhouette";
 import { DriverPortrait } from "@/components/identity/DriverPortrait";
+import {
+  HouseMark,
+  houseLabelShort,
+} from "@/components/identity/HouseMark";
 import {
   accentFor,
   compoundOf,
   formatDeltaSec,
   sectorDeltas,
+  type TeamAccent,
 } from "@/lib/identity";
 import type { Driver, Lap } from "@/lib/types";
 import { formatLapTime, cn } from "@/lib/utils";
@@ -59,87 +65,53 @@ export function CompareDuo({
   return (
     <div className="shrink-0 border-b border-[var(--hairline)]">
       <div
-        className="relative overflow-hidden"
+        className="compare-duo relative overflow-hidden"
         style={{
           background: comparing
-            ? `linear-gradient(90deg, ${focusAccent.accent}22 0%, ${focusAccent.accent}08 42%, transparent 50%, ${refAccent.accent}08 58%, ${refAccent.accent}22 100%), var(--asphalt)`
-            : `linear-gradient(90deg, ${focusAccent.accent}18 0%, var(--asphalt) 55%)`,
+            ? `linear-gradient(90deg, ${focusAccent.accent}28 0%, ${focusAccent.accent}0a 38%, transparent 50%, ${refAccent.accent}0a 62%, ${refAccent.accent}28 100%), var(--asphalt)`
+            : `linear-gradient(90deg, ${focusAccent.accent}22 0%, var(--asphalt) 58%)`,
         }}
       >
-        <div className="flex flex-col gap-1.5 px-2.5 py-1.5 sm:flex-row sm:items-stretch sm:gap-2">
-          {/* FOCUS */}
+        <div
+          className="pointer-events-none absolute inset-y-0 left-0 w-1/2 opacity-40"
+          style={{
+            background: `radial-gradient(ellipse 70% 120% at 8% 50%, ${focusAccent.accent}33, transparent 70%)`,
+          }}
+          aria-hidden
+        />
+        {comparing && (
           <div
-            className="relative flex min-w-0 flex-1 items-center gap-2.5 rounded-md border px-2.5 py-1.5"
+            className="pointer-events-none absolute inset-y-0 right-0 w-1/2 opacity-40"
             style={{
-              borderColor: `${focusAccent.accent}66`,
-              boxShadow: `inset 0 0 0 1px ${focusAccent.accent}22, 0 0 20px ${focusAccent.accent}14`,
-              background: "rgba(5,7,10,0.55)",
+              background: `radial-gradient(ellipse 70% 120% at 92% 50%, ${refAccent.accent}33, transparent 70%)`,
             }}
-          >
-            <span
-              className="absolute left-0 top-0 rounded-br-md px-1.5 py-0.5 font-mono text-[0.5rem] font-bold uppercase tracking-[0.14em] text-[var(--void)]"
-              style={{ background: focusAccent.accent }}
-            >
-              Focus
-            </span>
-            <DriverPortrait driver={focusDriver} size={52} className="mt-1.5" />
-            <div className="min-w-0 flex-1 pt-2">
-              <p className="truncate font-display text-base font-bold leading-tight text-[var(--chalk)]">
-                {focusDriver.name}
-              </p>
-              <p className="font-mono text-[0.68rem] text-[var(--mist)]">
-                <span style={{ color: focusAccent.accent }}>{focusDriver.code}</span>
-                {" · "}
-                {focusDriver.team}
-              </p>
-              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                <select
-                  value={focusDriver.id}
-                  onChange={(e) => onFocusDriver(e.target.value)}
-                  aria-label="Focus driver"
-                  className="max-w-[11rem] truncate rounded-sm border border-[var(--hairline)] bg-[var(--panel)] px-1.5 py-1 font-mono text-[0.62rem] text-[var(--chalk)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
-                >
-                  {getDrivers().map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.code}
-                      {d.team ? ` · ${d.team}` : ""}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={focusLap.number}
-                  onChange={(e) => onFocusLap(Number(e.target.value))}
-                  aria-label="Focus lap"
-                  className="rounded-sm border border-[var(--hairline)] bg-[var(--panel)] px-1.5 py-1 font-mono text-[0.62rem] text-[var(--chalk)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
-                >
-                  {focusLaps.map((l) => (
-                    <option key={l.id} value={l.number}>
-                      L{l.number}
-                    </option>
-                  ))}
-                </select>
-                <span className="rounded-sm bg-[var(--panel)] px-1.5 py-1 font-mono text-[0.58rem] uppercase text-[var(--mist)]">
-                  {compoundOf(focusLap)}
-                </span>
-              </div>
-            </div>
-              <p className="shrink-0 self-end pb-0.5 font-display text-xl font-bold tabular-nums tracking-tight text-[var(--chalk)] sm:self-center sm:pb-0">
-                {formatLapTime(focusLap.timeMs)}
-              </p>
-            </div>
+            aria-hidden
+          />
+        )}
 
-          {/* VS hub */}
-          <div className="flex shrink-0 flex-row items-center justify-center gap-1.5 sm:w-[6.5rem] sm:flex-col sm:gap-0.5">
+        <div className="relative flex flex-col gap-2 px-2.5 py-2 sm:flex-row sm:items-stretch sm:gap-2.5">
+          <RacerCard
+            role="Focus"
+            driver={focusDriver}
+            lap={focusLap}
+            laps={focusLaps}
+            accent={focusAccent}
+            mirror={false}
+            onDriver={onFocusDriver}
+            onLap={onFocusLap}
+          />
+
+          <div className="flex shrink-0 flex-row items-center justify-center gap-2 sm:w-[7rem] sm:flex-col sm:gap-1">
             {comparing && deltas ? (
               <>
                 <button
                   type="button"
                   onClick={onSwap}
-                  className="compare-vs-btn relative flex h-10 w-10 items-center justify-center rounded-full font-display text-xs font-black uppercase tracking-wide text-[var(--void)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+                  className="compare-vs-btn relative flex h-11 w-11 items-center justify-center rounded-full font-display text-xs font-black uppercase tracking-wide text-[var(--void)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
                   style={{
                     background:
                       "linear-gradient(135deg, var(--signal), #9be03a)",
-                    boxShadow: "0 0 24px rgba(198,255,74,0.45)",
+                    boxShadow: "0 0 28px rgba(198,255,74,0.5)",
                   }}
                   title="Swap Focus and Reference"
                 >
@@ -153,7 +125,7 @@ export function CompareDuo({
                 >
                   <p
                     className={cn(
-                      "font-display text-lg font-bold tabular-nums leading-none",
+                      "font-display text-xl font-bold tabular-nums leading-none",
                       deltas.lapMs > 0
                         ? "text-[var(--trace-amber)]"
                         : "text-[var(--signal)]",
@@ -161,7 +133,7 @@ export function CompareDuo({
                   >
                     Δ {formatDeltaSec(deltas.lapMs)}
                   </p>
-                  <p className="mt-0.5 font-mono text-[0.45rem] uppercase tracking-[0.12em] text-[var(--signal)]">
+                  <p className="mt-0.5 font-mono text-[0.45rem] uppercase tracking-[0.14em] text-[var(--signal)]">
                     Detail ▸
                   </p>
                 </button>
@@ -190,78 +162,22 @@ export function CompareDuo({
             )}
           </div>
 
-          {/* REFERENCE */}
           {referenceDriver && referenceLap ? (
-            <div
-              className="relative flex min-w-0 flex-1 items-center gap-2.5 rounded-md border px-2.5 py-1.5"
-              style={{
-                borderColor: `${refAccent.accent}66`,
-                boxShadow: `inset 0 0 0 1px ${refAccent.accent}22, 0 0 20px ${refAccent.accent}14`,
-                background: "rgba(5,7,10,0.55)",
-              }}
-            >
-              <span
-                className="absolute left-0 top-0 rounded-br-md px-1.5 py-0.5 font-mono text-[0.5rem] font-bold uppercase tracking-[0.14em] text-[var(--void)]"
-                style={{ background: refAccent.accent }}
-              >
-                Reference
-              </span>
-              <DriverPortrait
-                driver={referenceDriver}
-                size={52}
-                className="mt-1.5"
-              />
-              <div className="min-w-0 flex-1 pt-2">
-                <p className="truncate font-display text-base font-bold leading-tight text-[var(--chalk)]">
-                  {referenceDriver.name}
-                </p>
-                <p className="font-mono text-[0.68rem] text-[var(--mist)]">
-                  <span style={{ color: refAccent.accent }}>
-                    {referenceDriver.code}
-                  </span>
-                  {" · "}
-                  {referenceDriver.team}
-                </p>
-                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                  <select
-                    value={referenceDriver.id}
-                    onChange={(e) => onReferenceDriver(e.target.value)}
-                    aria-label="Reference driver"
-                    className="max-w-[11rem] truncate rounded-sm border border-[var(--hairline)] bg-[var(--panel)] px-1.5 py-1 font-mono text-[0.62rem] text-[var(--chalk)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
-                  >
-                    {getDrivers().map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.code}
-                        {d.team ? ` · ${d.team}` : ""}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={referenceLap.number}
-                    onChange={(e) => onReferenceLap(Number(e.target.value))}
-                    aria-label="Reference lap"
-                    className="rounded-sm border border-[var(--hairline)] bg-[var(--panel)] px-1.5 py-1 font-mono text-[0.62rem] text-[var(--chalk)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
-                  >
-                    {referenceLaps.map((l) => (
-                      <option key={l.id} value={l.number}>
-                        L{l.number}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="rounded-sm bg-[var(--panel)] px-1.5 py-1 font-mono text-[0.58rem] uppercase text-[var(--mist)]">
-                    {compoundOf(referenceLap)}
-                  </span>
-                </div>
-              </div>
-              <p className="shrink-0 self-end pb-0.5 font-display text-xl font-bold tabular-nums tracking-tight text-[var(--chalk)] sm:self-center sm:pb-0">
-                {formatLapTime(referenceLap.timeMs)}
-              </p>
-            </div>
+            <RacerCard
+              role="Reference"
+              driver={referenceDriver}
+              lap={referenceLap}
+              laps={referenceLaps}
+              accent={refAccent}
+              mirror
+              onDriver={onReferenceDriver}
+              onLap={onReferenceLap}
+            />
           ) : (
             <button
               type="button"
               onClick={onTeammate}
-              className="flex min-h-[4.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-md border border-dashed border-[var(--signal)]/40 bg-[var(--signal-dim)]/20 px-3 py-1.5 text-center transition hover:bg-[var(--signal-dim)]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+              className="flex min-h-[5.5rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-md border border-dashed border-[var(--signal)]/40 bg-[var(--signal-dim)]/20 px-3 py-2 text-center transition hover:bg-[var(--signal-dim)]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
             >
               <span className="font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--signal)]">
                 Reference
@@ -276,7 +192,7 @@ export function CompareDuo({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-1 border-t border-[var(--hairline)] bg-[rgba(5,7,10,0.35)] px-2.5 py-1">
+        <div className="relative flex flex-wrap items-center gap-1 border-t border-[var(--hairline)] bg-[rgba(5,7,10,0.4)] px-2.5 py-1">
           <span className="font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--mute)]">
             Presets
           </span>
@@ -311,6 +227,239 @@ export function CompareDuo({
             </span>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function splitName(name: string): { given: string; family: string } {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return { given: "", family: parts[0] ?? name };
+  return {
+    given: parts.slice(0, -1).join(" "),
+    family: parts[parts.length - 1] ?? name,
+  };
+}
+
+function RacerCard({
+  role,
+  driver,
+  lap,
+  laps,
+  accent,
+  mirror,
+  onDriver,
+  onLap,
+}: {
+  role: "Focus" | "Reference";
+  driver: Driver;
+  lap: Lap;
+  laps: Lap[];
+  accent: TeamAccent;
+  mirror: boolean;
+  onDriver: (id: string) => void;
+  onLap: (n: number) => void;
+}) {
+  const { given, family } = splitName(driver.name);
+  const compound = compoundOf(lap);
+  const house = houseLabelShort(accent);
+
+  return (
+    <div
+      className={cn(
+        "compare-racer relative flex min-w-0 flex-1 overflow-hidden rounded-md border",
+        mirror && "sm:flex-row-reverse",
+      )}
+      style={{
+        borderColor: `${accent.accent}70`,
+        boxShadow: `inset 0 0 0 1px ${accent.accent}28, 0 0 28px ${accent.accent}18`,
+        background: "rgba(5,7,10,0.62)",
+      }}
+    >
+      {/* Manufacturer rail */}
+      <div
+        className={cn(
+          "compare-house-rail relative flex w-[2.35rem] shrink-0 flex-col items-center justify-between py-2",
+          mirror ? "border-l" : "border-r",
+        )}
+        style={{
+          borderColor: `${accent.accent}40`,
+          background: `linear-gradient(180deg, ${accent.accent}55 0%, ${accent.accent}18 45%, rgba(5,7,10,0.5) 100%)`,
+        }}
+        title="Session accent. Not a team asset."
+      >
+        <HouseMark
+          house={accent.house}
+          accent={accent.second}
+          second={accent.accent}
+          size={22}
+          className="drop-shadow-[0_0_8px_rgba(0,0,0,0.45)]"
+        />
+        <span
+          className="compare-house-vert font-mono text-[0.52rem] font-bold uppercase tracking-[0.22em] text-[var(--chalk)]"
+          style={{
+            writingMode: mirror ? "vertical-lr" : "vertical-rl",
+            textOrientation: "mixed",
+            textShadow: "0 1px 2px rgba(0,0,0,0.65)",
+          }}
+        >
+          {house}
+        </span>
+        <span
+          className="h-1.5 w-1.5 rounded-full"
+          style={{ background: accent.second, boxShadow: `0 0 8px ${accent.accent}` }}
+          aria-hidden
+        />
+      </div>
+
+      <div
+        className={cn(
+          "relative flex min-w-0 flex-1 items-center gap-3 px-3 py-2",
+          mirror && "sm:flex-row-reverse sm:text-right",
+        )}
+      >
+        <div className="relative shrink-0">
+          <DriverPortrait driver={driver} size={68} />
+          <span
+            className={cn(
+              "absolute -top-1 font-mono text-[0.45rem] font-bold uppercase tracking-[0.16em] text-[var(--void)]",
+              mirror ? "-left-1" : "-right-1",
+            )}
+            style={{
+              background: accent.accent,
+              padding: "1px 5px",
+              borderRadius: 2,
+            }}
+          >
+            {role === "Focus" ? "FOC" : "REF"}
+          </span>
+        </div>
+
+        <div className={cn("min-w-0 flex-1", mirror && "sm:items-end")}>
+          <div
+            className={cn(
+              "flex items-baseline gap-2",
+              mirror && "sm:flex-row-reverse",
+            )}
+          >
+            <p
+              className="font-display text-[1.85rem] font-bold leading-none tabular-nums tracking-tight"
+              style={{
+                color: accent.accent,
+                textShadow: `0 0 28px ${accent.accent}66`,
+              }}
+            >
+              {driver.number ?? "—"}
+            </p>
+            <div className={cn("min-w-0", mirror && "sm:text-right")}>
+              {given ? (
+                <p className="truncate font-mono text-[0.58rem] uppercase tracking-[0.14em] text-[var(--mist)]">
+                  {given}
+                </p>
+              ) : null}
+              <p className="truncate font-display text-lg font-bold leading-[1.05] text-[var(--chalk)]">
+                {family}
+              </p>
+            </div>
+          </div>
+
+          <div
+            className={cn(
+              "mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5",
+              mirror && "sm:justify-end",
+            )}
+          >
+            <span
+              className="font-mono text-[0.78rem] font-bold tracking-wide"
+              style={{ color: accent.accent }}
+            >
+              {driver.code}
+            </span>
+            <span className="font-mono text-[0.55rem] uppercase tracking-[0.12em] text-[var(--mute)]">
+              ·
+            </span>
+            <span
+              className="inline-flex items-center gap-1 font-mono text-[0.58rem] font-semibold uppercase tracking-[0.1em]"
+              style={{ color: accent.second }}
+            >
+              <HouseMark
+                house={accent.house}
+                accent={accent.accent}
+                second={accent.second}
+                size={12}
+              />
+              {driver.team ?? "Independent"}
+            </span>
+          </div>
+
+          <div
+            className={cn(
+              "mt-1.5 flex flex-wrap items-center gap-1.5",
+              mirror && "sm:justify-end",
+            )}
+          >
+            <select
+              value={driver.id}
+              onChange={(e) => onDriver(e.target.value)}
+              aria-label={`${role} driver`}
+              className="max-w-[10.5rem] truncate rounded-sm border border-[var(--hairline)] bg-[var(--panel)] px-1.5 py-1 font-mono text-[0.62rem] text-[var(--chalk)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+            >
+              {getDrivers().map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.code}
+                  {d.team ? ` · ${d.team}` : ""}
+                </option>
+              ))}
+            </select>
+            <select
+              value={lap.number}
+              onChange={(e) => onLap(Number(e.target.value))}
+              aria-label={`${role} lap`}
+              className="rounded-sm border border-[var(--hairline)] bg-[var(--panel)] px-1.5 py-1 font-mono text-[0.62rem] text-[var(--chalk)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+            >
+              {laps.map((l) => (
+                <option key={l.id} value={l.number}>
+                  L{l.number}
+                </option>
+              ))}
+            </select>
+            <span
+              className="rounded-sm px-1.5 py-1 font-mono text-[0.58rem] font-bold uppercase tracking-wider"
+              style={{
+                background: `${accent.accent}22`,
+                color: accent.accent,
+                border: `1px solid ${accent.accent}44`,
+              }}
+            >
+              {compound}
+            </span>
+          </div>
+        </div>
+
+        <div
+          className={cn(
+            "hidden shrink-0 flex-col items-end gap-1 sm:flex",
+            mirror && "sm:items-start",
+          )}
+        >
+          <p className="font-display text-2xl font-bold tabular-nums tracking-tight text-[var(--chalk)]">
+            {formatLapTime(lap.timeMs)}
+          </p>
+          <div className="opacity-80">
+            <CarSilhouette
+              accent={accent.accent}
+              second={accent.second}
+              number={driver.number}
+              compoundLetter={compound[0]?.toUpperCase()}
+              width={112}
+            />
+          </div>
+        </div>
+
+        {/* Mobile lap time */}
+        <p className="shrink-0 self-end pb-0.5 font-display text-xl font-bold tabular-nums tracking-tight text-[var(--chalk)] sm:hidden">
+          {formatLapTime(lap.timeMs)}
+        </p>
       </div>
     </div>
   );

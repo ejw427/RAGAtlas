@@ -833,6 +833,7 @@ export function SessionShell() {
               speedDelta={speedDelta}
               onOpenCompare={compareLapId ? openCompare : undefined}
               onViewWindow={setMapWindow}
+              lapId={lapId}
             />
           </div>
           <div className="flex min-h-[380px] flex-1 flex-col gap-1.5 md:min-h-[320px]">

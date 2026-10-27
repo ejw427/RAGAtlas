@@ -2,19 +2,28 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ElevationStrip } from "@/components/session/ElevationStrip";
-import { getSessionPack } from "@/lib/session";
-import { cn } from "@/lib/utils";
+import { elevationAt, gradePctAt } from "@/lib/cota-elevation";
+import {
+  formatChannelValue,
+  getChannel,
+  getSample,
+  getSessionPack,
+} from "@/lib/session";
+import { interpolateAt, cn } from "@/lib/utils";
 
 const LANDMARKS = [
-  { id: "sf", label: "S/F", m: 0 },
-  { id: "t1", label: "T1", m: 420 },
-  { id: "esses", label: "Esses", m: 980 },
-  { id: "s1", label: "S1", m: 1483 },
-  { id: "t11", label: "T11", m: 2600 },
-  { id: "s2", label: "S2", m: 3672 },
-  { id: "stadium", label: "Stadium", m: 4100 },
-  { id: "t19", label: "T19", m: 5100 },
+  { id: "sf", label: "S/F", m: 0, hint: "Start / finish" },
+  { id: "t1", label: "T1", m: 420, hint: "Uphill crest" },
+  { id: "esses", label: "Esses", m: 980, hint: "T3–T6 rhythm" },
+  { id: "s1", label: "S1", m: 1483, hint: "Sector split" },
+  { id: "t11", label: "T11", m: 2600, hint: "Hairpin" },
+  { id: "s2", label: "S2", m: 3672, hint: "Into stadium" },
+  { id: "stadium", label: "Stadium", m: 4100, hint: "T12–T15" },
+  { id: "t19", label: "T19", m: 5100, hint: "Track limits" },
 ] as const;
+
+const MIN_ZOOM_FRAC = 0.06;
+const WHEEL_ZOOM_SENS = 0.0014;
 
 type ViewBox = { x: number; y: number; w: number; h: number };
 type DistWindow = { startM: number; endM: number };
@@ -72,6 +81,29 @@ function boundsForMetres(
     w: w + padX * 2,
     h: h + padY * 2,
   };
+}
+
+function metresInBox(
+  d: number[],
+  x: number[],
+  y: number[],
+  box: ViewBox,
+): DistWindow | null {
+  let start = Infinity;
+  let end = -Infinity;
+  for (let i = 0; i < d.length; i++) {
+    if (
+      x[i] >= box.x &&
+      x[i] <= box.x + box.w &&
+      y[i] >= box.y &&
+      y[i] <= box.y + box.h
+    ) {
+      start = Math.min(start, d[i]);
+      end = Math.max(end, d[i]);
+    }
+  }
+  if (!Number.isFinite(start) || end <= start) return null;
+  return { startM: start, endM: end };
 }
 
 function CarWedge({
@@ -159,6 +191,7 @@ export function TrackSchematic({
   speedDelta = null,
   onOpenCompare,
   onViewWindow,
+  lapId,
 }: {
   activeSector: string | null;
   playheadM: number;
@@ -179,12 +212,15 @@ export function TrackSchematic({
   onOpenCompare?: () => void;
   /** Fired when map zoom window changes — stretch traces to match. */
   onViewWindow?: (window: DistWindow | null) => void;
+  /** Focus lap — used for area speed / channel readout. */
+  lapId?: string;
 }) {
   const pack = getSessionPack();
   const { x, y, d } = pack.trackXY.series;
   const svgRef = useRef<SVGSVGElement>(null);
   const uid = useId();
   const [stretchMode, setStretchMode] = useState(false);
+  const [panMode, setPanMode] = useState(false);
   const [dragBox, setDragBox] = useState<{
     x0: number;
     y0: number;
@@ -193,6 +229,8 @@ export function TrackSchematic({
   } | null>(null);
   const [manualView, setManualView] = useState<ViewBox | null>(null);
   const dragOrigin = useRef<{ x: number; y: number } | null>(null);
+  const panLast = useRef<{ sx: number; sy: number } | null>(null);
+  const viewRef = useRef<ViewBox | null>(null);
 
   const fullView = useMemo((): ViewBox => {
     const minX = Math.min(...x);
@@ -228,10 +266,16 @@ export function TrackSchematic({
   }, [sectorWindow, d, x, y]);
 
   const view = manualView ?? sectorView ?? fullView;
-  const zoomed = view !== fullView && (manualView != null || sectorView != null);
+  const zoomed = manualView != null || sectorView != null;
+  viewRef.current = view;
 
   // Scale decorations to current view so the road reads on a huge COTA viewBox.
   const u = view.w / 55;
+
+  const activeWindow = useMemo((): DistWindow | null => {
+    if (manualView) return metresInBox(d, x, y, manualView);
+    return sectorWindow;
+  }, [manualView, sectorWindow, d, x, y]);
 
   useEffect(() => {
     if (manualView) return;
@@ -345,27 +389,33 @@ export function TrackSchematic({
     onPlayhead(d[best]);
   };
 
-  const metresInBox = (box: ViewBox): DistWindow | null => {
-    let start = Infinity;
-    let end = -Infinity;
-    for (let i = 0; i < d.length; i++) {
-      if (
-        x[i] >= box.x &&
-        x[i] <= box.x + box.w &&
-        y[i] >= box.y &&
-        y[i] <= box.y + box.h
-      ) {
-        start = Math.min(start, d[i]);
-        end = Math.max(end, d[i]);
-      }
+  const commitView = (next: ViewBox, opts?: { scrubMid?: boolean }) => {
+    // Zoomed out near full frame → reset
+    if (next.w >= fullView.w * 0.92 && next.h >= fullView.h * 0.92) {
+      setManualView(null);
+      setPanMode(false);
+      onSector?.("Lap");
+      onViewWindow?.(null);
+      return;
     }
-    if (!Number.isFinite(start) || end <= start) return null;
-    return { startM: start, endM: end };
+    const clamped: ViewBox = {
+      x: next.x,
+      y: next.y,
+      w: Math.min(Math.max(next.w, fullView.w * MIN_ZOOM_FRAC), fullView.w),
+      h: Math.min(Math.max(next.h, fullView.h * MIN_ZOOM_FRAC), fullView.h),
+    };
+    setManualView(clamped);
+    const win = metresInBox(d, x, y, clamped);
+    onViewWindow?.(win);
+    if (opts?.scrubMid && win) {
+      onPlayhead?.((win.startM + win.endM) / 2);
+    }
   };
 
   const fitLap = () => {
     setManualView(null);
     setStretchMode(false);
+    setPanMode(false);
     onSector?.("Lap");
     onViewWindow?.(null);
   };
@@ -376,15 +426,145 @@ export function TrackSchematic({
     const w = Math.abs(x1 - x0);
     const h = Math.abs(y1 - y0);
     if (w < view.w * 0.04 || h < view.h * 0.04) return;
-    const next = { x: left, y: top, w, h };
-    setManualView(next);
-    const win = metresInBox(next);
-    onViewWindow?.(win);
-    if (win) {
-      const mid = (win.startM + win.endM) / 2;
-      onPlayhead?.(mid);
-    }
+    commitView({ x: left, y: top, w, h }, { scrubMid: true });
+    setStretchMode(false);
+    setPanMode(false);
   };
+
+  const zoomAtClient = (clientX: number, clientY: number, factor: number) => {
+    const local = clientToSvg(clientX, clientY);
+    const cur = viewRef.current ?? view;
+    if (!local) {
+      // Fallback: zoom about view center
+      const cx = cur.x + cur.w / 2;
+      const cy = cur.y + cur.h / 2;
+      commitView({
+        x: cx - (cur.w * factor) / 2,
+        y: cy - (cur.h * factor) / 2,
+        w: cur.w * factor,
+        h: cur.h * factor,
+      });
+      return;
+    }
+    commitView({
+      x: local.x - (local.x - cur.x) * factor,
+      y: local.y - (local.y - cur.y) * factor,
+      w: cur.w * factor,
+      h: cur.h * factor,
+    });
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        fitLap();
+        return;
+      }
+      if (e.key === " " && zoomed) {
+        if (
+          e.target instanceof HTMLInputElement ||
+          e.target instanceof HTMLTextAreaElement
+        )
+          return;
+        e.preventDefault();
+        setPanMode((v) => !v);
+        setStretchMode(false);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zoomed, sectorWindow]);
+
+  // Non-passive wheel so we can prevent page scroll while zooming the map.
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const factor = Math.exp(e.deltaY * WHEEL_ZOOM_SENS);
+      zoomAtClient(e.clientX, e.clientY, factor);
+    };
+    svg.addEventListener("wheel", onWheel, { passive: false });
+    return () => svg.removeEventListener("wheel", onWheel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullView.w, fullView.h]);
+
+  const areaInsight = useMemo(() => {
+    if (!activeWindow) return null;
+    const { startM, endM } = activeWindow;
+    const span = endM - startM;
+    const marksIn = LANDMARKS.filter(
+      (lm) => lm.m >= startM - 40 && lm.m <= endM + 40,
+    );
+    const sectorsHit = pack.sectors.filter(
+      (s) => s.endM > startM && s.startM < endM,
+    );
+    const speedSample = lapId ? getSample("speed", lapId) : undefined;
+    const brakeSample = lapId ? getSample("brake", lapId) : undefined;
+    const speedCh = getChannel("speed");
+    const brakeCh = getChannel("brake");
+
+    let speedMin: number | null = null;
+    let speedMax: number | null = null;
+    let speedNow: number | null = null;
+    if (speedSample) {
+      const spd = speedSample.series;
+      speedNow = interpolateAt(spd, playheadM);
+      for (let i = 0; i < spd.d.length; i++) {
+        const m = spd.d[i];
+        if (m < startM || m > endM) continue;
+        const v = spd.v[i];
+        speedMin = speedMin == null ? v : Math.min(speedMin, v);
+        speedMax = speedMax == null ? v : Math.max(speedMax, v);
+      }
+    }
+    let brakePeak: number | null = null;
+    if (brakeSample) {
+      const brk = brakeSample.series;
+      for (let i = 0; i < brk.d.length; i++) {
+        const m = brk.d[i];
+        if (m < startM || m > endM) continue;
+        brakePeak =
+          brakePeak == null ? brk.v[i] : Math.max(brakePeak, brk.v[i]);
+      }
+    }
+
+    let deltaAvg: number | null = null;
+    if (speedDelta && speedDelta.d.length) {
+      let sum = 0;
+      let n = 0;
+      for (let i = 0; i < speedDelta.d.length; i++) {
+        if (speedDelta.d[i] < startM || speedDelta.d[i] > endM) continue;
+        sum += speedDelta.v[i];
+        n += 1;
+      }
+      if (n) deltaAvg = sum / n;
+    }
+
+    const z0 = elevationAt(startM);
+    const z1 = elevationAt(endM);
+    const grade = gradePctAt((startM + endM) / 2, Math.min(80, span / 2));
+
+    return {
+      startM,
+      endM,
+      span,
+      marksIn,
+      sectorsHit,
+      speedMin,
+      speedMax,
+      speedNow,
+      speedCh,
+      brakePeak,
+      brakeCh,
+      deltaAvg,
+      z0,
+      z1,
+      grade,
+    };
+  }, [activeWindow, lapId, playheadM, pack.sectors, speedDelta]);
 
   const sectorColor = (index: number, active: boolean) => {
     if (comparing && sectorDeltaMs) {
@@ -432,19 +612,27 @@ export function TrackSchematic({
           <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-[var(--mist)]">
             COTA · Austin
             {zoomed ? " · stretched" : ""}
+            {activeWindow
+              ? ` · ${Math.round(activeWindow.startM)}–${Math.round(activeWindow.endM)} m`
+              : ""}
           </p>
           <p className="truncate font-mono text-[0.5rem] text-[var(--mute)]">
             {stretchMode
               ? "Drag a box on the circuit to stretch · Esc/Fit to reset"
-              : zoomed
-                ? "Sector / marquee zoom · traces follow this window"
-                : "Click sector · Stretch to box-zoom · scrub playhead"}
+              : panMode
+                ? "Drag to pan · wheel zooms · Esc/Fit to reset"
+                : zoomed
+                  ? "Wheel zoom · Pan / Stretch · traces + elev follow"
+                  : "Wheel zoom · sector click · Stretch box · scrub playhead"}
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-1">
           <button
             type="button"
-            onClick={() => setStretchMode((v) => !v)}
+            onClick={() => {
+              setStretchMode((v) => !v);
+              setPanMode(false);
+            }}
             className={cn(
               "rounded-sm border px-2 py-1 font-mono text-[0.55rem] uppercase tracking-[0.08em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
               stretchMode
@@ -453,6 +641,22 @@ export function TrackSchematic({
             )}
           >
             Stretch
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setPanMode((v) => !v);
+              setStretchMode(false);
+            }}
+            disabled={!zoomed}
+            className={cn(
+              "rounded-sm border px-2 py-1 font-mono text-[0.55rem] uppercase tracking-[0.08em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-35",
+              panMode
+                ? "border-[var(--trace-cyan)] bg-[rgba(58,215,255,0.2)] text-[var(--trace-cyan)]"
+                : "border-[var(--hairline-strong)] text-[var(--mist)] hover:border-[var(--trace-cyan)]/50 hover:text-[var(--trace-cyan)]",
+            )}
+          >
+            Pan
           </button>
           <button
             type="button"
@@ -478,11 +682,20 @@ export function TrackSchematic({
           ref={svgRef}
           viewBox={`${view.x} ${view.y} ${view.w} ${view.h}`}
           className={cn(
-            "absolute inset-0 h-full w-full",
-            stretchMode ? "cursor-crosshair" : "cursor-crosshair",
+            "absolute inset-0 h-full w-full touch-none",
+            stretchMode
+              ? "cursor-crosshair"
+              : panMode
+                ? "cursor-grab active:cursor-grabbing"
+                : "cursor-crosshair",
           )}
           role="img"
           aria-label={`Circuit of the Americas. ${zoomed ? "Zoomed view. " : ""}Sector ${activeSector ?? "Lap"}. ${Math.round(playheadM)} metres.`}
+          onDoubleClick={(e) => {
+            e.preventDefault();
+            if (zoomed) fitLap();
+            else zoomAtClient(e.clientX, e.clientY, 0.45);
+          }}
           onPointerDown={(e) => {
             const local = clientToSvg(e.clientX, e.clientY);
             if (!local) return;
@@ -492,9 +705,29 @@ export function TrackSchematic({
               setDragBox({ x0: local.x, y0: local.y, x1: local.x, y1: local.y });
               return;
             }
+            if (panMode || e.altKey || e.button === 1) {
+              panLast.current = { sx: e.clientX, sy: e.clientY };
+              return;
+            }
             scrubTo(e.clientX, e.clientY);
           }}
           onPointerMove={(e) => {
+            if (panLast.current && e.buttons === 1) {
+              const svg = svgRef.current;
+              if (!svg) return;
+              const rect = svg.getBoundingClientRect();
+              const cur = viewRef.current ?? view;
+              const dx = ((e.clientX - panLast.current.sx) / rect.width) * cur.w;
+              const dy = ((e.clientY - panLast.current.sy) / rect.height) * cur.h;
+              panLast.current = { sx: e.clientX, sy: e.clientY };
+              commitView({
+                x: cur.x - dx,
+                y: cur.y - dy,
+                w: cur.w,
+                h: cur.h,
+              });
+              return;
+            }
             if (dragOrigin.current && (stretchMode || e.shiftKey) && e.buttons === 1) {
               const local = clientToSvg(e.clientX, e.clientY);
               if (!local) return;
@@ -506,19 +739,20 @@ export function TrackSchematic({
               });
               return;
             }
-            if (!onPlayhead || e.buttons !== 1 || stretchMode) return;
+            if (!onPlayhead || e.buttons !== 1 || stretchMode || panMode) return;
             scrubTo(e.clientX, e.clientY);
           }}
           onPointerUp={() => {
             if (dragBox && dragOrigin.current) {
               applyStretchBox(dragBox.x0, dragBox.y0, dragBox.x1, dragBox.y1);
-              setStretchMode(false);
             }
             dragOrigin.current = null;
+            panLast.current = null;
             setDragBox(null);
           }}
           onPointerCancel={() => {
             dragOrigin.current = null;
+            panLast.current = null;
             setDragBox(null);
           }}
         >
@@ -689,8 +923,11 @@ export function TrackSchematic({
           )}
 
           {marks.map((m) => {
-            if (zoomed && sectorWindow) {
-              if (m.m < sectorWindow.startM - 80 || m.m > sectorWindow.endM + 80)
+            if (activeWindow) {
+              if (
+                m.m < activeWindow.startM - 80 ||
+                m.m > activeWindow.endM + 80
+              )
                 return null;
             }
             return (
@@ -718,32 +955,39 @@ export function TrackSchematic({
             );
           })}
 
-          {trapMarks.map((t) => (
-            <g key={t.id}>
-              <rect
-                x={t.cx - u * 0.85}
-                y={t.cy - u * 1.05}
-                width={u * 1.7}
-                height={u * 0.55}
-                rx={u * 0.08}
-                fill="rgba(5,7,10,0.9)"
-                stroke="rgba(58,215,255,0.7)"
-                strokeWidth={u * 0.05}
-              />
-              <text
-                x={t.cx}
-                y={t.cy - u * 0.65}
-                textAnchor="middle"
-                fill="var(--trace-cyan)"
-                fontSize={u * 0.32}
-                fontFamily="var(--font-mono), monospace"
-                fontWeight="700"
-              >
-                {t.label}
-                {t.speed != null ? ` ${t.speed}` : ""}
-              </text>
-            </g>
-          ))}
+          {trapMarks.map((t) => {
+            if (
+              activeWindow &&
+              (t.m < activeWindow.startM - 60 || t.m > activeWindow.endM + 60)
+            )
+              return null;
+            return (
+              <g key={t.id}>
+                <rect
+                  x={t.cx - u * 0.85}
+                  y={t.cy - u * 1.05}
+                  width={u * 1.7}
+                  height={u * 0.55}
+                  rx={u * 0.08}
+                  fill="rgba(5,7,10,0.9)"
+                  stroke="rgba(58,215,255,0.7)"
+                  strokeWidth={u * 0.05}
+                />
+                <text
+                  x={t.cx}
+                  y={t.cy - u * 0.65}
+                  textAnchor="middle"
+                  fill="var(--trace-cyan)"
+                  fontSize={u * 0.32}
+                  fontFamily="var(--font-mono), monospace"
+                  fontWeight="700"
+                >
+                  {t.label}
+                  {t.speed != null ? ` ${t.speed}` : ""}
+                </text>
+              </g>
+            );
+          })}
 
           {referenceCar && referenceAccent && (
             <CarWedge
@@ -782,6 +1026,103 @@ export function TrackSchematic({
           )}
         </svg>
 
+        {/* Area insight — specific stats for the stretched window */}
+        {areaInsight && stage && (
+          <div className="pointer-events-none absolute left-2 top-2 z-[3] max-w-[min(100%,18rem)] rounded border border-[var(--hairline-strong)] bg-[rgba(5,7,10,0.88)] px-2.5 py-2 shadow-lg backdrop-blur-sm">
+            <p className="font-mono text-[0.52rem] uppercase tracking-[0.14em] text-[var(--signal)]">
+              Area · {Math.round(areaInsight.startM)}–{Math.round(areaInsight.endM)} m
+              <span className="text-[var(--mute)]">
+                {" "}
+                · {Math.round(areaInsight.span)} m span
+              </span>
+            </p>
+            {areaInsight.marksIn.length > 0 && (
+              <p className="mt-1 font-mono text-[0.58rem] text-[var(--chalk)]">
+                {areaInsight.marksIn.map((m) => m.label).join(" · ")}
+                <span className="text-[var(--mute)]">
+                  {" "}
+                  — {areaInsight.marksIn[0]?.hint}
+                </span>
+              </p>
+            )}
+            {areaInsight.sectorsHit.length > 0 && (
+              <p className="mt-0.5 font-mono text-[0.52rem] text-[var(--mist)]">
+                {areaInsight.sectorsHit.map((s) => s.label).join(" / ")}
+                {sectorDeltaMs &&
+                  comparing &&
+                  areaInsight.sectorsHit.map((s) => {
+                    const idx = pack.sectors.findIndex((p) => p.id === s.id);
+                    if (idx < 0) return null;
+                    const ms = sectorDeltaMs[idx];
+                    return (
+                      <span
+                        key={s.id}
+                        className={
+                          ms <= 0 ? " text-[var(--signal)]" : " text-[var(--fault)]"
+                        }
+                      >
+                        {" "}
+                        {s.label} {ms > 0 ? "+" : "−"}
+                        {Math.abs(ms / 1000).toFixed(3)}
+                      </span>
+                    );
+                  })}
+              </p>
+            )}
+            <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[0.58rem] tabular-nums text-[var(--mist)]">
+              {areaInsight.speedCh && areaInsight.speedNow != null && (
+                <span>
+                  <span className="text-[var(--mute)]">spd </span>
+                  <span className="text-[var(--chalk)]">
+                    {formatChannelValue(areaInsight.speedCh, areaInsight.speedNow)}
+                  </span>
+                  {areaInsight.speedMin != null && areaInsight.speedMax != null && (
+                    <span className="text-[var(--mute)]">
+                      {" "}
+                      · {Math.round(areaInsight.speedMin)}–
+                      {Math.round(areaInsight.speedMax)}
+                    </span>
+                  )}
+                </span>
+              )}
+              {areaInsight.brakeCh && areaInsight.brakePeak != null && (
+                <span>
+                  <span className="text-[var(--mute)]">brk pk </span>
+                  <span className="text-[var(--trace-brake)]">
+                    {formatChannelValue(
+                      areaInsight.brakeCh,
+                      areaInsight.brakePeak,
+                    )}
+                  </span>
+                </span>
+              )}
+              <span>
+                <span className="text-[var(--mute)]">elev </span>
+                <span className="text-[var(--chalk)]">
+                  {areaInsight.z0.toFixed(0)}→{areaInsight.z1.toFixed(0)} m
+                </span>
+                <span className="text-[var(--mute)]">
+                  {" "}
+                  · {areaInsight.grade >= 0 ? "+" : ""}
+                  {areaInsight.grade.toFixed(1)}%
+                </span>
+              </span>
+              {areaInsight.deltaAvg != null && (
+                <span
+                  className={
+                    areaInsight.deltaAvg >= 0
+                      ? "text-[var(--signal)]"
+                      : "text-[var(--fault)]"
+                  }
+                >
+                  Δv {areaInsight.deltaAvg >= 0 ? "+" : ""}
+                  {areaInsight.deltaAvg.toFixed(1)} km/h
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Mini overview when stretched */}
         {zoomed && stage && (
           <button
@@ -817,7 +1158,11 @@ export function TrackSchematic({
         {stage && (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-[rgba(5,7,10,0.92)] via-[rgba(5,7,10,0.55)] to-transparent pt-6">
             <div className="pointer-events-auto">
-              <ElevationStrip playheadM={playheadM} className="border-0 bg-transparent" />
+              <ElevationStrip
+                playheadM={playheadM}
+                viewWindow={activeWindow}
+                className="border-0 bg-transparent"
+              />
             </div>
           </div>
         )}

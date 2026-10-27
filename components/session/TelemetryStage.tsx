@@ -336,7 +336,7 @@ export function TelemetryStage({
           </p>
           <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-[var(--mute)]">
             {channels.length} channels · distance
-            {compareLapId ? " · dual-car compare" : ""}
+            {compareLapId ? " · racer vs racer" : ""}
             {viewWindow
               ? ` · stretch ${Math.round(domainStart)}–${Math.round(domainEnd)} m`
               : ""}
@@ -347,32 +347,54 @@ export function TelemetryStage({
           </p>
           {focusLabel && (
             <span className="inline-flex flex-wrap items-center gap-2 font-mono text-[0.62rem] text-[var(--mist)]">
-              <span className="inline-flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1.5 rounded-sm border border-[var(--hairline)] bg-[rgba(5,7,10,0.55)] px-1.5 py-0.5">
                 <span
-                  className="inline-block h-0.5 w-5 rounded-full"
+                  className="inline-block h-1 w-5 rounded-full"
                   style={{ background: focusAccent ?? "var(--signal)" }}
                 />
-                <span style={{ color: focusAccent ?? "var(--signal)" }}>
+                <span
+                  className="font-semibold"
+                  style={{ color: focusAccent ?? "var(--signal)" }}
+                >
                   {focusLabel}
                 </span>
-                <span className="text-[var(--mute)]">solid</span>
               </span>
               {referenceLabel && compareLapId && (
-                <span className="inline-flex items-center gap-1.5">
-                  <span
-                    className="inline-block h-0.5 w-5 rounded-full"
-                    style={{
-                      background: `repeating-linear-gradient(90deg, ${referenceAccent ?? "#6b7788"} 0 3px, transparent 3px 6px)`,
-                    }}
-                  />
-                  <span style={{ color: referenceAccent ?? "var(--mute)" }}>
-                    {referenceLabel}
+                <>
+                  <span className="font-display text-[0.7rem] font-black text-[var(--trace-cyan)]">
+                    VS
                   </span>
-                  <span className="text-[var(--mute)]">dashed</span>
-                </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-sm border border-[var(--hairline)] bg-[rgba(5,7,10,0.55)] px-1.5 py-0.5">
+                    <span
+                      className="inline-block h-1 w-5 rounded-full"
+                      style={{
+                        background: `repeating-linear-gradient(90deg, ${referenceAccent ?? "#6b7788"} 0 3px, transparent 3px 6px)`,
+                      }}
+                    />
+                    <span
+                      className="font-semibold"
+                      style={{ color: referenceAccent ?? "var(--mute)" }}
+                    >
+                      {referenceLabel}
+                    </span>
+                  </span>
+                </>
               )}
-              {speedDelta && (
-                <span className="text-[var(--signal)]">· Δ fill on</span>
+              {compareLapId && (
+                <span className="inline-flex items-center gap-2 rounded-sm border border-[var(--hairline)] px-1.5 py-0.5">
+                  <span className="inline-flex items-center gap-1 text-[var(--signal)]">
+                    <span className="inline-block h-2 w-2 rounded-sm bg-[var(--signal)] shadow-[0_0_8px_rgba(198,255,74,0.8)]" />
+                    Focus ahead
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[var(--fault)]">
+                    <span className="inline-block h-2 w-2 rounded-sm bg-[var(--fault)] shadow-[0_0_8px_rgba(255,77,94,0.7)]" />
+                    behind
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[var(--trace-cyan)]">
+                    <span className="inline-block h-2 w-2 rounded-sm bg-[var(--trace-cyan)]" />
+                    cyan = playhead
+                  </span>
+                </span>
               )}
             </span>
           )}
@@ -385,22 +407,50 @@ export function TelemetryStage({
             <button
               type="button"
               onClick={onOpenCompare}
-              className="rounded-sm border border-[var(--signal)]/45 bg-[var(--signal-dim)] px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-[var(--signal)] transition hover:bg-[var(--signal)] hover:text-[var(--void)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+              className="rounded-sm border border-[var(--trace-cyan)]/50 bg-[rgba(58,215,255,0.12)] px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-[var(--trace-cyan)] transition hover:bg-[rgba(58,215,255,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
             >
-              Open compare
+              Racer detail
             </button>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[0.6rem] text-[var(--mist)]">
-          {sectors.map((s) => (
-            <span key={s.id} className="inline-flex items-center gap-1">
-              <span className="h-1 w-1 rounded-full bg-[var(--signal)]/80" />
-              {s.label}
-              <span className="text-[var(--mute)]">
-                {Math.round(s.startM)}–{Math.round(s.endM)}
+          {sectors.map((s, i) => {
+            const delta = sectorDeltaMs?.[i];
+            const ahead = delta != null && delta <= 0;
+            const behind = delta != null && delta > 0;
+            return (
+              <span
+                key={s.id}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5",
+                  ahead && "bg-[var(--signal-dim)] text-[var(--signal)]",
+                  behind && "bg-[rgba(255,77,94,0.16)] text-[var(--fault)]",
+                )}
+              >
+                <span
+                  className={cn(
+                    "h-1.5 w-1.5 rounded-full",
+                    ahead
+                      ? "bg-[var(--signal)]"
+                      : behind
+                        ? "bg-[var(--fault)]"
+                        : "bg-[var(--trace-cyan)]/80",
+                  )}
+                />
+                {s.label}
+                {delta != null ? (
+                  <span className="font-bold tabular-nums">
+                    {delta > 0 ? "+" : "−"}
+                    {Math.abs(delta / 1000).toFixed(3)}
+                  </span>
+                ) : (
+                  <span className="text-[var(--mute)]">
+                    {Math.round(s.startM)}–{Math.round(s.endM)}
+                  </span>
+                )}
               </span>
-            </span>
-          ))}
+            );
+          })}
           {peak && evidence && activeCite?.channelId === peakChannelId && peakCh && (
             <span
               className={cn(
@@ -418,7 +468,10 @@ export function TelemetryStage({
 
       <div
         ref={shellRef}
-        className="stage-shell panel-scroll relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"
+        className={cn(
+          "stage-shell panel-scroll relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain",
+          compareLapId && "compare-stage-glow",
+        )}
       >
         <div className="stage-grid pointer-events-none absolute inset-0 opacity-50" />
         <svg
@@ -624,10 +677,14 @@ export function TelemetryStage({
                   height={rowH}
                   fill={
                     focused
-                      ? "rgba(198,255,74,0.06)"
-                      : idx % 2 === 0
-                        ? "rgba(255,255,255,0.015)"
-                        : "transparent"
+                      ? "rgba(198,255,74,0.08)"
+                      : liveDelta != null && liveDelta > 0
+                        ? "rgba(198,255,74,0.05)"
+                        : liveDelta != null && liveDelta < 0
+                          ? "rgba(255,77,94,0.05)"
+                          : idx % 2 === 0
+                            ? "rgba(255,255,255,0.015)"
+                            : "transparent"
                   }
                 />
                 <line
@@ -677,7 +734,7 @@ export function TelemetryStage({
                     <path
                       key={`g-${gi}`}
                       d={p}
-                      fill="rgba(198,255,74,0.38)"
+                      fill="rgba(198,255,74,0.52)"
                       stroke="none"
                     />
                   ))}
@@ -686,7 +743,7 @@ export function TelemetryStage({
                     <path
                       key={`l-${li}`}
                       d={p}
-                      fill="rgba(255,77,94,0.32)"
+                      fill="rgba(255,77,94,0.46)"
                       stroke="none"
                     />
                   ))}
