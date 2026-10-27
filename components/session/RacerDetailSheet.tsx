@@ -1,22 +1,18 @@
 "use client";
 
 import { useMemo } from "react";
-import { CarSilhouette } from "@/components/identity/CarSilhouette";
-import { DriverPortrait } from "@/components/identity/DriverPortrait";
-import { HouseMark } from "@/components/identity/HouseMark";
+import { RacerDossier } from "@/components/identity/RacerDossier";
+import { RacerHero } from "@/components/identity/RacerHero";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import {
-  accentFor,
-  compoundOf,
-  formatDeltaSec,
-} from "@/lib/identity";
+import { compoundOf, formatDeltaSec } from "@/lib/identity";
 import {
   formatChannelValue,
   getChannel,
   getLapsForDriver,
   getSample,
   getSessionPack,
+  getTrackPackage,
 } from "@/lib/session";
 import type { Driver, Lap } from "@/lib/types";
 import { formatLapTime, formatSector, interpolateAt, cn } from "@/lib/utils";
@@ -57,8 +53,8 @@ export function RacerDetailSheet({
   onMakeReference?: () => void;
   onSelectLap?: (n: number) => void;
 }) {
-  const accent = accentFor(driver);
   const pack = getSessionPack();
+  const trackPkg = getTrackPackage();
   const compound = compoundOf(lap);
   const laps = getLapsForDriver(driver.id);
   const stints =
@@ -101,63 +97,18 @@ export function RacerDetailSheet({
         </SheetTitle>
 
         <div className="mt-4 space-y-4">
-          <div
-            className="relative overflow-hidden rounded-md border px-3 py-3"
-            style={{
-              borderColor: `${accent.accent}66`,
-              background: `linear-gradient(135deg, ${accent.accent}28 0%, rgba(5,7,10,0.88) 48%, ${accent.second}14 100%), var(--panel)`,
-              boxShadow: `inset 0 0 40px ${accent.accent}18`,
-            }}
-          >
-            <div
-              className="pointer-events-none absolute -right-6 -top-8 h-28 w-28 rounded-full opacity-40 blur-2xl"
-              style={{ background: accent.accent }}
-              aria-hidden
-            />
-            <div className="flex items-start gap-3">
-              <DriverPortrait driver={driver} size={96} />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p
-                      className="font-display text-4xl font-black leading-none tabular-nums"
-                      style={{
-                        color: accent.accent,
-                        textShadow: `0 0 28px ${accent.accent}66`,
-                      }}
-                    >
-                      {driver.number ?? "-"}
-                    </p>
-                    <p className="mt-1 font-display text-xl font-bold text-[var(--chalk)]">
-                      {driver.name}
-                    </p>
-                    <p className="font-mono text-[0.72rem] text-[var(--mist)]">
-                      {driver.code} · {driver.team ?? "Independent"}
-                    </p>
-                  </div>
-                  <HouseMark
-                    house={accent.house}
-                    accent={accent.accent}
-                    second={accent.second}
-                    size={36}
-                  />
-                </div>
-                <p className="mt-2 font-mono text-[0.58rem] uppercase tracking-[0.14em] text-[var(--mute)]">
-                  Session accent · not a team trademark
-                </p>
-              </div>
-            </div>
+          <RacerHero
+            driver={driver}
+            lap={lap}
+            role={`Racer card · ${role}`}
+            carWidth={400}
+            portraitSize={104}
+          />
+          <p className="font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--mute)]">
+            {trackPkg.note}
+          </p>
 
-            <div className="mt-3 rounded-md border border-[var(--hairline)] bg-[rgba(5,7,10,0.55)] px-2 py-3">
-              <CarSilhouette
-                accent={accent.accent}
-                second={accent.second}
-                number={driver.number}
-                compoundLetter={compound[0]?.toUpperCase()}
-                width={400}
-              />
-            </div>
-          </div>
+          <RacerDossier driver={driver} />
 
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-md border border-[var(--hairline)] bg-[var(--panel)] px-3 py-2">

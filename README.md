@@ -21,7 +21,13 @@ npm install
 npm run dev -- -p 43127 -H 127.0.0.1
 ```
 
-Open [http://127.0.0.1:43127](http://127.0.0.1:43127).
+Open [http://127.0.0.1:43127](http://127.0.0.1:43127). Ask uses the **QaMap offline fallback** in plain `next dev`.
+
+For **Workers AI** grounding locally:
+
+```bash
+npm run build && npx wrangler dev
+```
 
 | Route | Purpose |
 |-------|---------|
@@ -36,8 +42,8 @@ Open [http://127.0.0.1:43127](http://127.0.0.1:43127).
 2. Use **Lap** for the whole lap, or S1–S3 for sector focus
 3. Ask: `Why did brake temp spike in S3 on lap 10?`
 4. Click cite → playhead locks on synthetic 942°C peak over real brake zone
-5. Ask more of the corpus: front vs rear (688°C vs 942°C), trail vs stab (71.7 bar), Soft tyre heat (128°C), ST trap (+5 vs Hard), track cool (−3.3°C), Soft-fit pit (lap 9), or LEC radio (0/12 clips)
-6. Switch drivers; Compare vs LEC Soft / Hard baseline
+5. Ask beyond the spike: LEC vs HAM (−615 ms), field order, Soft flyer 1:35.291, long-run L14, track cool (−3.3°C), Soft-fit pit, radio empty (0/12), OF1 vs OVL, race control / T18 NFA
+6. Probe fail-closed: `Who is the championship leader?` — then switch drivers / house
 
 Regen overlays without re-fetching car_data: `npm run enrich:cota`
 
@@ -54,9 +60,12 @@ npm run dev
 npm run build
 npm run check              # build + wrangler deploy --dry-run
 npm run deploy             # build + wrangler deploy (manual)
+npx wrangler dev           # after build — serves /api/ask + Workers AI
 npm run fetch:cota
 npm run generate:fixture   # legacy Bahrain synthetic
 ```
+
+**Ask path:** retrieve cites/notes in the browser → `POST /api/ask` (Workers AI) → validate cite ids → lock playhead. No evidence → silence.
 
 ## Deployment
 

@@ -311,18 +311,20 @@ export function biggestLossSector(
   };
 }
 
-/** Default dual-car / house walk-in - enough to argue the lap, not a starved trio. */
-/** Default stage pack - full driver / chassis story, not the starved Lap trio. */
+/** Default dual-car / house walk-in — full race story on stage (not a starved trio). */
 export const RACE_PLOT_IDS = [
   "speed",
   "throttle",
   "brake",
   "brake_pressure",
+  "brake_temp",
+  "brake_temp_fl",
   "n_gear",
   "steering",
   "rpm",
   "drs",
   "g_long",
+  "tyre_surf_fl",
 ] as const;
 
 export function channelPresets(): Record<string, string[]> {

@@ -1,8 +1,15 @@
 "use client";
 
+import { useId } from "react";
+import {
+  TRACK_PACKAGES,
+  type TrackPackage,
+  type TrackPackageId,
+} from "@/lib/track-package";
+
 /**
- * Original Welch Software open-wheel side profile - not a team livery.
- * Shared for every driver; accent/second carry the house colour.
+ * Original Welch Software open-wheel side profile — not a team livery.
+ * Track packages change wing, cooling, and rake so COTA ≠ Bahrain ≠ generic.
  */
 export function CarSilhouette({
   accent,
@@ -10,48 +17,79 @@ export function CarSilhouette({
   number,
   compoundLetter,
   width = 280,
+  track = "cota",
+  showPackageChip = false,
 }: {
   accent: string;
   second: string;
   number?: number;
   compoundLetter?: string;
   width?: number;
+  track?: TrackPackageId | TrackPackage;
+  showPackageChip?: boolean;
 }) {
-  const height = Math.round(width * (86 / 280));
-  const uid = `car-${number ?? "x"}-${Math.round(width)}`;
+  const pkg = typeof track === "string" ? TRACK_PACKAGES[track] : track;
+  const height = Math.round(width * (118 / 340));
+  const uid = useId().replace(/:/g, "");
+
+  const wingLift = (pkg.rearWing - 1) * 16;
+  const noseDrop = (pkg.rake - 1) * 5;
+  const cool = pkg.cooling;
+  const duct = pkg.brakeDuct;
+  const fw = pkg.frontWing;
 
   return (
     <svg
       width={width}
       height={height}
-      viewBox="0 0 280 86"
+      viewBox="0 0 340 118"
       role="img"
       aria-label={
-        number != null ? `Open-wheel car number ${number}` : "Open-wheel car"
+        number != null
+          ? `Open-wheel car number ${number}, ${pkg.chip}`
+          : `Open-wheel car, ${pkg.chip}`
       }
-      className="drop-shadow-[0_10px_22px_rgba(0,0,0,0.55)]"
+      className="drop-shadow-[0_14px_32px_rgba(0,0,0,0.65)]"
     >
       <defs>
         <linearGradient id={`${uid}-body`} x1="0" y1="0" x2="1" y2="0.35">
-          <stop offset="0%" stopColor={accent} stopOpacity="0.82" />
-          <stop offset="42%" stopColor={accent} />
-          <stop offset="100%" stopColor={second} />
+          <stop offset="0%" stopColor={accent} stopOpacity="0.55" />
+          <stop offset="22%" stopColor={accent} />
+          <stop offset="62%" stopColor={accent} />
+          <stop offset="100%" stopColor={second} stopOpacity="0.92" />
+        </linearGradient>
+        <linearGradient id={`${uid}-shine`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.38" />
+          <stop offset="45%" stopColor="#ffffff" stopOpacity="0.06" />
+          <stop offset="100%" stopColor="#000000" stopOpacity="0.25" />
         </linearGradient>
         <linearGradient id={`${uid}-floor`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={second} stopOpacity="0.95" />
-          <stop offset="100%" stopColor="#0a0c10" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#05070a" stopOpacity="0.95" />
         </linearGradient>
-        <linearGradient id={`${uid}-glass`} x1="0" y1="0" x2="0.2" y2="1">
-          <stop offset="0%" stopColor="#e8eef5" stopOpacity="0.7" />
-          <stop offset="100%" stopColor="#3a4658" stopOpacity="0.35" />
+        <linearGradient id={`${uid}-glass`} x1="0.1" y1="0" x2="0.4" y2="1">
+          <stop offset="0%" stopColor="#f2f6fb" stopOpacity="0.85" />
+          <stop offset="55%" stopColor="#6a7a90" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="#121820" stopOpacity="0.7" />
         </linearGradient>
-        <radialGradient id={`${uid}-rim`} cx="50%" cy="40%" r="55%">
-          <stop offset="0%" stopColor="rgba(232,238,245,0.35)" />
-          <stop offset="55%" stopColor="#12161e" />
+        <radialGradient id={`${uid}-rim`} cx="38%" cy="32%" r="62%">
+          <stop offset="0%" stopColor="rgba(232,238,245,0.55)" />
+          <stop offset="40%" stopColor="#1a1e26" />
           <stop offset="100%" stopColor="#05070a" />
         </radialGradient>
-        <filter id={`${uid}-glow`} x="-25%" y="-50%" width="150%" height="200%">
-          <feGaussianBlur stdDeviation="2.4" result="b" />
+        <linearGradient id={`${uid}-tyre`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3a424c" />
+          <stop offset="35%" stopColor="#12151a" />
+          <stop offset="70%" stopColor="#0a0c10" />
+          <stop offset="100%" stopColor="#222830" />
+        </linearGradient>
+        <linearGradient id={`${uid}-carbon`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#1a1e24" />
+          <stop offset="50%" stopColor="#0c0e12" />
+          <stop offset="100%" stopColor="#252a32" />
+        </linearGradient>
+        <filter id={`${uid}-glow`} x="-35%" y="-70%" width="170%" height="240%">
+          <feGaussianBlur stdDeviation="1.8" result="b" />
           <feMerge>
             <feMergeNode in="b" />
             <feMergeNode in="SourceGraphic" />
@@ -59,260 +97,335 @@ export function CarSilhouette({
         </filter>
       </defs>
 
-      {/* ground shadow */}
-      <ellipse cx="142" cy="78" rx="118" ry="6" fill="rgba(0,0,0,0.5)" />
+      {/* Ground shadow */}
+      <ellipse cx="168" cy="104" rx="148" ry="8" fill="rgba(0,0,0,0.58)" />
 
-      {/* diffuser / rear */}
+      {/* Diffuser / rear crash structure */}
       <path
-        d="M214 48 L248 44 L256 58 L252 64 H218 Z"
+        d={`M242 ${58 - wingLift * 0.12} L285 ${50 - wingLift * 0.18} L298 74 L290 82 H248 Z`}
         fill={`url(#${uid}-floor)`}
       />
       <path
-        d="M220 58 H250 M224 61 H246 M228 64 H242"
+        d="M250 76 H286 M254 80 H282 M258 84 H276"
         stroke={accent}
         strokeWidth="1.2"
-        opacity="0.55"
+        opacity={0.45 + cool * 0.35}
+      />
+      <path
+        d={`M288 ${62 - wingLift * 0.1} L304 ${58 - wingLift * 0.08} L308 78 L296 82 Z`}
+        fill={`url(#${uid}-carbon)`}
       />
 
-      {/* rear wing endplate + DRS */}
+      {/* Rear wing assembly */}
       <path
-        d="M232 8 H268 L272 4 H228 Z"
+        d={`M262 ${2 - wingLift} H318 L326 ${-2 - wingLift} H256 Z`}
         fill={second}
+        stroke="rgba(5,7,10,0.45)"
+        strokeWidth="0.85"
+      />
+      <path
+        d={`M264 ${5 - wingLift} H312 L318 ${14 - wingLift * 0.75} H270 Z`}
+        fill={accent}
+        filter={`url(#${uid}-glow)`}
+      />
+      <path
+        d={`M268 ${7 - wingLift} H306`}
+        stroke="rgba(242,246,251,0.45)"
+        strokeWidth="1.7"
+      />
+      <path
+        d={`M266 ${15 - wingLift * 0.7} H314 L320 ${24 - wingLift * 0.4} H272 Z`}
+        fill={second}
+        opacity="0.94"
+      />
+      <path
+        d={`M270 ${17 - wingLift * 0.65} H308`}
         stroke="rgba(5,7,10,0.35)"
-        strokeWidth="0.8"
+        strokeWidth="1.1"
       />
-      <path d="M234 10 H264 L266 18 H236 Z" fill={accent} />
-      <path
-        d="M238 12 H262"
-        stroke="rgba(232,238,245,0.35)"
-        strokeWidth="1.5"
-      />
-      <path d="M236 18 H266 L268 24 H238 Z" fill={second} opacity="0.9" />
+      {/* DRS flap gap */}
       <rect
-        x="248"
-        y="11"
-        width="10"
-        height="5"
+        x="282"
+        y={6 - wingLift}
+        width="14"
+        height="4.5"
         rx="1"
-        fill="rgba(5,7,10,0.45)"
+        fill="rgba(5,7,10,0.55)"
+      />
+      {/* Endplates */}
+      <path
+        d={`M270 ${24 - wingLift * 0.35} L260 52`}
+        stroke={second}
+        strokeWidth="2.4"
+        opacity="0.9"
+      />
+      <path
+        d={`M306 ${24 - wingLift * 0.35} L298 54`}
+        stroke={second}
+        strokeWidth="2.4"
+        opacity="0.9"
+      />
+      {/* Rear wing pylons */}
+      <path
+        d={`M278 ${24 - wingLift * 0.35} L272 56`}
+        stroke={`url(#${uid}-carbon)`}
+        strokeWidth="3.2"
+      />
+      <path
+        d={`M294 ${24 - wingLift * 0.35} L288 56`}
+        stroke={`url(#${uid}-carbon)`}
+        strokeWidth="3.2"
       />
 
-      {/* rear suspension wishbone hint */}
+      {/* Wishbone hint rear */}
       <path
-        d="M198 40 L218 52"
-        stroke="rgba(232,238,245,0.28)"
-        strokeWidth="1.4"
+        d="M228 50 L254 68"
+        stroke="rgba(232,238,245,0.35)"
+        strokeWidth="1.6"
       />
       <path
-        d="M200 36 L220 48"
+        d="M232 46 L258 64"
         stroke="rgba(232,238,245,0.18)"
-        strokeWidth="1"
+        strokeWidth="1.15"
       />
 
-      {/* wheels - rear */}
-      <g filter={`url(#${uid}-glow)`}>
-        <circle
-          cx="208"
-          cy="56"
-          r="18"
-          fill={`url(#${uid}-rim)`}
-          stroke="rgba(232,238,245,0.35)"
-          strokeWidth="2.2"
-        />
-        <circle cx="208" cy="56" r="10" fill="#0a0c10" />
-        <circle
-          cx="208"
-          cy="56"
-          r="5"
-          fill="none"
-          stroke={accent}
-          strokeWidth="2"
-        />
-        <circle cx="208" cy="56" r="2.2" fill={second} />
-      </g>
+      <Wheel
+        defsId={uid}
+        cx={242}
+        cy={74}
+        r={21.5}
+        accent={accent}
+        second={second}
+      />
 
-      {/* engine cover / airbox */}
+      {/* Engine cover / airbox */}
       <path
-        d="M118 22 L168 14 L198 18 L210 36 L168 42 L122 40 Z"
+        d={`M136 ${30 + noseDrop * 0.15} L188 ${16 - wingLift * 0.12} L232 ${22 - wingLift * 0.08} L248 48 L196 56 L140 52 Z`}
         fill={`url(#${uid}-body)`}
         filter={`url(#${uid}-glow)`}
       />
       <path
-        d="M148 16 L178 12 L182 20 L152 24 Z"
-        fill={second}
-        opacity="0.85"
+        d={`M136 ${30 + noseDrop * 0.15} L188 ${16 - wingLift * 0.12} L232 ${22 - wingLift * 0.08} L248 48 L196 56 L140 52 Z`}
+        fill={`url(#${uid}-shine)`}
       />
       <path
-        d="M130 20 L190 16"
+        d={`M168 ${18 - wingLift * 0.08} L204 ${12 - wingLift * 0.18} L212 26 L174 30 Z`}
+        fill={second}
+        opacity="0.9"
+      />
+      {/* Centerline crease */}
+      <path
+        d="M148 28 L220 20"
         stroke="rgba(5,7,10,0.4)"
-        strokeWidth="3.5"
+        strokeWidth="3.6"
         strokeLinecap="round"
       />
       <path
-        d="M134 26 L186 22"
-        stroke="rgba(232,238,245,0.2)"
-        strokeWidth="1.5"
+        d="M152 36 L216 28"
+        stroke="rgba(242,246,251,0.28)"
+        strokeWidth="1.7"
         strokeLinecap="round"
       />
 
-      {/* sidepod */}
+      {/* Sidepod */}
       <path
-        d="M96 36 L168 28 L198 34 L188 50 L108 52 Z"
+        d="M112 46 L194 34 L236 44 L222 66 L124 70 Z"
         fill={accent}
-        opacity="0.92"
+        opacity="0.96"
       />
       <path
-        d="M118 38 L178 32 L184 44 L124 48 Z"
-        fill={second}
+        d="M112 46 L194 34 L236 44 L222 66 L124 70 Z"
+        fill={`url(#${uid}-shine)`}
         opacity="0.55"
       />
-      {/* cooling inlet */}
       <path
-        d="M128 40 L152 36 L154 42 L130 46 Z"
-        fill="rgba(5,7,10,0.55)"
-      />
-
-      {/* halo + cockpit */}
-      <path
-        d="M78 30 L118 22 L128 36 L88 42 Z"
-        fill={`url(#${uid}-glass)`}
-        stroke="rgba(232,238,245,0.25)"
-        strokeWidth="1"
-      />
-      <path
-        d="M92 28 L112 24"
-        stroke="rgba(5,7,10,0.55)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M100 26 L100 38"
-        stroke="rgba(232,238,245,0.45)"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-
-      {/* mirror */}
-      <path
-        d="M108 24 L118 20 L120 24 L110 28 Z"
+        d="M134 48 L204 38 L214 56 L142 62 Z"
         fill={second}
+        opacity={0.38 + cool * 0.22}
+      />
+      {/* Cooling inlet — opens with track heat package */}
+      <path
+        d={`M146 50 L${146 + 32 + cool * 12} ${44 - cool * 1.2} L${148 + 32 + cool * 12} ${52 + cool * 2.2} L148 56 Z`}
+        fill="rgba(5,7,10,0.68)"
+      />
+      <path
+        d={`M150 51.5 L${150 + 26 + cool * 9} ${47 - cool * 0.6}`}
+        stroke="rgba(242,246,251,0.22)"
+        strokeWidth="0.9"
+      />
+      {/* Louvres */}
+      {[0, 1, 2].map((i) => (
+        <path
+          key={i}
+          d={`M${168 + i * 8} ${54 + i * 0.4} L${186 + i * 6} ${50 + i * 0.3}`}
+          stroke="rgba(5,7,10,0.45)"
+          strokeWidth="1.1"
+          opacity={0.5 + cool * 0.35}
+        />
+      ))}
+
+      {/* Floor edge */}
+      <path
+        d={`M102 ${58 + noseDrop * 0.25} L136 56 L138 64 L104 66 Z`}
+        fill={second}
+        opacity="0.72"
       />
 
-      {/* nose + front wing pillars */}
+      {/* Halo + canopy */}
       <path
-        d="M28 48 L72 32 L96 30 L88 46 L48 52 Z"
+        d="M90 40 L136 28 L150 48 L102 56 Z"
+        fill={`url(#${uid}-glass)`}
+        stroke="rgba(242,246,251,0.32)"
+        strokeWidth="1.15"
+      />
+      <path
+        d="M104 38 L130 30"
+        stroke="rgba(5,7,10,0.65)"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <path
+        d="M116 34 L116 52"
+        stroke="rgba(242,246,251,0.55)"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+      {/* Halo hoop */}
+      <path
+        d="M108 36 Q124 22 140 30"
+        fill="none"
+        stroke={`url(#${uid}-carbon)`}
+        strokeWidth="2.6"
+        strokeLinecap="round"
+      />
+      {/* Mirror */}
+      <path d="M124 26 L138 20 L142 28 L126 32 Z" fill={second} />
+      <path
+        d="M128 24 L136 21"
+        stroke="rgba(242,246,251,0.35)"
+        strokeWidth="0.8"
+      />
+
+      {/* Nose cone */}
+      <path
+        d={`M18 ${64 + noseDrop} L82 ${38 + noseDrop * 0.35} L116 36 L104 ${58 + noseDrop * 0.15} L48 ${68 + noseDrop * 0.25} Z`}
         fill={`url(#${uid}-body)`}
       />
       <path
-        d="M28 48 L48 40 L52 48 Z"
-        fill={second}
-        opacity="0.75"
+        d={`M18 ${64 + noseDrop} L82 ${38 + noseDrop * 0.35} L116 36 L104 ${58 + noseDrop * 0.15} L48 ${68 + noseDrop * 0.25} Z`}
+        fill={`url(#${uid}-shine)`}
+        opacity="0.4"
       />
       <path
-        d="M40 44 L70 34"
-        stroke="rgba(232,238,245,0.25)"
-        strokeWidth="1.5"
+        d={`M18 ${64 + noseDrop} L54 ${52 + noseDrop * 0.45} L58 ${64 + noseDrop * 0.25} Z`}
+        fill={second}
+        opacity="0.82"
+      />
+      <path
+        d={`M46 ${56 + noseDrop * 0.55} L88 ${42 + noseDrop * 0.25}`}
+        stroke="rgba(242,246,251,0.32)"
+        strokeWidth="1.6"
       />
 
-      {/* front wing */}
+      {/* Front wing */}
       <path
-        d="M8 52 H64 L60 58 H14 Z"
+        d={`M2 ${68 + noseDrop} H${62 * fw} L${58 * fw} ${78 + noseDrop} H${8 * fw} Z`}
         fill={second}
-        stroke="rgba(5,7,10,0.3)"
-        strokeWidth="0.8"
+        stroke="rgba(5,7,10,0.4)"
+        strokeWidth="0.85"
       />
       <path
-        d="M12 56 H56"
+        d={`M8 ${72 + noseDrop} H${54 * fw}`}
         stroke={accent}
-        strokeWidth="2"
-        opacity="0.75"
+        strokeWidth="2.2"
+        opacity="0.85"
       />
       <path
-        d="M16 59 H50"
-        stroke="rgba(232,238,245,0.35)"
+        d={`M12 ${76 + noseDrop} H${50 * fw}`}
+        stroke="rgba(242,246,251,0.4)"
         strokeWidth="1.2"
       />
-      <path d="M22 50 L22 56" stroke={second} strokeWidth="2" />
-      <path d="M48 48 L48 56" stroke={second} strokeWidth="2" />
-
-      {/* front suspension */}
       <path
-        d="M64 40 L78 54"
-        stroke="rgba(232,238,245,0.3)"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M68 36 L82 50"
-        stroke="rgba(232,238,245,0.18)"
-        strokeWidth="1"
-      />
-
-      {/* front wheel */}
-      <g filter={`url(#${uid}-glow)`}>
-        <circle
-          cx="72"
-          cy="56"
-          r="17"
-          fill={`url(#${uid}-rim)`}
-          stroke="rgba(232,238,245,0.35)"
-          strokeWidth="2.2"
-        />
-        <circle cx="72" cy="56" r="9.5" fill="#0a0c10" />
-        <circle
-          cx="72"
-          cy="56"
-          r="4.5"
-          fill="none"
-          stroke={accent}
-          strokeWidth="2"
-        />
-        <circle cx="72" cy="56" r="2" fill={second} />
-      </g>
-
-      {/* barge board line */}
-      <path
-        d="M88 46 L118 44"
+        d={`M16 ${78.5 + noseDrop} H${46 * fw}`}
         stroke="rgba(5,7,10,0.35)"
-        strokeWidth="2"
-        strokeLinecap="round"
+        strokeWidth="0.9"
+      />
+      {/* Wing pillars */}
+      <path
+        d={`M20 ${62 + noseDrop} L20 ${72 + noseDrop}`}
+        stroke={second}
+        strokeWidth="2.4"
+      />
+      <path
+        d={`M50 ${56 + noseDrop * 0.45} L50 ${72 + noseDrop}`}
+        stroke={second}
+        strokeWidth="2.4"
+      />
+      {/* Brake duct — opens with track package */}
+      <path
+        d={`M68 ${54 + noseDrop * 0.35} L78 ${50 + noseDrop * 0.25} L82 ${58 + duct * 1.1} L72 ${60 + duct * 0.55} Z`}
+        fill="rgba(5,7,10,0.58)"
+        opacity={0.5 + duct * 0.45}
+      />
+
+      {/* Front wishbones */}
+      <path
+        d="M76 50 L94 70"
+        stroke="rgba(232,238,245,0.36)"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M80 46 L98 66"
+        stroke="rgba(232,238,245,0.18)"
+        strokeWidth="1.15"
+      />
+
+      <Wheel
+        defsId={uid}
+        cx={86}
+        cy={74}
+        r={19.5}
+        accent={accent}
+        second={second}
       />
 
       {number != null && (
         <text
-          x="158"
-          y="40"
+          x="180"
+          y="52"
           textAnchor="middle"
           fill="#05070a"
-          fontSize="15"
+          fontSize="18"
           fontFamily="var(--font-mono), monospace"
           fontWeight="900"
           style={{
             paintOrder: "stroke",
-            stroke: "rgba(232,238,245,0.35)",
-            strokeWidth: 2,
+            stroke: "rgba(242,246,251,0.45)",
+            strokeWidth: 2.6,
           }}
         >
           {number}
         </text>
       )}
+
       {compoundLetter && (
         <g>
           <rect
-            x="188"
-            y="44"
-            width="16"
-            height="12"
+            x="218"
+            y="56"
+            width="18"
+            height="13"
             rx="2"
-            fill="rgba(5,7,10,0.75)"
+            fill="rgba(5,7,10,0.82)"
             stroke={accent}
-            strokeWidth="1"
+            strokeWidth="1.15"
           />
           <text
-            x="196"
-            y="53"
+            x="227"
+            y="66"
             textAnchor="middle"
-            fill="rgba(232,238,245,0.95)"
-            fontSize="9"
+            fill="rgba(242,246,251,0.95)"
+            fontSize="9.5"
             fontFamily="var(--font-mono), monospace"
             fontWeight="700"
           >
@@ -320,6 +433,110 @@ export function CarSilhouette({
           </text>
         </g>
       )}
+
+      {showPackageChip && (
+        <g>
+          <rect
+            x="8"
+            y="96"
+            width={Math.max(76, pkg.chip.length * 6.4 + 18)}
+            height="14"
+            rx="2"
+            fill="rgba(5,7,10,0.78)"
+            stroke="rgba(198,255,74,0.5)"
+            strokeWidth="0.9"
+          />
+          <text
+            x="16"
+            y="106"
+            fill="#C6FF4A"
+            fontSize="8"
+            fontFamily="var(--font-mono), monospace"
+            fontWeight="700"
+            letterSpacing="0.08em"
+          >
+            {pkg.chip.toUpperCase()}
+          </text>
+        </g>
+      )}
     </svg>
+  );
+}
+
+function Wheel({
+  defsId,
+  cx,
+  cy,
+  r,
+  accent,
+  second,
+}: {
+  defsId: string;
+  cx: number;
+  cy: number;
+  r: number;
+  accent: string;
+  second: string;
+}) {
+  const hub = r * 0.26;
+  const rim = r * 0.58;
+  return (
+    <g filter={`url(#${defsId}-glow)`}>
+      <circle
+        cx={cx}
+        cy={cy}
+        r={r}
+        fill={`url(#${defsId}-tyre)`}
+        stroke="rgba(232,238,245,0.32)"
+        strokeWidth="2.1"
+      />
+      {/* Sidewall ring */}
+      <circle
+        cx={cx}
+        cy={cy}
+        r={r * 0.82}
+        fill="none"
+        stroke="rgba(232,238,245,0.12)"
+        strokeWidth="3.5"
+      />
+      <circle
+        cx={cx}
+        cy={cy}
+        r={rim}
+        fill={`url(#${defsId}-rim)`}
+        stroke="rgba(232,238,245,0.28)"
+        strokeWidth="1.1"
+      />
+      {[0, 45, 90, 135].map((deg) => {
+        const a = ((deg - 15) * Math.PI) / 180;
+        return (
+          <line
+            key={deg}
+            x1={cx + Math.cos(a) * hub}
+            y1={cy + Math.sin(a) * hub}
+            x2={cx + Math.cos(a) * rim * 0.9}
+            y2={cy + Math.sin(a) * rim * 0.9}
+            stroke={accent}
+            strokeWidth="1.35"
+            opacity="0.75"
+          />
+        );
+      })}
+      <circle
+        cx={cx}
+        cy={cy}
+        r={hub}
+        fill="none"
+        stroke={accent}
+        strokeWidth="2.1"
+      />
+      <circle cx={cx} cy={cy} r={hub * 0.42} fill={second} />
+      <circle
+        cx={cx}
+        cy={cy}
+        r={hub * 0.18}
+        fill="rgba(5,7,10,0.85)"
+      />
+    </g>
   );
 }

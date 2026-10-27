@@ -143,7 +143,7 @@ Contents, top to bottom:
 2. **Number.** Display size, team accent, the racing number (`16`).
 3. **Name and code.** `Charles Leclerc` and `LEC`.
 4. **Team line.** The team name set in the product sans (Sora), tracked slightly open. A 4px accent bar sits at the left edge of the plate. No crest from the team. A small original shield behind the number is ours: a rounded rectangle, the number, nothing else.
-5. **Car.** One shared side-profile silhouette, about 220×56, used for every driver. Body fill is the team accent. A second panel (sidepod) uses the team’s second accent. The racing number is set on the sidepod. Each tyre is a circle; the rear tyre carries the compound letter `S`, `M`, or `H`.
+5. **Car.** One shared side-profile silhouette, staged on a venue atmosphere (`CarStage`), used for every driver. Body fill is the team accent. A second panel (sidepod) uses the team’s second accent. The racing number is set on the sidepod. Each tyre is a circle; the rear tyre carries the compound letter `S`, `M`, or `H`. **Track packages** (`lib/track-package.ts`) change wing, cooling, rake, and atmosphere so COTA (tower + kerb + mixed DF) does not look like Bahrain (desert heat ducts).
 6. **Stint facts already in the pack.** Compound, lap, and when present: tyre age, pit stop, radio clip count. Empty fields are omitted.
 7. **Sector trio.** Three selectable cells, `S1 25.630`, `S2 37.834`, `S3 31.827`, plus a `Lap` cell. Selecting one sets the evidence window and the map highlight. In compare mode each cell also shows the sector delta.
 
@@ -156,8 +156,8 @@ Promoted out of the rail into the center, above the graphs.
 - Path from `trackXY` (the real COTA trace already on the pack). Stroke ~10px in chalk, casing ~22px in asphalt so it reads as a road.
 - Sector spans use the existing bounds: S1 `0–1483`, S2 `1483–3672`, S3 `3672–5513`. The active sector brightens; the others stay mute.
 - Evidence window paints along the path, same coordinates the traces already use.
-- Focus car is a small wedge on the polyline, rotated to the local tangent, filled with the team accent, number beside it.
-- Reference car, when present, is a second wedge in the reference accent, drawn slightly offset so the two never fully stack.
+- Focus car is a top-down open-wheel mark (`CarMarker`) on the polyline, rotated to the local tangent, filled with the team accent, number beside it.
+- Reference car, when present, is a second mark in the reference accent, drawn slightly offset so the two never fully stack.
 - Traps from OpenF1 sit on the map as labels: `I1`, `I2`, `ST`, with the speed in km/h.
 - Pointer down on the path scrubs `playheadM` by nearest distance sample. The traces follow. Dragging a trace still scrubs the map. One playhead.
 - Click a sector’s portion of the path to focus that sector. The plate’s sector cell matches.
@@ -258,7 +258,7 @@ Three original SVGs, all in `components/identity/`. No remote images, no driver 
 
 **`HelmetMark`.** Shared shell path. Motif index `number % 3`. Fill from the accent. The number is HTML next to it, not baked into the path, so it stays a real text node for screen readers.
 
-**`CarSilhouette`.** One open-wheel side profile: nose, sidepod, engine cover, rear wing, two wheels. `body` and `panel` are props. Compound letter is a `<text>` on the rear wheel. Nose carries a small number. The same component renders at plate size and, simplified (no wings detail), as the map wedge.
+**`CarSilhouette`.** One open-wheel side profile: nose, sidepod, engine cover, rear wing, two wheels. Accent props colour the body. Compound letter is a chip near the rear. Number sits on the sidepod. `track` selects a package (COTA / Bahrain / generic). **`CarStage`** wraps it in venue atmosphere. **`CarMarker`** is the top-down mark on the circuit.
 
 **`Plate`.** Composes helmet, number, name, team, car, compound, sector cells. Props are a `Driver`, a `Lap`, and optional sector deltas. It does not fetch.
 
@@ -451,7 +451,7 @@ One paragraph, for the project page and the top of a résumé note:
 
 > CiteTrace is a pit wall for a race session. The circuit is on screen, large enough to scrub. Any car can be set against any other car, with the sector delta, the compound, and both traces on the same metre. Selecting a driver brings up an original plate: number, team, helmet mark, and car. Under that, the traces and a cite that locks the playhead. Built by Eric at Welch Software. Live at citetrace.welchsoftware.net.
 
-The landing page CTA becomes **Compare two cars**, aimed at `?house=ferrari`, with **Ask the lap** as the second action. The night photograph and the track stroke on the hero stay. They already promise a circuit; the session should keep that promise.
+The landing page CTA becomes **Open the pit wall**, aimed at `?house=ferrari`, with **Ask the lap** as the second action. That sells the workspace — circuit, duo, cite, playhead — not a single compare feature. The night photograph and the track stroke on the hero stay. They already promise a circuit; the session should keep that promise.
 
 ---
 

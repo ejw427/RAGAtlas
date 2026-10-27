@@ -9,7 +9,7 @@ const STEPS: { id: DemoStep; label: string; hint: string }[] = [
   {
     id: 0,
     label: "1 · Compare",
-    hint: "Two named cars. Read the lap delta.",
+    hint: "Open the pit wall — two cars on the same metre.",
   },
   {
     id: 1,

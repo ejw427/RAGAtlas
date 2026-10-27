@@ -321,38 +321,38 @@ export default function AboutPage() {
           <div className="grid gap-2 sm:grid-cols-2">
             <DemoChip
               href="/session?driver=LEC&lap=10&citeId=cite_brake_spike"
-              label="Cite lock · brake spike"
+              label="Thermal · brake spike"
               hint="Playhead eases to synthetic 942°C peak on the real heavy zone"
             />
             <DemoChip
-              href="/session?driver=LEC&lap=10&citeId=cite_front_brake&q=Why%20is%20the%20front%20brake%20cooler%20than%20the%20rear%20on%20lap%2010%3F"
-              label="Front vs rear"
-              hint="Synthetic FL peaks at 688°C under the rear 942°C duct flag"
+              href="/session?house=ferrari&q=How%20does%20Leclerc%20compare%20to%20Hamilton%3F&citeId=cite_teammate"
+              label="Compare · LEC vs HAM"
+              hint="Soft flyers −615 ms · same ST 319 — gap mostly S2"
             />
             <DemoChip
-              href="/session?driver=LEC&lap=10&citeId=cite_pressure&q=Was%20the%20S3%20stop%20a%20late%20stab%20or%20a%20trail%3F"
-              label="Trail, not a stab"
-              hint="Brake pressure peaks at 71.7 bar while speed is still high"
+              href="/session?driver=LEC&lap=10&citeId=cite_field_pace&q=Who%20was%20fastest%20in%20FP2%20in%20this%20pack%3F"
+              label="Pace · field order"
+              hint="LEC / ANT / VER Soft best-flyers from OpenF1"
             />
             <DemoChip
-              href="/session?driver=LEC&lap=10&citeId=cite_tyre&q=How%20hot%20was%20the%20Soft%20tyre%20through%20S2%3F"
-              label="Soft tyre heat"
-              hint="Synthetic FL tyre 128°C in S2 vs Hard 105°C"
+              href="/session?driver=LEC&lap=10&citeId=cite_weather&q=Did%20the%20track%20cool%20during%20FP2%3F"
+              label="Ops · track cools"
+              hint="OpenF1 weather −3.3°C track across FP2"
             />
             <DemoChip
-              href="/session?driver=LEC&lap=10&citeId=cite_trap_st&q=What%20was%20the%20Soft%20speed%20trap%20vs%20Hard%3F"
-              label="Speed trap +5"
-              hint="OpenF1 ST 319 vs Hard 314 km/h"
+              href="/session?driver=LEC&lap=10&citeId=cite_pit&q=When%20did%20Leclerc%20fit%20Softs%3F"
+              label="Ops · Soft-fit pit"
+              hint="Stint map laps 9–11 · pit on lap 9"
             />
             <DemoChip
-              href="/session?driver=LEC&lap=10&citeId=cite_delta_soft&q=Where%20did%20Soft%20gain%20vs%20the%20Hard%20push%3F"
-              label="Soft vs Hard delta"
-              hint="OpenF1 sector story - Soft flyer vs Hard push"
+              href="/session?driver=LEC&lap=10&citeId=cite_radio&q=Any%20team%20radio%20for%20Leclerc%20in%20FP2%3F"
+              label="Ops · team radio empty"
+              hint="12 clips in pack · 0 for car 16 — honest silence"
             />
             <DemoChip
-              href="/session?driver=LEC&lap=7&citeId=cite_track_limits&q=Any%20track%20limits%20issues%20for%20Leclerc%3F"
-              label="Track limits · T19"
-              hint="Race-control grounded note from the FP2 session"
+              href="/session?driver=LEC&lap=10&citeId=cite_of1_ovl&q=What%20is%20OpenF1%20vs%20OVL%20in%20this%20pack%3F"
+              label="Method · OF1 vs OVL"
+              hint="Broadcast vs synthetic labels — the honesty pitch"
             />
             <DemoChip
               href="/session?driver=LEC&lap=10&q=Who%20is%20the%20championship%20leader%3F"
@@ -369,13 +369,14 @@ export default function AboutPage() {
         <section className="mt-10 space-y-4 border-t border-[var(--hairline)] pt-8">
           <h2 className="font-display text-xl font-semibold">System shape</h2>
           <p className="text-[var(--mist)] leading-relaxed">
-            One session pack, three stores, one retrieval path. Cites are first-class
-            objects - not chat footnotes.
+            One session pack, three stores, retrieve-then-generate. Cites are
+            first-class objects - not chat footnotes. Workers AI only phrases
+            answers from retrieved evidence.
           </p>
           <div
             className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-stretch sm:gap-x-2 sm:gap-y-2"
             role="img"
-            aria-label="Samples, metadata, and notes feed a deterministic QaMap that produces a cite, which locks the telemetry stage"
+            aria-label="Samples, metadata, and notes retrieve evidence, Workers AI grounds a claim, then a cite locks the telemetry stage"
           >
             <FlowNode label="Samples" sub="car_data · overlays" />
             <FlowArrow />
@@ -383,7 +384,9 @@ export default function AboutPage() {
             <FlowArrow />
             <FlowNode label="Notes" sub="events · debrief" />
             <FlowArrow />
-            <FlowNode label="QaMap" sub="deterministic" accent />
+            <FlowNode label="Retrieve" sub="QaMap + notes" accent />
+            <FlowArrow />
+            <FlowNode label="Workers AI" sub="grounded only" accent />
             <FlowArrow />
             <FlowNode label="Cite > stage" sub="playhead + band" accent />
           </div>
@@ -400,9 +403,14 @@ export default function AboutPage() {
           </h2>
           <ul className="list-disc space-y-2 pl-5 text-[var(--mist)]">
             <li>
-              <span className="text-[var(--chalk)]">Deterministic QaMap</span> -
-              the money-shot demo never flakes; honesty over LLM theater for a
-              portfolio walkthrough.
+              <span className="text-[var(--chalk)]">
+                Retrieve → generate → cite
+              </span>{" "}
+              - QaMap + notes retrieve evidence first; Cloudflare Workers AI
+              phrases the claim only from that set. No evidence → fail closed.
+              Offline /{" "}
+              <span className="font-mono text-[0.78rem]">next dev</span> falls
+              back to the deterministic draft so the money-shot never flakes.
             </li>
             <li>
               <span className="text-[var(--chalk)]">

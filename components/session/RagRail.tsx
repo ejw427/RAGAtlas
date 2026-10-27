@@ -4,16 +4,26 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CiteChip } from "@/components/session/CiteChip";
-import { answerQuery, seedQueries } from "@/lib/rag";
+import { askSession } from "@/lib/ask-client";
+import { featuredSeeds, type FeaturedSeed } from "@/lib/rag";
 import { DEMO_ASK, DEMO_NO_HIT } from "@/lib/brand";
 import type { CiteTarget, RagAnswer } from "@/lib/types";
-import { prefersReducedMotion } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 
 const EMPTY: RagAnswer = {
   status: "empty",
   query: "",
   cites: [],
-  message: "Run a query to bind an answer to this lap window.",
+  message:
+    "Ask anything grounded in this FP2 pack — pace, weather, radio, race control, teammate gap, or the thermal money-shot.",
+};
+
+const CATEGORY_LABEL: Record<FeaturedSeed["category"], string> = {
+  thermal: "Thermal",
+  pace: "Pace",
+  ops: "Ops",
+  compare: "Compare",
+  method: "Method",
 };
 
 export function RagRail({
@@ -38,7 +48,7 @@ export function RagRail({
 }) {
   const [query, setQuery] = useState(initialQuery ?? DEMO_ASK);
   const [answer, setAnswer] = useState<RagAnswer>(EMPTY);
-  const seeds = seedQueries();
+  const seeds = featuredSeeds();
   const autoAsked = useRef(false);
   const lastTrigger = useRef(0);
 
@@ -52,11 +62,9 @@ export function RagRail({
       status: "loading",
       query: trimmed,
       cites: [],
-      message: "Matching QaMap patterns (deterministic)...",
+      message: "Retrieving evidence… grounding with Workers AI…",
     });
-    const delay = prefersReducedMotion() ? 40 : 280;
-    await new Promise((r) => setTimeout(r, delay));
-    setAnswer(answerQuery(trimmed));
+    setAnswer(await askSession(trimmed));
   };
 
   useEffect(() => {
@@ -73,6 +81,8 @@ export function RagRail({
     void submit(askTrigger.query);
   }, [askTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const visibleSeeds = compact ? seeds.slice(0, 8) : seeds;
+
   return (
     <aside
       className={
@@ -86,7 +96,7 @@ export function RagRail({
           Ask the session
         </p>
         <p className="mt-1 rounded-sm border border-[var(--signal)]/25 bg-[var(--signal-dim)] px-2 py-1 font-mono text-[0.58rem] leading-snug text-[var(--signal)]">
-          Deterministic QaMap · fail closed - not an LLM
+          Retrieve → generate → cite · fail closed
         </p>
       </div>
 
@@ -109,19 +119,24 @@ export function RagRail({
         </Button>
       </form>
 
-      <div className="flex max-h-28 flex-wrap gap-1.5 overflow-auto">
-        {seeds.slice(0, compact ? 4 : seeds.length).map((s) => (
+      <div className="flex max-h-40 flex-wrap gap-1.5 overflow-auto">
+        {visibleSeeds.map((s) => (
           <button
-            key={s}
+            key={s.query}
             type="button"
             onClick={() => {
-              setQuery(s);
-              void submit(s);
+              setQuery(s.query);
+              void submit(s.query);
             }}
-            title={s}
-            className="border border-[var(--hairline)] px-2 py-1 text-left font-mono text-[0.58rem] text-[var(--mute)] hover:border-[var(--hairline-strong)] hover:text-[var(--mist)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+            title={s.query}
+            className={cn(
+              "border border-[var(--hairline)] px-2 py-1 text-left font-mono text-[0.58rem] text-[var(--mute)] hover:border-[var(--hairline-strong)] hover:text-[var(--mist)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
+            )}
           >
-            {s.length > 48 ? `${s.slice(0, 46)}...` : s}
+            <span className="mr-1 text-[var(--signal)]/80">
+              {CATEGORY_LABEL[s.category]}
+            </span>
+            {s.query.length > 36 ? `${s.query.slice(0, 34)}...` : s.query}
           </button>
         ))}
         <button
@@ -143,9 +158,9 @@ export function RagRail({
               {answer.message}
             </p>
             <ol className="list-decimal space-y-1 pl-4 font-mono text-[0.62rem] text-[var(--mute)]">
-              <li>Ask the money-shot (or tap a seed)</li>
+              <li>Tap a seed (Thermal · Pace · Ops · Compare · Method)</li>
               <li>Click an Evidence cite</li>
-              <li>Playhead locks on the band</li>
+              <li>Playhead locks on the band — that is the pitch</li>
             </ol>
           </div>
         )}
@@ -162,6 +177,18 @@ export function RagRail({
         )}
         {answer.status === "hit" && (
           <div className="space-y-3">
+            <p
+              className={cn(
+                "inline-flex rounded-sm border px-1.5 py-0.5 font-mono text-[0.55rem] uppercase tracking-[0.1em]",
+                answer.source === "ai"
+                  ? "border-[var(--signal)]/40 text-[var(--signal)]"
+                  : "border-[var(--hairline)] text-[var(--mute)]",
+              )}
+            >
+              {answer.source === "ai"
+                ? "Workers AI · grounded"
+                : "QaMap · offline fallback"}
+            </p>
             <p className="text-[0.82rem] leading-relaxed text-[var(--chalk)]">
               {answer.claim}
             </p>
@@ -190,8 +217,8 @@ export function RagRail({
       </div>
 
       <p className="mt-auto text-[0.62rem] leading-snug text-[var(--mute)]">
-        Pattern map over notes & channel docs - silence when the session cannot
-        support the claim. Method: /about
+        Retrieve cites first, then Workers AI phrases only from that evidence —
+        silence when the session cannot support the claim. Method: /about
       </p>
     </aside>
   );

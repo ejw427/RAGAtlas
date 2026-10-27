@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { CarMarker } from "@/components/identity/CarMarker";
 import { ElevationStrip } from "@/components/session/ElevationStrip";
 import { elevationAt, gradePctAt } from "@/lib/cota-elevation";
 import {
@@ -106,71 +107,6 @@ function metresInBox(
   return { startM: start, endM: end };
 }
 
-function CarWedge({
-  cx,
-  cy,
-  angle,
-  fill,
-  number,
-  offset = 0,
-  scale = 1,
-  glow,
-}: {
-  cx: number;
-  cy: number;
-  angle: number;
-  fill: string;
-  number?: number;
-  offset?: number;
-  scale?: number;
-  glow?: boolean;
-}) {
-  const rad = ((angle + 90) * Math.PI) / 180;
-  const ox = Math.cos(rad) * offset * scale;
-  const oy = Math.sin(rad) * offset * scale;
-  const s = scale;
-  return (
-    <g transform={`translate(${cx + ox}, ${cy + oy}) rotate(${angle})`}>
-      {glow && (
-        <polygon
-          points={`${18 * s},0 ${-12 * s},${-10 * s} ${-12 * s},${10 * s}`}
-          fill={fill}
-          opacity="0.35"
-          filter="blur(6px)"
-        />
-      )}
-      <polygon
-        points={`${16 * s},0 ${-11 * s},${-9 * s} ${-11 * s},${9 * s}`}
-        fill={fill}
-        stroke="rgba(5,7,10,0.85)"
-        strokeWidth={2.5 * s}
-      />
-      <polygon
-        points={`${8 * s},0 ${-4 * s},${-3.5 * s} ${-4 * s},${3.5 * s}`}
-        fill="rgba(255,255,255,0.35)"
-      />
-      {number != null && (
-        <text
-          x="0"
-          y={-18 * s}
-          textAnchor="middle"
-          fill={fill}
-          fontSize={16 * s}
-          fontFamily="var(--font-mono), monospace"
-          fontWeight="800"
-          transform={`rotate(${-angle})`}
-          style={{
-            paintOrder: "stroke",
-            stroke: "rgba(5,7,10,0.8)",
-            strokeWidth: 4 * s,
-          }}
-        >
-          {number}
-        </text>
-      )}
-    </g>
-  );
-}
 
 export function TrackSchematic({
   activeSector,
@@ -182,6 +118,8 @@ export function TrackSchematic({
   referenceAccent,
   focusNumber,
   referenceNumber,
+  focusCode,
+  referenceCode,
   comparing = false,
   traps,
   sectorDeltaMs,
@@ -193,7 +131,10 @@ export function TrackSchematic({
   speedDelta = null,
   onOpenCompare,
   onViewWindow,
+  viewWindow: externalWindow,
   onExpand,
+  onInspectFocus,
+  onInspectReference,
   lapId,
 }: {
   activeSector: string | null;
@@ -205,6 +146,8 @@ export function TrackSchematic({
   referenceAccent?: string;
   focusNumber?: number;
   referenceNumber?: number;
+  focusCode?: string;
+  referenceCode?: string;
   comparing?: boolean;
   traps?: { id: string; m: number; label: string; speed?: number }[];
   sectorDeltaMs?: [number, number, number] | null;
@@ -219,7 +162,16 @@ export function TrackSchematic({
   onOpenCompare?: () => void;
   /** Fired when map zoom window changes - stretch traces to match. */
   onViewWindow?: (window: DistWindow | null) => void;
+  /**
+   * Controlled distance window from graphs (Ctrl+wheel) / Fit lap.
+   * Keeps the circuit viewbox in lockstep with TelemetryStage.
+   */
+  viewWindow?: DistWindow | null;
   onExpand?: () => void;
+  /** Click Focus car on the map → racer card. */
+  onInspectFocus?: () => void;
+  /** Click Reference car on the map → racer card. */
+  onInspectReference?: () => void;
   /** Focus lap - used for area speed / channel readout. */
   lapId?: string;
 }) {
@@ -295,6 +247,39 @@ export function TrackSchematic({
     if (manualView) return;
     onViewWindow?.(sectorWindow);
   }, [sectorWindow, manualView, onViewWindow]);
+
+  // Graph → map: Ctrl+wheel / Fit lap on the stage drives the circuit view.
+  useEffect(() => {
+    if (externalWindow === undefined) return;
+    if (externalWindow == null) {
+      if (manualView != null) {
+        setManualView(null);
+        setPanMode(false);
+      }
+      return;
+    }
+    const cur = manualView
+      ? metresInBox(d, x, y, manualView)
+      : sectorWindow;
+    if (
+      cur &&
+      Math.abs(cur.startM - externalWindow.startM) < 12 &&
+      Math.abs(cur.endM - externalWindow.endM) < 12
+    ) {
+      return;
+    }
+    const next = boundsForMetres(
+      d,
+      x,
+      y,
+      externalWindow.startM,
+      externalWindow.endM,
+      0.22,
+    );
+    setManualView(next);
+    setPanMode(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to external window
+  }, [externalWindow?.startM, externalWindow?.endM, externalWindow, d, x, y]);
 
   const pathD = useMemo(() => {
     if (!x.length) return "";
@@ -632,13 +617,23 @@ export function TrackSchematic({
               : ""}
           </p>
           <p className="truncate font-mono text-[0.5rem] text-[var(--mute)]">
+            <span style={{ color: focusAccent }}>
+              Focus {focusCode ?? focusNumber ?? "—"}
+            </span>
+            {comparing && (
+              <>
+                {" · "}
+                <span style={{ color: referenceAccent ?? "var(--mute)" }}>
+                  Ref {referenceCode ?? referenceNumber ?? "—"}
+                </span>
+              </>
+            )}
+            {" · "}
             {stretchMode
-              ? "Drag a box on the circuit to stretch · Esc/Fit to reset"
+              ? "box stretch"
               : panMode
-                ? "Drag to pan · wheel zooms · Esc/Fit to reset"
-                : zoomed
-                  ? "Wheel zoom · Pan / Stretch · traces + elev follow"
-                  : "Wheel zoom · sector click · Stretch box · scrub playhead"}
+                ? "pan"
+                : "wheel zoom · Shift+drag section · click car"}
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-1">
@@ -1020,26 +1015,34 @@ export function TrackSchematic({
           })}
 
           {referenceCar && referenceAccent && (
-            <CarWedge
+            <CarMarker
               cx={referenceCar.cx}
               cy={referenceCar.cy}
               angle={referenceCar.angle}
               fill={referenceAccent}
+              second="rgba(232,238,245,0.75)"
               number={referenceNumber}
-              offset={0.55}
-              scale={u * 0.085}
+              code={referenceCode}
+              offset={1.35}
+              scale={u * 0.14}
               glow
+              pulseKey={`ref-${referenceCode ?? ""}-${referenceNumber ?? ""}-${lapId ?? ""}`}
+              onSelect={onInspectReference}
             />
           )}
-          <CarWedge
+          <CarMarker
             cx={focusCar.cx}
             cy={focusCar.cy}
             angle={focusCar.angle}
-            fill={focusAccent}
+            fill={focusAccent ?? "var(--signal)"}
+            second="rgba(232,238,245,0.7)"
             number={focusNumber}
-            offset={comparing ? -0.35 : 0}
-            scale={u * 0.085}
+            code={focusCode}
+            offset={comparing ? -1.25 : 0}
+            scale={u * 0.15}
             glow
+            pulseKey={`foc-${focusCode ?? ""}-${focusNumber ?? ""}-${lapId ?? ""}`}
+            onSelect={onInspectFocus}
           />
 
           {dragBox && (

@@ -1,6 +1,7 @@
 import cota from "@/data/mock/cota-2026-fp2.json";
 import channelsJson from "@/data/mock/channels.json";
 import failureModesJson from "@/data/mock/failure-modes.json";
+import { trackPackageForMeeting } from "@/lib/track-package";
 import type {
   Channel,
   ChannelSample,
@@ -19,6 +20,10 @@ const failureModes = failureModesJson.modes as FailureMode[];
 
 export function getSessionPack(): SessionPack {
   return pack;
+}
+
+export function getTrackPackage() {
+  return trackPackageForMeeting(pack.meeting);
 }
 
 export function getChannels(): Channel[] {

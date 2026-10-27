@@ -1,6 +1,7 @@
 "use client";
 
 import { CarSilhouette } from "@/components/identity/CarSilhouette";
+import { CarStage } from "@/components/identity/CarStage";
 import { DriverPortrait } from "@/components/identity/DriverPortrait";
 import {
   HouseMark,
@@ -15,7 +16,7 @@ import {
 } from "@/lib/identity";
 import type { Driver, Lap } from "@/lib/types";
 import { formatLapTime, cn } from "@/lib/utils";
-import { getDrivers } from "@/lib/session";
+import { getDrivers, getTrackPackage } from "@/lib/session";
 
 export function CompareDuo({
   focusDriver,
@@ -183,11 +184,17 @@ export function CompareDuo({
             <button
               type="button"
               onClick={onTeammate}
-              className="flex min-h-[5.5rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-md border border-dashed border-[var(--signal)]/40 bg-[var(--signal-dim)]/20 px-3 py-2 text-center transition hover:bg-[var(--signal-dim)]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+              className="flex min-h-[5.5rem] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-[var(--signal)]/40 bg-[var(--signal-dim)]/20 px-3 py-2 text-center transition hover:bg-[var(--signal-dim)]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
             >
               <span className="font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--signal)]">
                 Reference
               </span>
+              <CarSilhouette
+                accent="rgba(198,255,74,0.35)"
+                second="rgba(154,167,184,0.45)"
+                width={140}
+                track={getTrackPackage()}
+              />
               <span className="font-display text-base font-semibold text-[var(--chalk)]">
                 Pick a car to compare
               </span>
@@ -271,6 +278,7 @@ function RacerCard({
   const { given, family } = splitName(driver.name);
   const compound = compoundOf(lap);
   const house = houseLabelShort(accent);
+  const trackPkg = getTrackPackage();
 
   return (
     <div
@@ -330,10 +338,10 @@ function RacerCard({
           type="button"
           onClick={onInspect}
           disabled={!onInspect}
-          title="Open racer detail"
+          title="Open racer card"
           className="relative shrink-0 rounded-sm transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
         >
-          <DriverPortrait driver={driver} size={68} />
+          <DriverPortrait driver={driver} size={68} track={trackPkg} />
           <span
             className={cn(
               "absolute -top-1 font-mono text-[0.45rem] font-bold uppercase tracking-[0.16em] text-[var(--void)]",
@@ -353,13 +361,17 @@ function RacerCard({
         </button>
 
         <div className={cn("min-w-0 flex-1", mirror && "sm:items-end")}>
-          <div
+          <button
+            type="button"
+            onClick={onInspect}
+            disabled={!onInspect}
+            title="Open racer card"
             className={cn(
-              "flex items-baseline gap-2",
-              mirror && "sm:flex-row-reverse",
+              "flex w-full items-baseline gap-2 text-left transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default",
+              mirror && "sm:flex-row-reverse sm:text-right",
             )}
           >
-            <p
+            <span
               className="font-display text-[1.85rem] font-bold leading-none tabular-nums tracking-tight"
               style={{
                 color: accent.accent,
@@ -367,18 +379,18 @@ function RacerCard({
               }}
             >
               {driver.number ?? "-"}
-            </p>
-            <div className={cn("min-w-0", mirror && "sm:text-right")}>
+            </span>
+            <span className={cn("min-w-0", mirror && "sm:text-right")}>
               {given ? (
-                <p className="truncate font-mono text-[0.58rem] uppercase tracking-[0.14em] text-[var(--mist)]">
+                <span className="block truncate font-mono text-[0.58rem] uppercase tracking-[0.14em] text-[var(--mist)]">
                   {given}
-                </p>
+                </span>
               ) : null}
-              <p className="truncate font-display text-lg font-bold leading-[1.05] text-[var(--chalk)]">
+              <span className="block truncate font-display text-lg font-bold leading-[1.05] text-[var(--chalk)]">
                 {family}
-              </p>
-            </div>
-          </div>
+              </span>
+            </span>
+          </button>
 
           <div
             className={cn(
@@ -455,37 +467,41 @@ function RacerCard({
 
         <div
           className={cn(
-            "hidden shrink-0 flex-col items-end gap-1 sm:flex",
+            "flex shrink-0 flex-col items-end gap-1",
             mirror && "sm:items-start",
           )}
         >
-          <p className="font-display text-2xl font-bold tabular-nums tracking-tight text-[var(--chalk)]">
+          <p className="font-display text-xl font-bold tabular-nums tracking-tight text-[var(--chalk)] sm:text-2xl">
             {formatLapTime(lap.timeMs)}
           </p>
           <button
             type="button"
             onClick={onInspect}
             disabled={!onInspect}
-            title="Open racer detail"
+            title="Open racer card — car, helmet, dossier, news"
             className="opacity-90 transition hover:opacity-100 hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
           >
-            <CarSilhouette
-              accent={accent.accent}
-              second={accent.second}
-              number={driver.number}
-              compoundLetter={compound[0]?.toUpperCase()}
-              width={168}
-            />
-            <span className="mt-0.5 block text-center font-mono text-[0.4rem] uppercase tracking-[0.12em] text-[var(--trace-cyan)]">
-              Inspect car
-            </span>
+            <CarStage
+              track={trackPkg}
+              compact
+              showNote={false}
+              className="min-w-[148px] border-[var(--hairline-strong)] sm:min-w-[200px]"
+            >
+              <CarSilhouette
+                accent={accent.accent}
+                second={accent.second}
+                number={driver.number}
+                compoundLetter={compound[0]?.toUpperCase()}
+                width={188}
+                track={trackPkg}
+                showPackageChip
+              />
+              <span className="mt-0.5 block text-center font-mono text-[0.42rem] uppercase tracking-[0.12em] text-[var(--trace-cyan)]">
+                Tap car · {trackPkg.chip}
+              </span>
+            </CarStage>
           </button>
         </div>
-
-        {/* Mobile lap time */}
-        <p className="shrink-0 self-end pb-0.5 font-display text-xl font-bold tabular-nums tracking-tight text-[var(--chalk)] sm:hidden">
-          {formatLapTime(lap.timeMs)}
-        </p>
       </div>
     </div>
   );

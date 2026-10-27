@@ -244,6 +244,36 @@ body {
   }
 }
 
+@keyframes car-marker-pulse {
+  0% {
+    opacity: 0.15;
+    transform: scale(0.7);
+  }
+  40% {
+    opacity: 0.55;
+    transform: scale(1.35);
+  }
+  100% {
+    opacity: 0.28;
+    transform: scale(1);
+  }
+}
+
+.car-marker-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: car-marker-pulse 700ms var(--ease) both;
+}
+
+.car-marker-hit:focus {
+  outline: none;
+}
+
+.car-marker-hit:focus-visible > path:nth-of-type(1),
+.car-marker-hit:hover > path:nth-of-type(1) {
+  filter: brightness(1.15);
+}
+
 .compare-racer {
   animation: compare-racer-in 420ms var(--ease) both;
 }

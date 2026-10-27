@@ -264,6 +264,8 @@ export interface SessionPack {
   timeline: TimelineMarker[];
 }
 
+export type QaCategory = "thermal" | "pace" | "ops" | "compare" | "method";
+
 export interface QaEntry {
   id: string;
   exactQuery: string;
@@ -273,7 +275,21 @@ export interface QaEntry {
   citeIds: string[];
   noHit: boolean;
   noHitMessage?: string;
+  /** Employer-demo chip grouping */
+  category?: QaCategory;
+  /** Show in the curated Ask rail seeds */
+  featured?: boolean;
 }
+
+/** Snippet sent to Workers AI — ids must resolve to pack cites. */
+export interface EvidenceSnippet {
+  id: string;
+  label: string;
+  summary: string;
+  body?: string;
+}
+
+export type RagSource = "ai" | "qamap";
 
 export interface RagAnswer {
   status: "empty" | "loading" | "hit" | "no-hit" | "error";
@@ -282,4 +298,19 @@ export interface RagAnswer {
   rationale?: string;
   cites: CiteTarget[];
   message?: string;
+  /** ai = Workers AI grounded on retrieved cites; qamap = deterministic draft */
+  source?: RagSource;
+  model?: string;
+}
+
+/** Client-side retrieval result before optional AI generation. */
+export interface EvidenceBundle {
+  status: "empty" | "hit" | "no-hit" | "error";
+  query: string;
+  message?: string;
+  allowedCiteIds: string[];
+  evidence: EvidenceSnippet[];
+  draftClaim?: string;
+  draftRationale?: string;
+  cites: CiteTarget[];
 }

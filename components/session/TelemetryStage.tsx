@@ -51,6 +51,7 @@ export function TelemetryStage({
   referenceLabel,
   onOpenCompare,
   viewWindow = null,
+  onViewWindow,
   sectorDeltaMs = null,
 }: {
   lapId: string;
@@ -68,6 +69,8 @@ export function TelemetryStage({
   onOpenCompare?: () => void;
   /** Stretch x-domain to match map zoom / sector. */
   viewWindow?: { startM: number; endM: number } | null;
+  /** Bidirectional: Ctrl+wheel on graphs zooms the distance window (and map). */
+  onViewWindow?: (window: { startM: number; endM: number } | null) => void;
   /** Focus - Reference sector gaps (ms). Colors the stage green/amber. */
   sectorDeltaMs?: [number, number, number] | null;
 }) {
@@ -77,6 +80,7 @@ export function TelemetryStage({
   const shellRef = useRef<HTMLDivElement>(null);
   const [drawn, setDrawn] = useState(false);
   const [hoverId, setHoverId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [shellH, setShellH] = useState(0);
   const lengthM = lapDistanceM();
   const pack = getSessionPack();
@@ -144,6 +148,43 @@ export function TelemetryStage({
     return () => window.clearTimeout(t);
   }, [drawKey, plotChannelIds.join("|")]);
 
+  // Ctrl/Meta + wheel on the stage zooms the distance window (keeps map in sync).
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg || !onViewWindow) return;
+    const onWheel = (e: WheelEvent) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const factor = Math.exp(e.deltaY * 0.0016);
+      const curStart = viewWindow?.startM ?? 0;
+      const curEnd = viewWindow?.endM ?? lengthM;
+      const span = Math.max(curEnd - curStart, 80);
+      const nextSpan = Math.min(
+        lengthM,
+        Math.max(lengthM * 0.06, span * factor),
+      );
+      let start = playheadM - nextSpan / 2;
+      let end = playheadM + nextSpan / 2;
+      if (start < 0) {
+        end -= start;
+        start = 0;
+      }
+      if (end > lengthM) {
+        start -= end - lengthM;
+        end = lengthM;
+      }
+      start = Math.max(0, start);
+      if (nextSpan >= lengthM * 0.92) {
+        onViewWindow(null);
+        return;
+      }
+      onViewWindow({ startM: start, endM: end });
+    };
+    svg.addEventListener("wheel", onWheel, { passive: false });
+    return () => svg.removeEventListener("wheel", onWheel);
+  }, [onViewWindow, viewWindow, playheadM, lengthM]);
+
   const plots = useMemo(() => {
     return channels.map((ch, idx) => {
       const sample = getSample(ch.id, lapId);
@@ -174,20 +215,28 @@ export function TelemetryStage({
   const showDelta = Boolean(speedDelta);
   const n = Math.max(plots.length + (showDelta ? 1 : 0), 1);
   const axisH = 28;
-  // Keep readable row height; overflow scrolls instead of crushing every channel.
-  // Room for full channel names + OF1/OVL · unit under the label.
-  const minRow = n >= 10 ? 52 : n >= 6 ? 60 : 68;
+  // Readable rows; expanded channel gets a hero band so you can scrub detail.
+  const baseMin = n >= 12 ? 52 : n >= 8 ? 58 : 68;
   const fitted =
-    shellH > 0 ? Math.floor((shellH - axisH - 4) / n) : minRow;
-  const rowH = Math.max(minRow, Math.min(fitted, 88));
+    shellH > 0 ? Math.floor((shellH - axisH - 4) / n) : baseMin;
+  const normalRow = Math.max(baseMin, Math.min(fitted, 100));
+  const expandRow = Math.max(240, Math.round(normalRow * 2.85));
+  const rowHeights = plots.map(({ ch }) =>
+    expandedId === ch.id ? expandRow : normalRow,
+  );
+  const deltaRowH = showDelta ? (expandedId === "__delta" ? expandRow : normalRow) : 0;
+  const rowsH =
+    rowHeights.reduce((a, b) => a + b, 0) + deltaRowH;
   const W = 960;
-  const H = axisH + rowH * n + 4;
-  const padL = compareLapId ? 118 : 108;
-  const padR = compareLapId ? 92 : 78;
+  const H = axisH + rowsH + 4;
+  const padL = compareLapId ? 124 : 108;
+  const padR = compareLapId ? 96 : 78;
   const plotW = W - padL - padR;
   const plotTop = axisH;
-  // Only stretch-to-fill when everything fits with roomy rows; else scroll.
-  const fillsShell = shellH > 0 && H <= shellH + 1 && rowH >= minRow;
+  const fillsShell = false; // prefer scroll so 12+ channels stay readable
+
+  const rowTop = (idx: number) =>
+    plotTop + rowHeights.slice(0, idx).reduce((a, b) => a + b, 0);
 
   const xOf = (m: number) =>
     padL + ((m - domainStart) / domainSpan) * plotW;
@@ -337,14 +386,18 @@ export function TelemetryStage({
           </p>
           <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-[var(--mute)]">
             {channels.length} channels · distance
-            {compareLapId ? " · racer vs racer" : ""}
+            {compareLapId ? " · dual draw" : ""}
             {viewWindow
-              ? ` · stretch ${Math.round(domainStart)}-${Math.round(domainEnd)} m`
+              ? ` · window ${Math.round(domainStart)}-${Math.round(domainEnd)} m`
               : ""}
             {" · "}
             <span className="text-[var(--mute)]">OF1</span>
             {" / "}
             <span className="text-[var(--trace-amber)]">OVL</span>
+            {" · "}
+            <span className="text-[var(--mist)]">
+              click name to enlarge · Ctrl+wheel zoom
+            </span>
           </p>
           {focusLabel && (
             <span className="inline-flex flex-wrap items-center gap-2 font-mono text-[0.62rem] text-[var(--mist)]">
@@ -640,16 +693,25 @@ export function TelemetryStage({
           ))}
 
           {plots.map(({ ch, sample, compare, live }, idx) => {
-            const y0 = plotTop + idx * rowH;
+            const rowH = rowHeights[idx] ?? normalRow;
+            const y0 = rowTop(idx);
             const y1 = y0 + rowH;
             if (!sample) return null;
             const baseStroke = strokeFor(ch);
             const stroke =
               ch.id === "speed" && focusAccent ? focusAccent : baseStroke;
-            const compareStroke = referenceAccent ?? "var(--mute)";
-            const focused = focusChannelId === ch.id;
-            const dimmed = Boolean(focusChannelId) && !focused;
+            const compareStroke =
+              referenceAccent &&
+              referenceAccent.toLowerCase() !== stroke.toLowerCase()
+                ? referenceAccent
+                : "#F4B942";
+            const focused = focusChannelId === ch.id || expandedId === ch.id;
+            const dimmed =
+              Boolean(focusChannelId || expandedId) &&
+              focusChannelId !== ch.id &&
+              expandedId !== ch.id;
             const dash = ch.id === "throttle" || ch.id === "drs" ? "5 4" : undefined;
+            const isExpanded = expandedId === ch.id;
             const liveRef =
               compare != null ? interpolateAt(compare.series, playheadM) : null;
             const fillBundle =
@@ -711,11 +773,17 @@ export function TelemetryStage({
                   x={10}
                   y={y0 + rowH / 2 - (compare ? 2 : 0)}
                   fill={focused ? "var(--chalk)" : "var(--mist)"}
-                  fontSize="10"
+                  fontSize={isExpanded ? 12 : 10}
                   fontFamily="var(--font-mono)"
                   fontWeight={focused ? 700 : 600}
+                  className="cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpandedId((cur) => (cur === ch.id ? null : ch.id));
+                  }}
                 >
                   {ch.displayName ?? ch.name}
+                  {isExpanded ? " · shrink" : " · enlarge"}
                 </text>
                 <text
                   x={10}
@@ -729,6 +797,7 @@ export function TelemetryStage({
                 >
                   {sourceBadge(ch)}
                   {ch.unit ? ` · ${ch.unit}` : ""}
+                  {compare ? " · dual" : ""}
                 </text>
                 {fillBundle &&
                   fillBundle.gain.map((p, gi) => (
@@ -753,12 +822,10 @@ export function TelemetryStage({
                     d={pathFor(clipSeries(compare.series), y0, y1, sharedRange)}
                     fill="none"
                     stroke={compareStroke}
-                    strokeWidth="2.4"
-                    strokeDasharray="6 3.5"
-                    opacity="0.95"
-                    filter={
-                      ch.id === "speed" ? `url(#${uid}-glow)` : undefined
-                    }
+                    strokeWidth={isExpanded ? 3.2 : 2.6}
+                    strokeDasharray="7 4"
+                    opacity="0.98"
+                    filter={`url(#${uid}-glow)`}
                   />
                 )}
                 <path
@@ -766,7 +833,9 @@ export function TelemetryStage({
                   d={pathFor(clipSeries(sample.series), y0, y1, sharedRange)}
                   fill="none"
                   stroke={stroke}
-                  strokeWidth={focused || compare ? 2.8 : rowH >= 44 ? 2.4 : 2}
+                  strokeWidth={
+                    isExpanded ? 3.4 : focused || compare ? 2.8 : rowH >= 54 ? 2.5 : 2.2
+                  }
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeDasharray={drawn ? dash : undefined}
@@ -841,13 +910,21 @@ export function TelemetryStage({
 
           {speedDelta &&
             (() => {
-              const idx = plots.length;
-              const y0 = plotTop + idx * rowH;
+              const rowH = deltaRowH || normalRow;
+              const y0 = rowTop(plots.length);
               const y1 = y0 + rowH;
               const live = interpolateAt(speedDelta, playheadM);
               const areas = deltaAreaPaths(speedDelta, y0, y1);
               return (
-                <g key="delta-speed">
+                <g
+                  key="delta-speed"
+                  onClick={() =>
+                    setExpandedId((cur) =>
+                      cur === "__delta" ? null : "__delta",
+                    )
+                  }
+                  className="cursor-pointer"
+                >
                   <rect
                     x={0}
                     y={y0}
@@ -895,6 +972,7 @@ export function TelemetryStage({
                     fontWeight={700}
                   >
                     DeltaSpd
+                    {expandedId === "__delta" ? " · shrink" : " · enlarge"}
                   </text>
                   <text
                     x={padL - 6}
@@ -910,7 +988,7 @@ export function TelemetryStage({
                     d={pathFor(clipSeries(speedDelta), y0, y1, areas.range)}
                     fill="none"
                     stroke="var(--chalk)"
-                    strokeWidth="2.4"
+                    strokeWidth={expandedId === "__delta" ? 3.2 : 2.4}
                     strokeLinecap="round"
                     filter={`url(#${uid}-glow)`}
                   />

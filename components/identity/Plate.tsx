@@ -2,6 +2,7 @@
 
 import { DriverPortrait } from "@/components/identity/DriverPortrait";
 import { CarSilhouette } from "@/components/identity/CarSilhouette";
+import { CarStage } from "@/components/identity/CarStage";
 import {
   accentFor,
   compoundLetter,
@@ -10,7 +11,7 @@ import {
 } from "@/lib/identity";
 import type { Driver, Lap } from "@/lib/types";
 import { formatLapTime, formatSector, cn } from "@/lib/utils";
-import { getSessionPack } from "@/lib/session";
+import { getSessionPack, getTrackPackage } from "@/lib/session";
 
 export function Plate({
   driver,
@@ -32,6 +33,7 @@ export function Plate({
   const accent = accentFor(driver);
   const compound = compoundOf(lap);
   const pack = getSessionPack();
+  const trackPkg = getTrackPackage();
   const stints = (pack.stints ?? []).filter(
     (s) => driver.number == null || s.driverNumber === driver.number,
   );
@@ -58,7 +60,7 @@ export function Plate({
           title="Open racer detail"
           className="rounded-sm transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
         >
-          <DriverPortrait driver={driver} size={52} />
+          <DriverPortrait driver={driver} size={52} track={trackPkg} />
         </button>
         <button
           type="button"
@@ -89,6 +91,7 @@ export function Plate({
             number={driver.number}
             compoundLetter={compoundLetter(compound)}
             width={168}
+            track={trackPkg}
           />
         </button>
       </div>
@@ -112,7 +115,7 @@ export function Plate({
           title="Open full racer card"
           className="flex w-full items-start gap-3 rounded-sm text-left transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
         >
-          <DriverPortrait driver={driver} size={92} />
+          <DriverPortrait driver={driver} size={92} track={trackPkg} showCode />
           <div className="min-w-0 flex-1 pt-1">
             <p
               className="font-display text-4xl font-black leading-none tabular-nums"
@@ -147,18 +150,21 @@ export function Plate({
           onClick={onInspect}
           disabled={!onInspect}
           title="Open full racer card"
-          className="w-full rounded-md border border-[var(--hairline)] bg-[rgba(5,7,10,0.45)] px-2 py-3 transition hover:border-[var(--signal)]/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
+          className="w-full rounded-md transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
         >
-          <CarSilhouette
-            accent={accent.accent}
-            second={accent.second}
-            number={driver.number}
-            compoundLetter={compoundLetter(compound)}
-            width={248}
-          />
-          <p className="mt-1 text-center font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--trace-cyan)]">
-            Inspect car
-          </p>
+          <CarStage track={trackPkg} className="hover:border-[var(--signal)]/40">
+            <CarSilhouette
+              accent={accent.accent}
+              second={accent.second}
+              number={driver.number}
+              compoundLetter={compoundLetter(compound)}
+              width={248}
+              track={trackPkg}
+            />
+            <p className="mt-1 text-center font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--trace-cyan)]">
+              Inspect car · {trackPkg.chip}
+            </p>
+          </CarStage>
         </button>
 
         <div className="space-y-1 font-mono text-[0.62rem] text-[var(--mist)]">

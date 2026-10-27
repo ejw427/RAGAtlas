@@ -1,0 +1,884 @@
+{
+  "NOR": {
+    "nationality": "British",
+    "born": "1999-11-13",
+    "birthplace": "Bristol, England",
+    "debut": "2019 Australian GP",
+    "highlights": "McLaren race winner · 2025 World Drivers' Champion (public record)",
+    "summary": "British driver for McLaren. Known for late-braking aggression and strong quali pace.",
+    "helmet": "Papaya / black shell with British cue stripes; number 4 historically, now runs #1 as champion.",
+    "suit": "McLaren papaya race suit with black shoulders; team kit, not a custom one-off every weekend.",
+    "livery": "McLaren often runs specials (Gulf, Senna tribute, chrome). CiteTrace shows session accent — not a copied team wrap.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Lando_Norris"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/lando-norris.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "VER": {
+    "nationality": "Dutch",
+    "born": "1997-09-30",
+    "birthplace": "Hasselt, Belgium",
+    "debut": "2015 Australian GP",
+    "highlights": "Four-time World Champion (2021–2024) · Red Bull race winner",
+    "summary": "Competes under the Dutch flag for Red Bull Racing. Benchmark for race management and tyre life.",
+    "helmet": "Lion / Dutch orange-blue motifs rotate by season; dark shell with high-contrast stripes.",
+    "suit": "Navy Red Bull suit with yellow accents; standard works kit.",
+    "livery": "Red Bull runs seasonal specials (e.g. tribute wraps). Wall uses original session accent only.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Max_Verstappen"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/max-verstappen.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "Antonelli takes controlled COTA win to close in on Drivers’ title",
+        "source": "FIA",
+        "href": "https://www.fia.com/news/f1-antonelli-takes-controlled-cota-win-ahead-leclerc-and-verstappen-close-f1-drivers-title",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      }
+    ]
+  },
+  "BOR": {
+    "nationality": "Brazilian",
+    "born": "2004-10-14",
+    "birthplace": "São Paulo, Brazil",
+    "debut": "2025 (F1 grid)",
+    "highlights": "F2 champion pathway · Audi works seat",
+    "summary": "Brazilian rookie generation driver at Audi. Public profile still building at F1 level.",
+    "helmet": "Green / yellow Brazilian cue patterns on a dark shell — geometric stand-in on this wall.",
+    "suit": "Audi works suit (red / grey kit language).",
+    "livery": "New works entry — package and ducts matter more than paint in FP2.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Gabriel_Bortoleto"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "HAD": {
+    "nationality": "French",
+    "born": "2004-09-28",
+    "birthplace": "Paris, France",
+    "debut": "2025 (F1 grid)",
+    "highlights": "Red Bull pathway · French flag",
+    "summary": "French-Algerian driver competing under the French flag at Red Bull Racing.",
+    "helmet": "Blue / white French cue bands; junior-series motifs carried into F1.",
+    "suit": "Red Bull navy / yellow works suit.",
+    "livery": "Same team wrap language as VER — deltas are driver/lap, not paint.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Isack_Hadjar"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "GAS": {
+    "nationality": "French",
+    "born": "1996-02-07",
+    "birthplace": "Rouen, France",
+    "debut": "2017 Malaysian GP",
+    "highlights": "2020 Italian GP winner · Alpine race seat",
+    "summary": "French race winner at Alpine. Strong wet-weather and overtake reputation.",
+    "helmet": "Blue / pink Alpine-era accents; earlier AlphaTauri seasons used darker shells.",
+    "suit": "Alpine blue / pink kit.",
+    "livery": "Alpine BWT pink flashes are the public signature — wall keeps original accent marks.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Pierre_Gasly"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/pierre-gasly.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "PER": {
+    "nationality": "Mexican",
+    "born": "1990-01-26",
+    "birthplace": "Guadalajara, Mexico",
+    "debut": "2011 Australian GP",
+    "highlights": "Six GP wins · 2023 WDC runner-up · Cadillac seat",
+    "summary": "Mexican veteran at Cadillac. Known for race craft and tyre management.",
+    "helmet": "Green / red / white Mexican cue bands; \"Checo\" identity is public branding.",
+    "suit": "Cadillac gold / black kit language for 2026.",
+    "livery": "Cadillac new-entry wrap — treat as session accent on this wall, not a trademark asset.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Sergio_P%C3%A9rez"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/sergio-perez.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "ANT": {
+    "nationality": "Italian",
+    "born": "2006-08-25",
+    "birthplace": "Bologna, Italy",
+    "debut": "2025 (Mercedes)",
+    "highlights": "Mercedes junior · early F1 race wins on public record",
+    "summary": "Italian Mercedes driver. Youngest end of the grid with works backing.",
+    "helmet": "Teal / silver Mercedes cues with Italian tricolour flashes.",
+    "suit": "Mercedes teal race suit.",
+    "livery": "Mercedes black / teal specials appear some weekends — wall stays original marks.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Kimi_Antonelli"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "Antonelli takes controlled COTA win to close in on Drivers’ title",
+        "source": "FIA",
+        "href": "https://www.fia.com/news/f1-antonelli-takes-controlled-cota-win-ahead-leclerc-and-verstappen-close-f1-drivers-title",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      }
+    ]
+  },
+  "ALO": {
+    "nationality": "Spanish",
+    "born": "1981-07-29",
+    "birthplace": "Oviedo, Spain",
+    "debut": "2001 Australian GP",
+    "highlights": "2× WDC (2005–06) · Le Mans / WEC champion · Daytona winner",
+    "summary": "Spanish double World Champion at Aston Martin. Endurance résumé is part of the public craft story.",
+    "helmet": "Blue / yellow Spanish cue patterns; long-running personal shell language.",
+    "suit": "Aston Martin British Racing Green kit.",
+    "livery": "AMR green with lime flashes; specials for anniversaries. Wall uses session accent only.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Fernando_Alonso"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/fernando-alonso.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "LEC": {
+    "nationality": "Monégasque",
+    "born": "1997-10-16",
+    "birthplace": "Monte Carlo, Monaco",
+    "debut": "2018 Australian GP",
+    "highlights": "2022 WDC runner-up · multiple Ferrari wins · COTA FP2 Soft flyer in this pack",
+    "summary": "Monégasque Ferrari driver. This pack's Soft flyer (L10) is the CiteTrace money-shot cite.",
+    "helmet": "Red / white / black Ferrari-era shell with Monaco cue details; number 16 is identity.",
+    "suit": "Ferrari red race suit with cream accents in the current kit language.",
+    "livery": "Rosso corsa specials (anniversaries, chrome) — wall never copies the wrap; accent only.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Charles_Leclerc"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/charles-leclerc.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Free practice 2: Charles fastest, Lewis fourth at COTA",
+        "source": "Ferrari",
+        "href": "https://www.ferrari.com/en-EN/formula1/articles/united-states-grand-prix-2026-free-practice-2",
+        "date": "2026-10-24"
+      },
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      }
+    ]
+  },
+  "STR": {
+    "nationality": "Canadian",
+    "born": "1998-10-29",
+    "birthplace": "Montreal, Canada",
+    "debut": "2017 Australian GP",
+    "highlights": "Aston Martin race seat · multiple podiums",
+    "summary": "Canadian driver at Aston Martin. Long-run and race-day consistency is the public narrative.",
+    "helmet": "Green / maple cues; dark shell with Canadian flashes.",
+    "suit": "Aston Martin green kit shared with Alonso.",
+    "livery": "Same AMR wrap family as ALO — compare is driver delta, not paint.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Lance_Stroll"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/lance-stroll.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "ALB": {
+    "nationality": "Thai",
+    "born": "1996-03-23",
+    "birthplace": "London, England",
+    "debut": "2019 Australian GP",
+    "highlights": "Williams race seat · races under Thai flag",
+    "summary": "Thai-British driver for Williams. Strong wet and race-pace reputation in public coverage.",
+    "helmet": "Blue / white / red Thai cue bands on a dark shell.",
+    "suit": "Williams navy / blue kit.",
+    "livery": "Williams Gulf or anniversary specials appear some seasons — accent only here.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Alex_Albon"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/alexander-albon.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "HUL": {
+    "nationality": "German",
+    "born": "1987-08-19",
+    "birthplace": "Emmerich am Rhein, Germany",
+    "debut": "2010 Bahrain GP",
+    "highlights": "Le Mans winner · Audi F1 seat · longest F1 start streak narratives",
+    "summary": "German veteran at Audi. Endurance résumé (Le Mans) sits beside the F1 story.",
+    "helmet": "Fluorescent / German cue patterns; highly personal shell language year to year.",
+    "suit": "Audi red / grey works suit.",
+    "livery": "Audi entry livery is new to the grid — treat as accent on CiteTrace.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Nico_H%C3%BClkenberg"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/nico-hulkenberg.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "LAW": {
+    "nationality": "New Zealander",
+    "born": "2002-02-11",
+    "birthplace": "Hastings, New Zealand",
+    "debut": "2023 Dutch GP",
+    "highlights": "Racing Bulls seat · Red Bull pathway",
+    "summary": "New Zealand driver at Racing Bulls. House compare with LIN is a CiteTrace walk-in.",
+    "helmet": "Silver fern / black-white NZ cues on a dark shell.",
+    "suit": "Racing Bulls blue kit.",
+    "livery": "Sister-team language to Red Bull — deltas stay driver/lap on the wall.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Liam_Lawson"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/liam-lawson.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "OCO": {
+    "nationality": "French",
+    "born": "1996-09-17",
+    "birthplace": "Évreux, France",
+    "debut": "2016 Belgian GP",
+    "highlights": "2021 Hungarian GP winner · Haas seat",
+    "summary": "French race winner at Haas. Publicly known for race craft from midfield machinery.",
+    "helmet": "Blue / white French bands with personal graphics rotating by season.",
+    "suit": "Haas black / white / red kit.",
+    "livery": "Haas often runs money-sponsor heavy wraps — wall never copies them.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Esteban_Ocon"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/esteban-ocon.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "LIN": {
+    "nationality": "British / Swedish",
+    "born": "2007-12-08",
+    "birthplace": "London, England",
+    "debut": "2026 (Racing Bulls)",
+    "highlights": "Youngest end of the 2026 grid · Racing Bulls seat",
+    "summary": "British-Swedish junior on the 2026 Racing Bulls seat. Public bio still early-career.",
+    "helmet": "Blue / white junior motifs; geometric stand-in on CiteTrace until a stable public shell lands.",
+    "suit": "Racing Bulls blue kit shared with Lawson.",
+    "livery": "Same team wrap family as LAW — compare is the product, not the paint.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Arvid_Lindblad"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "COL": {
+    "nationality": "Argentine",
+    "born": "2003-05-27",
+    "birthplace": "Pilar, Argentina",
+    "debut": "2024 (Williams substitute) / Alpine seat",
+    "highlights": "Alpine race seat · Argentine flag carrier",
+    "summary": "Argentine driver at Alpine. Public breakout via mid-season opportunities.",
+    "helmet": "Light blue / white Argentine cue bands.",
+    "suit": "Alpine blue / pink kit.",
+    "livery": "Alpine BWT language — accent only on this wall.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Franco_Colapinto"
+      }
+    ],
+    "news": [
+      {
+        "title": "Colapinto among three retirements at United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "HAM": {
+    "nationality": "British",
+    "born": "1985-01-07",
+    "birthplace": "Stevenage, England",
+    "debut": "2007 Australian GP",
+    "highlights": "7× World Champion · Ferrari seat · knighthood (public)",
+    "summary": "British seven-time champion at Ferrari. Teammate compare vs LEC is the default CiteTrace walk-in.",
+    "helmet": "Yellow / purple / chrome themes across eras; British cue details; number 44 identity.",
+    "suit": "Ferrari red kit (post-Mercedes teal era).",
+    "livery": "Ferrari specials + historic Mercedes black eras are public lore — wall uses original accent marks only.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Lewis_Hamilton"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/lewis-hamilton.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Hamilton: Ferrari losing out on the straights after US GP Qualifying P5",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/hamilton-says-ferrari-are-losing-out-on-the-straights-after-taking-p5-in-us-gp-qualifying.3HHgLe8LEJj5Cb90uXqIYL",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "Free practice 2: Charles fastest, Lewis fourth at COTA",
+        "source": "Ferrari",
+        "href": "https://www.ferrari.com/en-EN/formula1/articles/united-states-grand-prix-2026-free-practice-2",
+        "date": "2026-10-24"
+      },
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "SAI": {
+    "nationality": "Spanish",
+    "born": "1994-09-01",
+    "birthplace": "Madrid, Spain",
+    "debut": "2015 Australian GP",
+    "highlights": "Multiple GP wins · Williams seat · ex-Ferrari",
+    "summary": "Spanish race winner at Williams after Ferrari. Strong race-day reputation in public coverage.",
+    "helmet": "Yellow / red Spanish cue patterns; long personal shell history.",
+    "suit": "Williams navy kit.",
+    "livery": "Williams specials; prior Ferrari seasons are public history, not assets on this site.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Carlos_Sainz_Jr."
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/carlos-sainz.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "RUS": {
+    "nationality": "British",
+    "born": "1998-02-15",
+    "birthplace": "King's Lynn, England",
+    "debut": "2019 Australian GP",
+    "highlights": "Mercedes race winner · British GP winner narratives",
+    "summary": "British Mercedes driver. Teammate swap stories with Antonelli are a CiteTrace house preset.",
+    "helmet": "Teal / black Mercedes cues with personal graphics.",
+    "suit": "Mercedes teal race suit.",
+    "livery": "Mercedes black / chrome specials some weekends — accent only here.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/George_Russell_(racing_driver)"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/george-russell.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "BOT": {
+    "nationality": "Finnish",
+    "born": "1989-08-28",
+    "birthplace": "Nastola, Finland",
+    "debut": "2013 Australian GP",
+    "highlights": "Multiple GP wins · Cadillac seat · ex-Mercedes / Alfa",
+    "summary": "Finnish veteran at Cadillac. Publicly known for quali pace and calm radio.",
+    "helmet": "White / blue Finnish cue bands; personal graphics rotate.",
+    "suit": "Cadillac gold / black kit language.",
+    "livery": "New Cadillac wrap — session accent on CiteTrace, not a trademark file.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Valtteri_Bottas"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/valtteri-bottas.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Bottas retirement triggers late VSC in United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "PIA": {
+    "nationality": "Australian",
+    "born": "2001-04-06",
+    "birthplace": "Melbourne, Australia",
+    "debut": "2023 Bahrain GP",
+    "highlights": "McLaren race winner · Australian flag",
+    "summary": "Australian McLaren driver. Soft vs Hard compound traps are a CiteTrace teaching compare.",
+    "helmet": "Green / gold Australian cue bands on a dark / papaya-adjacent shell language.",
+    "suit": "McLaren papaya suit shared with Norris.",
+    "livery": "McLaren specials (Gulf, chrome) — wall never redistributes the wrap art.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Oscar_Piastri"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/oscar-piastri.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "What the teams said — race day at the 2026 United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-united-states-2026.4FopoItrER6KX395f6ZENu",
+        "date": "2026-10-26"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  },
+  "BEA": {
+    "nationality": "British",
+    "born": "2005-05-08",
+    "birthplace": "Chelmsford, England",
+    "debut": "2024 Saudi Arabian GP (substitute)",
+    "highlights": "Haas race seat · Ferrari Driver Academy pathway",
+    "summary": "British Haas driver from the Ferrari junior pathway. House compare with OCO is on the wall.",
+    "helmet": "Red / white junior Ferrari-academy cues mixed with Haas black.",
+    "suit": "Haas black / white / red kit.",
+    "livery": "Haas sponsor-heavy wraps — original accent marks only on CiteTrace.",
+    "links": [
+      {
+        "label": "Wikipedia",
+        "href": "https://en.wikipedia.org/wiki/Oliver_Bearman"
+      },
+      {
+        "label": "F1 profile",
+        "href": "https://www.formula1.com/en/drivers/oliver-bearman.html"
+      }
+    ],
+    "news": [
+      {
+        "title": "Bearman retires in Haas home race at United States GP",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "Antonelli wins United States GP ahead of Leclerc and Verstappen",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/latest/article/antonelli-surges-to-dominant-victory-in-united-states-grand-prix-ahead-of-leclerc-and-verstappen.6kmBQv9FNTW7LzkDj8S34j",
+        "date": "2026-10-25"
+      },
+      {
+        "title": "2026 United States Grand Prix — race result",
+        "source": "Formula1.com",
+        "href": "https://www.formula1.com/en/results/2026/races/1297/united-states/race-result",
+        "date": "2026-10-25"
+      }
+    ]
+  }
+}

@@ -24,9 +24,10 @@ export const PORTFOLIO_URL = "https://www.welchsoftware.net/projects/citetrace";
 export const DEMO_ASK = "Why did brake temp spike in S3 on lap 10?";
 export const DEMO_NO_HIT = "Who is the championship leader?";
 export const DEMO_STEPS = [
-  "Land > Compare two cars (Ferrari house)",
+  "Land > Open the pit wall (Ferrari house)",
   "Open the sector that owns the gap",
   `Ask: ${DEMO_ASK}`,
   "Click the cite > playhead locks on the map and the traces",
+  "Ask again: teammate gap, weather, radio empty, OF1 vs OVL — then the no-hit probe",
 ] as const;
 export const EMAIL_BLURB = `I built CiteTrace - a pit wall for a race session. Circuit on stage, any car vs any car, evidence-bound asks that lock the playhead. ${LIVE_DEMO_URL}`;

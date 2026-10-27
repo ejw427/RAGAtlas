@@ -1,17 +1,19 @@
 "use client";
 
 import { useMemo } from "react";
+import { CarSilhouette } from "@/components/identity/CarSilhouette";
 import { DriverPortrait } from "@/components/identity/DriverPortrait";
 import { ElevationStrip } from "@/components/session/ElevationStrip";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import {
   accentFor,
+  compoundLetter,
   compoundOf,
   formatDeltaSec,
 } from "@/lib/identity";
 import { speedDeltaSeries } from "@/lib/compare-series";
-import { lapDistanceM } from "@/lib/session";
+import { getTrackPackage, lapDistanceM } from "@/lib/session";
 import type { Driver, Lap } from "@/lib/types";
 import { formatLapTime, interpolateAt, cn } from "@/lib/utils";
 
@@ -44,6 +46,7 @@ export function CompareDetailSheet({
 }) {
   const focusAccent = accentFor(focusDriver);
   const refAccent = accentFor(referenceDriver);
+  const trackPkg = getTrackPackage();
   const lengthM = lapDistanceM();
   const compoundsDiffer =
     compoundOf(focusLap) !== compoundOf(referenceLap);
@@ -100,7 +103,11 @@ export function CompareDetailSheet({
                 Focus
               </p>
               <div className="mt-1 flex items-center gap-2">
-                <DriverPortrait driver={focusDriver} size={44} />
+                <DriverPortrait
+                  driver={focusDriver}
+                  size={44}
+                  track={trackPkg}
+                />
                 <div className="min-w-0">
                   <p className="truncate font-display text-sm font-bold text-[var(--chalk)]">
                     {focusDriver.code}
@@ -113,6 +120,14 @@ export function CompareDetailSheet({
                   </p>
                 </div>
               </div>
+              <CarSilhouette
+                accent={focusAccent.accent}
+                second={focusAccent.second}
+                number={focusDriver.number}
+                compoundLetter={compoundLetter(compoundOf(focusLap))}
+                width={120}
+                track={trackPkg}
+              />
             </div>
             <div className="text-center">
               <p
@@ -128,6 +143,9 @@ export function CompareDetailSheet({
               <p className="font-mono text-[0.5rem] uppercase tracking-[0.12em] text-[var(--mute)]">
                 lap Delta
               </p>
+              <p className="mt-1 font-mono text-[0.45rem] uppercase tracking-[0.12em] text-[var(--signal)]">
+                {trackPkg.chip}
+              </p>
             </div>
             <div
               className="rounded-md border px-2.5 py-2"
@@ -137,7 +155,11 @@ export function CompareDetailSheet({
                 Reference
               </p>
               <div className="mt-1 flex items-center gap-2">
-                <DriverPortrait driver={referenceDriver} size={44} />
+                <DriverPortrait
+                  driver={referenceDriver}
+                  size={44}
+                  track={trackPkg}
+                />
                 <div className="min-w-0">
                   <p className="truncate font-display text-sm font-bold text-[var(--chalk)]">
                     {referenceDriver.code}
@@ -150,6 +172,14 @@ export function CompareDetailSheet({
                   </p>
                 </div>
               </div>
+              <CarSilhouette
+                accent={refAccent.accent}
+                second={refAccent.second}
+                number={referenceDriver.number}
+                compoundLetter={compoundLetter(compoundOf(referenceLap))}
+                width={120}
+                track={trackPkg}
+              />
             </div>
           </div>
 

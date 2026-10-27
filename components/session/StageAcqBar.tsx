@@ -20,12 +20,16 @@ export function StageAcqBar({
   onSetPlots,
   onSolo,
   totalChannels,
+  viewWindow = null,
+  onClearWindow,
 }: {
   plotChannelIds: string[];
   comparing: boolean;
   onSetPlots: (ids: string[]) => void;
   onSolo?: () => void;
   totalChannels: number;
+  viewWindow?: { startM: number; endM: number } | null;
+  onClearWindow?: () => void;
 }) {
   const allIds = defaultPlotIds();
 
@@ -42,11 +46,13 @@ export function StageAcqBar({
       </p>
       {PRESET_ORDER.map((name) => {
         const hot = activePreset === name;
+        const count = resolvePreset(name, allIds).length;
         return (
           <button
             key={name}
             type="button"
             onClick={() => onSetPlots(resolvePreset(name, allIds))}
+            title={`${count} channels`}
             className={cn(
               "min-h-7 rounded-sm border px-2 font-mono text-[0.58rem] uppercase tracking-[0.08em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
               hot
@@ -55,12 +61,24 @@ export function StageAcqBar({
             )}
           >
             {name}
+            <span className="ml-1 tabular-nums opacity-70">{count}</span>
           </button>
         );
       })}
       <span className="font-mono text-[0.58rem] tabular-nums text-[var(--mute)]">
         {plotChannelIds.length}/{totalChannels} plotted
       </span>
+      {viewWindow && onClearWindow && (
+        <button
+          type="button"
+          onClick={onClearWindow}
+          className="rounded-sm border border-[var(--signal)]/50 bg-[var(--signal-dim)] px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-[0.1em] text-[var(--signal)] transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+          title="Reset map + graphs to full lap"
+        >
+          Fit lap · {Math.round(viewWindow.startM)}–
+          {Math.round(viewWindow.endM)} m
+        </button>
+      )}
       {comparing && onSolo && (
         <button
           type="button"
@@ -73,7 +91,12 @@ export function StageAcqBar({
       )}
       {!comparing && (
         <span className="ml-auto font-mono text-[0.5rem] uppercase tracking-[0.12em] text-[var(--signal)]">
-          Solo focus · one flyer
+          Solo · pick Reference to overlay
+        </span>
+      )}
+      {comparing && !onSolo && (
+        <span className="ml-auto font-mono text-[0.5rem] uppercase tracking-[0.12em] text-[var(--trace-cyan)]">
+          Dual draw · Focus solid · Ref dashed
         </span>
       )}
     </div>

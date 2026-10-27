@@ -10,13 +10,9 @@ type MediaEntry = {
 
 const byCode = media as Record<string, MediaEntry>;
 
-/** Codes with missing/placeholder OpenF1 assets - use helmet mark instead. */
-const BROKEN_CODES = new Set(["lin"]);
-
 export function headshotFor(driver: Driver | undefined): string | null {
   if (!driver?.code) return null;
   const code = driver.code.toLowerCase();
-  if (BROKEN_CODES.has(code)) return null;
   const entry = byCode[code];
   return entry?.file ?? null;
 }

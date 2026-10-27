@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { CarSilhouette } from "@/components/identity/CarSilhouette";
+import { CarStage } from "@/components/identity/CarStage";
 import {
   DEMO_ASK,
   LIVE_URL,
@@ -10,25 +12,26 @@ import {
   TAGLINE,
   WEDGE,
 } from "@/lib/brand";
+import { TEAM_ACCENTS } from "@/lib/identity";
 import { corpusSummary } from "@/lib/rag";
 
 const STEPS = [
   {
     n: "01",
     title: "Ask the lap",
-    body: "Query the COTA session pack - notes, channel docs, and distance windows on the US GP circuit - not the open web.",
-    mark: "T1 · Esses · Stadium",
+    body: "Query the COTA pack — thermal, pace, weather, pits, race control, teammate gap, OF1 vs OVL — not the open web.",
+    mark: "Thermal · Pace · Ops · Compare",
   },
   {
     n: "02",
     title: "Get a cite",
-    body: "Every claim binds to evidence chips. No match > fail closed. Deterministic QaMap, not an LLM inventing physics.",
+    body: "Every claim binds to evidence chips. Retrieve first, then Workers AI phrases only from cites — no match > fail closed.",
     mark: "S3 brake · Soft flyer",
   },
   {
     n: "03",
     title: "Lock the trace",
-    body: "Click a cite > playhead and evidence band lock on the waveforms. Walk a race team through what you can see.",
+    body: "Click a cite > playhead and evidence band lock on the waveforms. Walk a hiring manager through what you can prove.",
     mark: "Playhead + band",
   },
 ] as const;
@@ -36,28 +39,28 @@ const STEPS = [
 const CHIPS = [
   {
     href: "/session?driver=LEC&lap=10&citeId=cite_brake_spike",
-    label: "Cite lock · stadium brake",
+    label: "Thermal · stadium brake",
     hint: "942°C peak · S3 heavy",
   },
   {
-    href: "/session?driver=LEC&lap=10&citeId=cite_front_brake&q=Why%20is%20the%20front%20brake%20cooler%20than%20the%20rear%20on%20lap%2010%3F",
-    label: "Front vs rear · COTA ducts",
-    hint: "Duct story · OVL",
+    href: "/session?house=ferrari&q=How%20does%20Leclerc%20compare%20to%20Hamilton%3F&citeId=cite_teammate",
+    label: "Compare · LEC vs HAM",
+    hint: "−615 ms Soft flyers",
   },
   {
-    href: "/session?driver=LEC&lap=10&citeId=cite_pressure&q=Was%20the%20S3%20stop%20a%20late%20stab%20or%20a%20trail%3F",
-    label: "Trail into stadium",
-    hint: "Brake pressure shape",
+    href: "/session?driver=LEC&lap=10&citeId=cite_weather&q=Did%20the%20track%20cool%20during%20FP2%3F",
+    label: "Ops · track cools",
+    hint: "OpenF1 weather −3.3°C",
   },
   {
-    href: "/session?driver=LEC&lap=10&citeId=cite_tyre&q=How%20hot%20was%20the%20Soft%20tyre%20through%20S2%3F",
-    label: "Soft heat · esses / S2",
-    hint: "OVL surface temp",
+    href: "/session?driver=LEC&lap=10&citeId=cite_radio&q=Any%20team%20radio%20for%20Leclerc%20in%20FP2%3F",
+    label: "Ops · radio empty",
+    hint: "0/12 clips for LEC",
   },
   {
-    href: "/session?driver=LEC&lap=10&citeId=cite_trap_st&q=What%20was%20the%20Soft%20speed%20trap%20vs%20Hard%3F",
-    label: "Speed trap +5 · Austin",
-    hint: "OpenF1 ST",
+    href: "/session?driver=LEC&lap=10&citeId=cite_of1_ovl&q=What%20is%20OpenF1%20vs%20OVL%20in%20this%20pack%3F",
+    label: "Method · OF1 vs OVL",
+    hint: "Labeled sources",
   },
   {
     href: "/session?driver=LEC&lap=10&q=Who%20is%20the%20championship%20leader%3F",
@@ -132,7 +135,7 @@ export function HowItWorks() {
           ))}
         </ol>
 
-        <div className="mt-10 flex flex-wrap items-end justify-between gap-4 border-t border-[var(--hairline)] pt-8">
+        <div className="mt-10 grid gap-6 border-t border-[var(--hairline)] pt-8 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
             <p className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-[var(--mute)]">
               Live corpus · {corpus.yearHint} {corpus.sessionLabel} · Austin
@@ -142,6 +145,19 @@ export function HowItWorks() {
               {corpus.openf1Channels} OF1 / {corpus.overlayChannels} OVL) ·{" "}
               {corpus.cites} cites · {rateLabel} pack rates
             </p>
+            <div className="mt-4 max-w-sm">
+              <CarStage track="cota">
+                <CarSilhouette
+                  accent={TEAM_ACCENTS.Ferrari.accent}
+                  second={TEAM_ACCENTS.Ferrari.second}
+                  number={16}
+                  compoundLetter="S"
+                  width={260}
+                  track="cota"
+                  showPackageChip
+                />
+              </CarStage>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button asChild size="sm">

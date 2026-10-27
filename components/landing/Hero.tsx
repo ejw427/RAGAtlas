@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useId, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { CarSilhouette } from "@/components/identity/CarSilhouette";
+import { CarStage } from "@/components/identity/CarStage";
 import {
   CANDIDATE_LINE,
   PRODUCT,
@@ -11,6 +13,7 @@ import {
   TAGLINE,
   WEDGE,
 } from "@/lib/brand";
+import { TEAM_ACCENTS } from "@/lib/identity";
 import { prefersReducedMotion } from "@/lib/motion";
 import track from "@/data/mock/cota-track.json";
 
@@ -202,7 +205,7 @@ export function Hero() {
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
           <Button asChild>
-            <Link href="/session?demo=1&house=ferrari">Compare two cars</Link>
+            <Link href="/session?demo=1&house=ferrari">Open the pit wall</Link>
           </Button>
           <Button asChild variant="ghost">
             <Link href="/session?demo=1&house=ferrari">Ask the lap</Link>
@@ -210,6 +213,28 @@ export function Hero() {
           <Button asChild variant="ghost">
             <Link href="#how-it-works">How it works</Link>
           </Button>
+        </div>
+        <div className="mt-6 max-w-md">
+          <CarStage track="cota" compact showNote={false}>
+            <div className="flex w-full items-end justify-between gap-2 px-1">
+              <CarSilhouette
+                accent={TEAM_ACCENTS.Ferrari.accent}
+                second={TEAM_ACCENTS.Ferrari.second}
+                number={16}
+                compoundLetter="S"
+                width={200}
+                track="cota"
+              />
+              <CarSilhouette
+                accent={TEAM_ACCENTS.Ferrari.accent}
+                second={TEAM_ACCENTS.Ferrari.second}
+                number={44}
+                compoundLetter="S"
+                width={160}
+                track="cota"
+              />
+            </div>
+          </CarStage>
         </div>
         <p className="mt-4 text-[0.85rem] text-[var(--mist)]">{CANDIDATE_LINE}</p>
         <p className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.14em] text-[var(--mute)]">

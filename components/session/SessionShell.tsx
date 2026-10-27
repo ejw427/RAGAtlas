@@ -139,10 +139,10 @@ export function SessionShell() {
   const [plotChannelIds, setPlotChannelIds] = useState(() => {
     if (boot.initialChannels) {
       const ids = boot.initialChannels.split(",").filter(Boolean);
-      // Legacy house/demo URLs pinned Lap to speed,throttle,brake - upgrade.
+      // Legacy house/demo URLs pinned a thin Lap pack — lift to full Race stage.
       if (
         ids.length > 0 &&
-        ids.length <= 3 &&
+        ids.length < RACE_PLOT_IDS.length &&
         ids.includes("speed") &&
         ids.includes("throttle") &&
         ids.includes("brake")
@@ -224,7 +224,14 @@ export function SessionShell() {
   const compareLapId =
     referenceLap && referenceLap.id !== lapId ? referenceLap.id : null;
   const focusAccent = accentFor(driver);
-  const referenceAccent = accentFor(referenceDriver ?? undefined);
+  const referenceAccentRaw = accentFor(referenceDriver ?? undefined);
+  // Same-house teammates share a brand accent — force a chalk/amber Ref stroke
+  // so dual-draw on stage + map never collapses into one colour.
+  const referenceAccent =
+    compareLapId &&
+    referenceAccentRaw.accent.toLowerCase() === focusAccent.accent.toLowerCase()
+      ? { ...referenceAccentRaw, accent: "#F4B942", second: "#E8EEF5" }
+      : referenceAccentRaw;
   const deltas = sectorDeltas(lap, referenceLap);
   const gain = biggestGainSector(deltas);
   const loss = biggestLossSector(deltas);
@@ -458,6 +465,8 @@ export function SessionShell() {
     setEvidence(null);
     setSelectedCite(null);
     setActiveHouse(null);
+    setActiveSector("Lap");
+    // Keep playhead; map markers remount via pulseKey so accent/number/code update.
     pushUrl({
       driverId: nextId,
       lap: nextLap,
@@ -465,6 +474,7 @@ export function SessionShell() {
       referenceLap: referenceLapNumber,
       channels: plotChannelIds,
       house: null,
+      sector: "Lap",
     });
   };
 
@@ -484,6 +494,8 @@ export function SessionShell() {
 
   const selectReferenceDriver = (nextId: string) => {
     const nextLap = defaultLapNumber(nextId);
+    const nextPlots = plotsForCompare(plotChannelIds);
+    setPlotChannelIds(nextPlots);
     setReferenceDriverId(nextId);
     setReferenceLapNumber(nextLap);
     setActiveHouse(null);
@@ -492,7 +504,7 @@ export function SessionShell() {
       lap: lapNumber,
       referenceDriverId: nextId,
       referenceLap: nextLap,
-      channels: plotChannelIds,
+      channels: nextPlots,
       house: null,
     });
   };
@@ -508,11 +520,17 @@ export function SessionShell() {
     });
   };
 
+  /** Dual-car needs enough channels to argue the lap — never leave a starved trio. */
+  const plotsForCompare = (current: string[]) =>
+    current.length < RACE_PLOT_IDS.length ? [...RACE_PLOT_IDS] : current;
+
   const fillTeammate = () => {
     const mate = teammateId(driverId);
     if (!mate) return;
     const flyer = bestFlyerFor(mate);
     if (!flyer) return;
+    const nextPlots = plotsForCompare(plotChannelIds);
+    setPlotChannelIds(nextPlots);
     setReferenceDriverId(mate);
     setReferenceLapNumber(flyer.number);
     pushUrl({
@@ -520,13 +538,15 @@ export function SessionShell() {
       lap: lapNumber,
       referenceDriverId: mate,
       referenceLap: flyer.number,
-      channels: plotChannelIds,
+      channels: nextPlots,
     });
   };
 
   const fillFieldBest = () => {
     const best = fieldBestLap(lapId);
     if (!best?.driverId) return;
+    const nextPlots = plotsForCompare(plotChannelIds);
+    setPlotChannelIds(nextPlots);
     setReferenceDriverId(best.driverId);
     setReferenceLapNumber(best.number);
     pushUrl({
@@ -534,7 +554,7 @@ export function SessionShell() {
       lap: lapNumber,
       referenceDriverId: best.driverId,
       referenceLap: best.number,
-      channels: plotChannelIds,
+      channels: nextPlots,
     });
   };
 
@@ -594,6 +614,7 @@ export function SessionShell() {
     setReferenceDriverId(resolved.referenceDriverId);
     setReferenceLapNumber(resolved.referenceLap);
     setPlotChannelIds(racePlots);
+    setMapWindow(null);
     setEvidence(null);
     setSelectedCite(null);
     setActiveSector("Lap");
@@ -832,7 +853,7 @@ export function SessionShell() {
             compareLapId ? "compare-stage-glow" : ""
           }`}
         >
-          <div className="h-[min(58vw,440px)] shrink-0 overflow-hidden md:h-[min(46vh,460px)] md:min-h-[320px]">
+          <div className="h-[min(48vw,360px)] shrink-0 overflow-hidden md:h-[min(34vh,360px)] md:min-h-[260px]">
             <TrackSchematic
               stage
               paintMode={compareLapId ? "both" : "sector"}
@@ -847,6 +868,8 @@ export function SessionShell() {
               }
               focusNumber={driver.number}
               referenceNumber={referenceDriver?.number}
+              focusCode={driver.code}
+              referenceCode={referenceDriver?.code}
               comparing={Boolean(compareLapId)}
               traps={traps}
               sectorDeltaMs={deltas?.sectorsMs ?? null}
@@ -857,17 +880,29 @@ export function SessionShell() {
               speedDelta={speedDelta}
               onOpenCompare={compareLapId ? openCompare : undefined}
               onViewWindow={setMapWindow}
+              viewWindow={mapWindow}
               onExpand={() => setMapOpen(true)}
+              onInspectFocus={() => setRacerSheet("Focus")}
+              onInspectReference={
+                referenceDriver && referenceLap
+                  ? () => setRacerSheet("Reference")
+                  : undefined
+              }
               lapId={lapId}
             />
           </div>
-          <div className="flex min-h-[380px] flex-1 flex-col gap-1.5 md:min-h-[320px]">
+          <div className="flex min-h-[720px] flex-1 flex-col gap-1.5 md:min-h-[620px]">
             <StageAcqBar
               plotChannelIds={plotChannelIds}
               comparing={Boolean(compareLapId)}
               onSetPlots={setPlots}
               onSolo={compareLapId ? clearReference : undefined}
               totalChannels={defaultPlotIds().length}
+              viewWindow={mapWindow}
+              onClearWindow={() => {
+                setMapWindow(null);
+                selectSector("Lap");
+              }}
             />
             <TelemetryStage
               lapId={lapId}
@@ -890,6 +925,7 @@ export function SessionShell() {
               }
               onOpenCompare={compareLapId ? openCompare : undefined}
               viewWindow={mapWindow}
+              onViewWindow={setMapWindow}
               sectorDeltaMs={deltas?.sectorsMs ?? null}
             />
           </div>
@@ -978,6 +1014,13 @@ export function SessionShell() {
         speedDelta={speedDelta}
         onOpenCompare={compareLapId ? openCompare : undefined}
         onViewWindow={setMapWindow}
+        viewWindow={mapWindow}
+        onInspectFocus={() => setRacerSheet("Focus")}
+        onInspectReference={
+          referenceDriver && referenceLap
+            ? () => setRacerSheet("Reference")
+            : undefined
+        }
         lapId={lapId}
       />
 

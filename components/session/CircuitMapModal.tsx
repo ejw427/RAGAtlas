@@ -45,6 +45,9 @@ export function CircuitMapModal({
   speedDelta,
   onOpenCompare,
   onViewWindow,
+  viewWindow = null,
+  onInspectFocus,
+  onInspectReference,
   lapId,
 }: {
   open: boolean;
@@ -68,6 +71,9 @@ export function CircuitMapModal({
   speedDelta?: { d: number[]; v: number[] } | null;
   onOpenCompare?: () => void;
   onViewWindow?: (window: { startM: number; endM: number } | null) => void;
+  viewWindow?: { startM: number; endM: number } | null;
+  onInspectFocus?: () => void;
+  onInspectReference?: () => void;
   lapId?: string;
 }) {
   const pack = getSessionPack();
@@ -191,6 +197,8 @@ export function CircuitMapModal({
               referenceAccent={referenceAccent}
               focusNumber={focusNumber}
               referenceNumber={referenceNumber}
+              focusCode={focusCode}
+              referenceCode={referenceCode}
               comparing={comparing}
               traps={traps}
               sectorDeltaMs={sectorDeltaMs}
@@ -199,6 +207,9 @@ export function CircuitMapModal({
               speedDelta={speedDelta}
               onOpenCompare={onOpenCompare}
               onViewWindow={onViewWindow}
+              viewWindow={viewWindow}
+              onInspectFocus={onInspectFocus}
+              onInspectReference={onInspectReference}
               lapId={lapId}
             />
           </div>
