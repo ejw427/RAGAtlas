@@ -29,9 +29,9 @@ export function ProvenanceStrip() {
         <span className="font-mono text-[0.55rem] text-[var(--mist)]">
           {fetched ? `fetched ${fetched}` : "pack"} ·{" "}
           {rates
-            ? `${rates.high ?? "—"}/${rates.mid ?? "—"}/${rates.low ?? "—"} Hz`
+            ? `${rates.high ?? "-"}/${rates.mid ?? "-"}/${rates.low ?? "-"} Hz`
             : "rates n/a"}{" "}
-          · {open ? "−" : "+"}
+          · {open ? "-" : "+"}
         </span>
       </button>
       <div
@@ -59,7 +59,7 @@ export function ProvenanceStrip() {
           </p>
         )}
         <p className="text-[var(--mute)]">
-          Pack rates are demo density — not ATLAS SECU sample rates.{" "}
+          Pack rates are demo density - not ATLAS SECU sample rates.{" "}
           <Link href="/about" className="text-[var(--trace-cyan)]">
             Method
           </Link>

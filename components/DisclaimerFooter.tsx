@@ -12,7 +12,7 @@ export function DisclaimerFooter({ compact = false }: { compact?: boolean }) {
     >
       <div className="mx-auto flex max-w-[1120px] flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <p>
-          <span className="text-[var(--chalk)]">{STUDIO}</span> · {PRODUCT} —
+          <span className="text-[var(--chalk)]">{STUDIO}</span> · {PRODUCT} -
           independent portfolio prototype. Not affiliated with Formula 1 teams,
           commercial telemetry vendors, Formula 1, or the FIA. 2026 COTA OpenF1
           subset + synthetic ATLAS-style overlays · No SECU / team feeds ·

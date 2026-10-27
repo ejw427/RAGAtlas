@@ -1,7 +1,7 @@
 import { getSample } from "@/lib/session";
 import { interpolateAt } from "@/lib/utils";
 
-/** Resample Focus − Reference speed along the lap (distance domain). */
+/** Resample Focus - Reference speed along the lap (distance domain). */
 export function speedDeltaSeries(
   focusLapId: string,
   referenceLapId: string,

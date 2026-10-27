@@ -14,11 +14,11 @@ import { interpolateAt, cn } from "@/lib/utils";
 const LANDMARKS = [
   { id: "sf", label: "S/F", m: 0, hint: "Start / finish" },
   { id: "t1", label: "T1", m: 420, hint: "Uphill crest" },
-  { id: "esses", label: "Esses", m: 980, hint: "T3–T6 rhythm" },
+  { id: "esses", label: "Esses", m: 980, hint: "T3-T6 rhythm" },
   { id: "s1", label: "S1", m: 1483, hint: "Sector split" },
   { id: "t11", label: "T11", m: 2600, hint: "Hairpin" },
   { id: "s2", label: "S2", m: 3672, hint: "Into stadium" },
-  { id: "stadium", label: "Stadium", m: 4100, hint: "T12–T15" },
+  { id: "stadium", label: "Stadium", m: 4100, hint: "T12-T15" },
   { id: "t19", label: "T19", m: 5100, hint: "Track limits" },
 ] as const;
 
@@ -188,9 +188,12 @@ export function TrackSchematic({
   gainSectorIndex = null,
   lossSectorIndex = null,
   stage = false,
+  expanded = false,
+  paintMode = "both",
   speedDelta = null,
   onOpenCompare,
   onViewWindow,
+  onExpand,
   lapId,
 }: {
   activeSector: string | null;
@@ -208,13 +211,24 @@ export function TrackSchematic({
   gainSectorIndex?: number | null;
   lossSectorIndex?: number | null;
   stage?: boolean;
+  /** Full-bleed modal map. */
+  expanded?: boolean;
+  /** Compare paint stack: green/red delta, sector colors, or clean road. */
+  paintMode?: "both" | "delta" | "sector" | "clean";
   speedDelta?: { d: number[]; v: number[] } | null;
   onOpenCompare?: () => void;
-  /** Fired when map zoom window changes — stretch traces to match. */
+  /** Fired when map zoom window changes - stretch traces to match. */
   onViewWindow?: (window: DistWindow | null) => void;
-  /** Focus lap — used for area speed / channel readout. */
+  onExpand?: () => void;
+  /** Focus lap - used for area speed / channel readout. */
   lapId?: string;
 }) {
+  const showDeltaPaint =
+    comparing &&
+    (paintMode === "both" || paintMode === "delta") &&
+    Boolean(speedDelta);
+  const showSectorPaint =
+    paintMode === "both" || paintMode === "sector";
   const pack = getSessionPack();
   const { x, y, d } = pack.trackXY.series;
   const svgRef = useRef<SVGSVGElement>(null);
@@ -336,7 +350,7 @@ export function TrackSchematic({
   const tower = useMemo(() => pointAt(d, x, y, 180), [d, x, y]);
 
   const deltaRibbon = useMemo(() => {
-    if (!comparing || !speedDelta || speedDelta.d.length < 2) return [];
+    if (!showDeltaPaint || !speedDelta || speedDelta.d.length < 2) return [];
     const segs: { path: string; gain: boolean }[] = [];
     const step = Math.max(1, Math.floor(speedDelta.d.length / 90));
     for (let i = 0; i < speedDelta.d.length - step; i += step) {
@@ -357,7 +371,7 @@ export function TrackSchematic({
       if (pts.length >= 2) segs.push({ path: pts.join(" "), gain: vAvg >= 0 });
     }
     return segs;
-  }, [comparing, speedDelta, d, x, y]);
+  }, [showDeltaPaint, speedDelta, d, x, y]);
 
   const clientToSvg = (clientX: number, clientY: number) => {
     const svg = svgRef.current;
@@ -390,7 +404,7 @@ export function TrackSchematic({
   };
 
   const commitView = (next: ViewBox, opts?: { scrubMid?: boolean }) => {
-    // Zoomed out near full frame → reset
+    // Zoomed out near full frame > reset
     if (next.w >= fullView.w * 0.92 && next.h >= fullView.h * 0.92) {
       setManualView(null);
       setPanMode(false);
@@ -569,7 +583,7 @@ export function TrackSchematic({
   const sectorColor = (index: number, active: boolean) => {
     if (comparing && sectorDeltaMs) {
       const delta = sectorDeltaMs[index];
-      // Always paint gain/loss — Lap view and sector focus both read green/red.
+      // Always paint gain/loss - Lap view and sector focus both read green/red.
       if (delta < -5) return "var(--signal)";
       if (delta > 5) return "var(--fault)";
       if (active || activeSector === "Lap") return "var(--trace-cyan)";
@@ -591,6 +605,7 @@ export function TrackSchematic({
       className={cn(
         "circuit-stage relative flex flex-col overflow-hidden rounded-md border border-[var(--hairline-strong)]",
         stage ? "h-full min-h-[280px]" : "p-2",
+        expanded && "min-h-0 border-0",
       )}
     >
       <div className="circuit-stage-bg pointer-events-none absolute inset-0" />
@@ -613,7 +628,7 @@ export function TrackSchematic({
             COTA · Austin
             {zoomed ? " · stretched" : ""}
             {activeWindow
-              ? ` · ${Math.round(activeWindow.startM)}–${Math.round(activeWindow.endM)} m`
+              ? ` · ${Math.round(activeWindow.startM)}-${Math.round(activeWindow.endM)} m`
               : ""}
           </p>
           <p className="truncate font-mono text-[0.5rem] text-[var(--mute)]">
@@ -674,6 +689,15 @@ export function TrackSchematic({
               Compare
             </button>
           )}
+          {onExpand && !expanded && (
+            <button
+              type="button"
+              onClick={onExpand}
+              className="rounded-sm border border-[var(--trace-cyan)]/50 bg-[rgba(58,215,255,0.12)] px-2 py-1 font-mono text-[0.55rem] uppercase tracking-[0.08em] text-[var(--trace-cyan)] hover:bg-[rgba(58,215,255,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+            >
+              Expand map
+            </button>
+          )}
         </div>
       </div>
 
@@ -693,6 +717,10 @@ export function TrackSchematic({
           aria-label={`Circuit of the Americas. ${zoomed ? "Zoomed view. " : ""}Sector ${activeSector ?? "Lap"}. ${Math.round(playheadM)} metres.`}
           onDoubleClick={(e) => {
             e.preventDefault();
+            if (onExpand && !expanded) {
+              onExpand();
+              return;
+            }
             if (zoomed) fitLap();
             else zoomAtClient(e.clientX, e.clientY, 0.45);
           }}
@@ -820,19 +848,20 @@ export function TrackSchematic({
             strokeLinejoin="round"
           />
 
-          {deltaRibbon.map((seg, i) => (
-            <path
-              key={`Δ-${i}`}
-              d={seg.path}
-              fill="none"
-              stroke={seg.gain ? "var(--signal)" : "var(--fault)"}
-              strokeWidth={u * 1.35}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-              opacity={0.92}
-              filter={`url(#${uid}-bloom)`}
-            />
-          ))}
+          {showDeltaPaint &&
+            deltaRibbon.map((seg, i) => (
+              <path
+                key={`dlt-${i}`}
+                d={seg.path}
+                fill="none"
+                stroke={seg.gain ? "var(--signal)" : "var(--fault)"}
+                strokeWidth={u * (expanded ? 1.55 : 1.35)}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                opacity={0.92}
+                filter={`url(#${uid}-bloom)`}
+              />
+            ))}
 
           <path
             d={pathD}
@@ -844,51 +873,52 @@ export function TrackSchematic({
             className="circuit-dash"
           />
 
-          {sectorPaths.map((sec, index) => {
-            const wholeLap = activeSector === "Lap" || !activeSector;
-            const active = wholeLap || activeSector === sec.label;
-            const comparingPaint = comparing && sectorDeltaMs;
-            return (
-              <path
-                key={sec.id}
-                d={sec.path}
-                fill="none"
-                strokeWidth={
-                  comparingPaint
-                    ? active && !wholeLap
-                      ? u * 0.95
-                      : u * 0.7
-                    : active && !wholeLap
-                      ? u * 0.72
-                      : u * 0.38
-                }
-                strokeLinejoin="round"
-                stroke={sectorColor(index, active)}
-                opacity={
-                  comparingPaint
-                    ? active || wholeLap
-                      ? 1
-                      : 0.55
-                    : wholeLap
-                      ? 0.9
-                      : active
+          {showSectorPaint &&
+            sectorPaths.map((sec, index) => {
+              const wholeLap = activeSector === "Lap" || !activeSector;
+              const active = wholeLap || activeSector === sec.label;
+              const comparingPaint = comparing && sectorDeltaMs;
+              return (
+                <path
+                  key={sec.id}
+                  d={sec.path}
+                  fill="none"
+                  strokeWidth={
+                    comparingPaint
+                      ? active && !wholeLap
+                        ? u * (expanded ? 1.05 : 0.95)
+                        : u * (expanded ? 0.82 : 0.7)
+                      : active && !wholeLap
+                        ? u * 0.72
+                        : u * 0.38
+                  }
+                  strokeLinejoin="round"
+                  stroke={sectorColor(index, active)}
+                  opacity={
+                    comparingPaint
+                      ? active || wholeLap
                         ? 1
-                        : 0.28
-                }
-                filter={
-                  comparingPaint || (active && !wholeLap)
-                    ? `url(#${uid}-bloom)`
-                    : undefined
-                }
-                className="cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setManualView(null);
-                  onSector?.(sec.label);
-                }}
-              />
-            );
-          })}
+                        : 0.55
+                      : wholeLap
+                        ? 0.9
+                        : active
+                          ? 1
+                          : 0.28
+                  }
+                  filter={
+                    comparingPaint || (active && !wholeLap)
+                      ? `url(#${uid}-bloom)`
+                      : undefined
+                  }
+                  className="cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setManualView(null);
+                    onSector?.(sec.label);
+                  }}
+                />
+              );
+            })}
 
           {evidenceArc && (
             <path
@@ -1026,11 +1056,11 @@ export function TrackSchematic({
           )}
         </svg>
 
-        {/* Area insight — specific stats for the stretched window */}
+        {/* Area insight - specific stats for the stretched window */}
         {areaInsight && stage && (
           <div className="pointer-events-none absolute left-2 top-2 z-[3] max-w-[min(100%,18rem)] rounded border border-[var(--hairline-strong)] bg-[rgba(5,7,10,0.88)] px-2.5 py-2 shadow-lg backdrop-blur-sm">
             <p className="font-mono text-[0.52rem] uppercase tracking-[0.14em] text-[var(--signal)]">
-              Area · {Math.round(areaInsight.startM)}–{Math.round(areaInsight.endM)} m
+              Area · {Math.round(areaInsight.startM)}-{Math.round(areaInsight.endM)} m
               <span className="text-[var(--mute)]">
                 {" "}
                 · {Math.round(areaInsight.span)} m span
@@ -1041,7 +1071,7 @@ export function TrackSchematic({
                 {areaInsight.marksIn.map((m) => m.label).join(" · ")}
                 <span className="text-[var(--mute)]">
                   {" "}
-                  — {areaInsight.marksIn[0]?.hint}
+                  - {areaInsight.marksIn[0]?.hint}
                 </span>
               </p>
             )}
@@ -1062,7 +1092,7 @@ export function TrackSchematic({
                         }
                       >
                         {" "}
-                        {s.label} {ms > 0 ? "+" : "−"}
+                        {s.label} {ms > 0 ? "+" : "-"}
                         {Math.abs(ms / 1000).toFixed(3)}
                       </span>
                     );
@@ -1079,7 +1109,7 @@ export function TrackSchematic({
                   {areaInsight.speedMin != null && areaInsight.speedMax != null && (
                     <span className="text-[var(--mute)]">
                       {" "}
-                      · {Math.round(areaInsight.speedMin)}–
+                      · {Math.round(areaInsight.speedMin)}-
                       {Math.round(areaInsight.speedMax)}
                     </span>
                   )}
@@ -1099,7 +1129,9 @@ export function TrackSchematic({
               <span>
                 <span className="text-[var(--mute)]">elev </span>
                 <span className="text-[var(--chalk)]">
-                  {areaInsight.z0.toFixed(0)}→{areaInsight.z1.toFixed(0)} m
+                  {areaInsight.z0.toFixed(0)}
+                  {">"}
+                  {areaInsight.z1.toFixed(0)} m
                 </span>
                 <span className="text-[var(--mute)]">
                   {" "}
@@ -1115,7 +1147,7 @@ export function TrackSchematic({
                       : "text-[var(--fault)]"
                   }
                 >
-                  Δv {areaInsight.deltaAvg >= 0 ? "+" : ""}
+                  dv {areaInsight.deltaAvg >= 0 ? "+" : ""}
                   {areaInsight.deltaAvg.toFixed(1)} km/h
                 </span>
               )}
@@ -1206,7 +1238,7 @@ export function TrackSchematic({
                     : "text-[var(--signal)]",
                 )}
               >
-                {sectorDeltaMs[i] > 0 ? "+" : "−"}
+                {sectorDeltaMs[i] > 0 ? "+" : "-"}
                 {Math.abs(sectorDeltaMs[i] / 1000).toFixed(3)}
               </span>
             )}

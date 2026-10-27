@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Original Welch Software open-wheel side profile — not a team livery.
+ * Original Welch Software open-wheel side profile - not a team livery.
  * Shared for every driver; accent/second carry the house colour.
  */
 export function CarSilhouette({
@@ -109,7 +109,7 @@ export function CarSilhouette({
         strokeWidth="1"
       />
 
-      {/* wheels — rear */}
+      {/* wheels - rear */}
       <g filter={`url(#${uid}-glow)`}>
         <circle
           cx="208"

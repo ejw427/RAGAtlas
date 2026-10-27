@@ -1,6 +1,6 @@
 /**
  * Approximate COTA elevation profile (relative metres from S/F).
- * Shaped from public Circuit of the Americas facts — ~41 m climb to T1 crest —
+ * Shaped from public Circuit of the Americas facts - ~41 m climb to T1 crest -
  * not a surveyed DEM. Labeled as approximate in the UI.
  */
 const KEYS: { m: number; z: number; note?: string }[] = [
@@ -13,13 +13,13 @@ const KEYS: { m: number; z: number; note?: string }[] = [
   { m: 700, z: 22 },
   { m: 980, z: 14, note: "Esses" },
   { m: 1200, z: 11 },
-  { m: 1483, z: 9, note: "S1→" },
+  { m: 1483, z: 9, note: "S1" },
   { m: 1800, z: 8 },
   { m: 2200, z: 6 },
   { m: 2600, z: 5, note: "T11" },
   { m: 3000, z: 7 },
   { m: 3400, z: 8 },
-  { m: 3672, z: 7, note: "S2→" },
+  { m: 3672, z: 7, note: "S2" },
   { m: 3900, z: 6 },
   { m: 4100, z: 5, note: "Stadium" },
   { m: 4500, z: 6 },

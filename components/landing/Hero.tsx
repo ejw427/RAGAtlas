@@ -166,7 +166,7 @@ export function Hero() {
       <div className="absolute inset-0 z-0">
         <Image
           src="/cota-hero-night.jpg"
-          alt="Circuit of the Americas Turn 1 climb at night with observation tower — United States Grand Prix atmosphere"
+          alt="Circuit of the Americas Turn 1 climb at night with observation tower - United States Grand Prix atmosphere"
           fill
           priority
           className="object-cover object-[center_42%] hero-kenburns"
@@ -196,7 +196,7 @@ export function Hero() {
         <p className="mt-2 text-[0.95rem] text-[var(--mist)]">{TAGLINE}</p>
         <p className="mt-4 max-w-xl text-base leading-relaxed text-[var(--mist)]">
           Evidence-bound session RAG on real 2026 Circuit of the Americas FP2
-          telemetry — cite a note or channel, lock the playhead on the T1 climb
+          telemetry - cite a note or channel, lock the playhead on the T1 climb
           or the stadium stop, trust the trace. Built to demo performance
           engineering craft to race teams.
         </p>

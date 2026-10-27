@@ -6,7 +6,7 @@ export default function SessionPage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-ink text-sm text-mist/60">
-          Loading session…
+          Loading session...
         </div>
       }
     >

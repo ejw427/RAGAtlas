@@ -7,11 +7,11 @@ import { prefersReducedMotion } from "@/lib/motion";
 const LANDMARKS = [
   { id: "sf", label: "S/F", m: 0, hint: "Start / finish" },
   { id: "t1", label: "T1", m: 420, hint: "Uphill crest" },
-  { id: "esses", label: "Esses", m: 980, hint: "T3–T6 rhythm" },
-  { id: "s1", label: "S1→", m: 1483, hint: "Sector split" },
+  { id: "esses", label: "Esses", m: 980, hint: "T3-T6 rhythm" },
+  { id: "s1", label: "S1", m: 1483, hint: "Sector split" },
   { id: "t11", label: "T11", m: 2600, hint: "Hairpin" },
-  { id: "s2", label: "S2→", m: 3672, hint: "Into stadium" },
-  { id: "stadium", label: "Stadium", m: 4100, hint: "T12–T15" },
+  { id: "s2", label: "S2", m: 3672, hint: "Into stadium" },
+  { id: "stadium", label: "Stadium", m: 4100, hint: "T12-T15" },
   { id: "t19", label: "T19", m: 5100, hint: "Track limits" },
 ] as const;
 
@@ -260,7 +260,7 @@ export function CotaCircuitMap() {
               Austin. 5.513 km. 20 turns.
             </h3>
             <p className="mt-2 text-[0.85rem] leading-relaxed text-[var(--mist)]">
-              The demo pack is the 2026 United States GP FP2 session — same
+              The demo pack is the 2026 United States GP FP2 session - same
               asphalt your engineers argue about: T1 climb, esses rhythm,
               stadium stop, T19 limits.
             </p>
@@ -307,7 +307,7 @@ export function CotaCircuitMap() {
               className="inline-block h-1.5 w-4 rounded-sm"
               style={{ background: s.color }}
             />
-            {s.label} {s.startM}–{s.endM} m
+            {s.label} {s.startM}-{s.endM} m
           </span>
         ))}
       </div>

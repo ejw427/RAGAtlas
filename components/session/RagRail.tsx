@@ -52,7 +52,7 @@ export function RagRail({
       status: "loading",
       query: trimmed,
       cites: [],
-      message: "Matching QaMap patterns (deterministic)…",
+      message: "Matching QaMap patterns (deterministic)...",
     });
     const delay = prefersReducedMotion() ? 40 : 280;
     await new Promise((r) => setTimeout(r, delay));
@@ -86,7 +86,7 @@ export function RagRail({
           Ask the session
         </p>
         <p className="mt-1 rounded-sm border border-[var(--signal)]/25 bg-[var(--signal-dim)] px-2 py-1 font-mono text-[0.58rem] leading-snug text-[var(--signal)]">
-          Deterministic QaMap · fail closed — not an LLM
+          Deterministic QaMap · fail closed - not an LLM
         </p>
       </div>
 
@@ -121,7 +121,7 @@ export function RagRail({
             title={s}
             className="border border-[var(--hairline)] px-2 py-1 text-left font-mono text-[0.58rem] text-[var(--mute)] hover:border-[var(--hairline-strong)] hover:text-[var(--mist)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
           >
-            {s.length > 48 ? `${s.slice(0, 46)}…` : s}
+            {s.length > 48 ? `${s.slice(0, 46)}...` : s}
           </button>
         ))}
         <button
@@ -190,7 +190,7 @@ export function RagRail({
       </div>
 
       <p className="mt-auto text-[0.62rem] leading-snug text-[var(--mute)]">
-        Pattern map over notes & channel docs — silence when the session cannot
+        Pattern map over notes & channel docs - silence when the session cannot
         support the claim. Method: /about
       </p>
     </aside>

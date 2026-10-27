@@ -190,7 +190,7 @@ export function SelectDock({
                             {sourceBadge(ch)}
                           </span>
                           <span className="w-[3.6rem] shrink-0 text-right tabular-nums text-[var(--chalk)]">
-                            {val != null ? formatChannelValue(ch, val) : "—"}
+                            {val != null ? formatChannelValue(ch, val) : "-"}
                           </span>
                         </button>
                       </li>
@@ -208,7 +208,7 @@ export function SelectDock({
               const compound =
                 l.tags?.find((t) =>
                   ["soft", "hard", "medium", "intermediate", "wet"].includes(t),
-                ) ?? "—";
+                ) ?? "-";
               return (
                 <li key={l.id}>
                   <button

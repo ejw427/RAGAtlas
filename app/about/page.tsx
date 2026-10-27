@@ -98,7 +98,7 @@ function FlowArrow() {
       className="hidden shrink-0 self-center font-mono text-[var(--mute)] sm:inline"
       aria-hidden
     >
-      →
+      {">"}
     </span>
   );
 }
@@ -109,8 +109,8 @@ export default function AboutPage() {
   const channels = getChannels();
   const rates = corpus.ratesHz;
   const rateLabel = rates
-    ? `${rates.high ?? "—"}/${rates.mid ?? "—"}/${rates.low ?? "—"} Hz`
-    : "—";
+    ? `${rates.high ?? "-"}/${rates.mid ?? "-"}/${rates.low ?? "-"} Hz`
+    : "-";
 
   return (
     <main className="min-h-dvh bg-[var(--void)]">
@@ -168,7 +168,7 @@ export default function AboutPage() {
         <p className="mt-4 text-[var(--mist)] leading-relaxed">
           {PRODUCT} is a {STUDIO} portfolio prototype: React/TypeScript craft for
           dense time-series workspaces, multi-store session literacy (samples +
-          metadata + notes), and evidence-bound retrieval — not a chatbot toy.
+          metadata + notes), and evidence-bound retrieval - not a chatbot toy.
           Independent work. Not affiliated with Formula 1 teams, commercial
           telemetry vendors, Formula 1, or the FIA.
         </p>
@@ -274,16 +274,16 @@ export default function AboutPage() {
             <Stat label="Rates" value={rateLabel} />
             <Stat
               label="Track"
-              value={`${corpus.lengthM?.toLocaleString() ?? "—"} m`}
+              value={`${corpus.lengthM?.toLocaleString() ?? "-"} m`}
             />
             <Stat label="Cites" value={String(corpus.cites)} />
           </div>
         </section>
 
-        {/* Problem → product */}
+        {/* Problem > product */}
         <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
           <h2 className="font-display text-xl font-semibold">
-            Problem → product
+            {"Problem > product"}
           </h2>
           <p className="text-[var(--mist)] leading-relaxed">
             Session Q&amp;A without grounding invents physics: a fluent answer
@@ -291,7 +291,7 @@ export default function AboutPage() {
             silence for performance users.
           </p>
           <p className="text-[var(--mist)] leading-relaxed">
-            {PRODUCT} binds every claim to a cite — then locks the playhead and
+            {PRODUCT} binds every claim to a cite - then locks the playhead and
             paints an evidence band on the traces. Out-of-window questions
             fail closed. The wedge is not “AI on telemetry”; it is{" "}
             <span className="text-[var(--chalk)]">
@@ -307,12 +307,15 @@ export default function AboutPage() {
             What you can do in 90 seconds
           </h2>
           <ol className="list-decimal space-y-2 pl-5 text-[var(--mist)]">
-            <li>Open the COTA session — LEC Soft flyer by default</li>
+            <li>Open the COTA session - LEC Soft flyer by default</li>
             <li>
               Use <span className="text-[var(--chalk)]">Lap</span> for the whole
-              lap, or S1–S3 for sector focus; scrub the playhead
+              lap, or S1-S3 for sector focus; scrub the playhead
             </li>
-            <li>Ask a grounded question → claim + cites → click a cite → lock</li>
+            <li>
+              Ask a grounded question {">"} claim + cites {">"} click a cite {">"}{" "}
+              lock
+            </li>
             <li>Switch drivers; Compare vs Soft flyer / Hard baseline</li>
           </ol>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -344,7 +347,7 @@ export default function AboutPage() {
             <DemoChip
               href="/session?driver=LEC&lap=10&citeId=cite_delta_soft&q=Where%20did%20Soft%20gain%20vs%20the%20Hard%20push%3F"
               label="Soft vs Hard delta"
-              hint="OpenF1 sector story — Soft flyer vs Hard push"
+              hint="OpenF1 sector story - Soft flyer vs Hard push"
             />
             <DemoChip
               href="/session?driver=LEC&lap=7&citeId=cite_track_limits&q=Any%20track%20limits%20issues%20for%20Leclerc%3F"
@@ -354,7 +357,7 @@ export default function AboutPage() {
             <DemoChip
               href="/session?driver=LEC&lap=10&q=Who%20is%20the%20championship%20leader%3F"
               label="Honest no-hit"
-              hint="Championship standings — fail closed, no invented claim"
+              hint="Championship standings - fail closed, no invented claim"
             />
           </div>
           <Button asChild>
@@ -367,7 +370,7 @@ export default function AboutPage() {
           <h2 className="font-display text-xl font-semibold">System shape</h2>
           <p className="text-[var(--mist)] leading-relaxed">
             One session pack, three stores, one retrieval path. Cites are first-class
-            objects — not chat footnotes.
+            objects - not chat footnotes.
           </p>
           <div
             className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-stretch sm:gap-x-2 sm:gap-y-2"
@@ -382,7 +385,7 @@ export default function AboutPage() {
             <FlowArrow />
             <FlowNode label="QaMap" sub="deterministic" accent />
             <FlowArrow />
-            <FlowNode label="Cite → stage" sub="playhead + band" accent />
+            <FlowNode label="Cite > stage" sub="playhead + band" accent />
           </div>
           <p className="font-mono text-[0.65rem] text-[var(--mute)]">
             {corpus.notes} notes · {corpus.events} events · {corpus.cites} cites ·{" "}
@@ -397,7 +400,7 @@ export default function AboutPage() {
           </h2>
           <ul className="list-disc space-y-2 pl-5 text-[var(--mist)]">
             <li>
-              <span className="text-[var(--chalk)]">Deterministic QaMap</span> —
+              <span className="text-[var(--chalk)]">Deterministic QaMap</span> -
               the money-shot demo never flakes; honesty over LLM theater for a
               portfolio walkthrough.
             </li>
@@ -405,19 +408,19 @@ export default function AboutPage() {
               <span className="text-[var(--chalk)]">
                 OpenF1 subset + labeled overlays
               </span>{" "}
-              — real broadcast car_data, pits, weather series, and team radio
+              - real broadcast car_data, pits, weather series, and team radio
               for the field; synthetic rear/front brake temp, brake pressure,
               tyre surface, steering, long-g, fuel flow, oil, and coolant where
-              public feeds have no ATLAS-class plant channels — provenance is
+              public feeds have no ATLAS-class plant channels - provenance is
               explicit in the chrome.
             </li>
             <li>
               <span className="text-[var(--chalk)]">Distance-domain stage</span>{" "}
-              — whole-lap and sector focus, playhead scrub, compare overlays;
+              - whole-lap and sector focus, playhead scrub, compare overlays;
               matches how engineers argue about the lap.
             </li>
             <li>
-              <span className="text-[var(--chalk)]">Field + depth</span> — best
+              <span className="text-[var(--chalk)]">Field + depth</span> - best
               flyer for all {corpus.drivers} cars; LEC Hard / Soft / long-run
               trio for Soft-vs-Hard narrative depth.
             </li>
@@ -430,19 +433,19 @@ export default function AboutPage() {
           <ul className="list-disc space-y-2 pl-5 text-[var(--mist)]">
             <li>
               <span className="text-[var(--chalk)]">React / TypeScript UX</span>{" "}
-              — dense pit-wall chrome, SVG waveforms, keyboard-focusable controls.
+              - dense pit-wall chrome, SVG waveforms, keyboard-focusable controls.
             </li>
             <li>
               <span className="text-[var(--chalk)]">Multi-store literacy</span>{" "}
-              — samples, session metadata, and notes as one grounded corpus.
+              - samples, session metadata, and notes as one grounded corpus.
             </li>
             <li>
               <span className="text-[var(--chalk)]">Telemetry vocabulary</span>{" "}
-              — session, lap, channel, compare, notes, events — shaped like public
+              - session, lap, channel, compare, notes, events - shaped like public
               ATLAS docs without cloning vendor UI.
             </li>
             <li>
-              <span className="text-[var(--chalk)]">Provenance labeling</span> —
+              <span className="text-[var(--chalk)]">Provenance labeling</span> -
               OpenF1 vs synthetic overlay called out in-product; fail-closed when
               the window cannot support the claim.
             </li>
@@ -481,7 +484,7 @@ export default function AboutPage() {
           </p>
           <p className="text-[var(--mist)] leading-relaxed">
             Pack{" "}
-            <code className="text-[var(--chalk)]">cota-2026-fp2.json</code> —
+            <code className="text-[var(--chalk)]">cota-2026-fp2.json</code> -
             {corpus.drivers} drivers (best flying lap) plus LEC Hard/Soft/long-run.
             Real OpenF1 car_data, location path, weather, stints, race control.
             Overlays:{" "}

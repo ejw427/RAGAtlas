@@ -35,6 +35,8 @@ export function CompareDuo({
   onOtherCompound,
   canOtherCompound,
   onOpenCompare,
+  onInspectFocus,
+  onInspectReference,
 }: {
   focusDriver: Driver;
   focusLap: Lap;
@@ -53,6 +55,8 @@ export function CompareDuo({
   onOtherCompound: () => void;
   canOtherCompound: boolean;
   onOpenCompare?: () => void;
+  onInspectFocus?: () => void;
+  onInspectReference?: () => void;
 }) {
   const focusAccent = accentFor(focusDriver);
   const refAccent = accentFor(referenceDriver ?? undefined);
@@ -99,6 +103,7 @@ export function CompareDuo({
             mirror={false}
             onDriver={onFocusDriver}
             onLap={onFocusLap}
+            onInspect={onInspectFocus}
           />
 
           <div className="flex shrink-0 flex-row items-center justify-center gap-2 sm:w-[7rem] sm:flex-col sm:gap-1">
@@ -131,10 +136,10 @@ export function CompareDuo({
                         : "text-[var(--signal)]",
                     )}
                   >
-                    Δ {formatDeltaSec(deltas.lapMs)}
+                    Delta {formatDeltaSec(deltas.lapMs)}
                   </p>
                   <p className="mt-0.5 font-mono text-[0.45rem] uppercase tracking-[0.14em] text-[var(--signal)]">
-                    Detail ▸
+                    {"Detail >"}
                   </p>
                 </button>
                 <button
@@ -172,6 +177,7 @@ export function CompareDuo({
               mirror
               onDriver={onReferenceDriver}
               onLap={onReferenceLap}
+              onInspect={onInspectReference}
             />
           ) : (
             <button
@@ -250,6 +256,7 @@ function RacerCard({
   mirror,
   onDriver,
   onLap,
+  onInspect,
 }: {
   role: "Focus" | "Reference";
   driver: Driver;
@@ -259,6 +266,7 @@ function RacerCard({
   mirror: boolean;
   onDriver: (id: string) => void;
   onLap: (n: number) => void;
+  onInspect?: () => void;
 }) {
   const { given, family } = splitName(driver.name);
   const compound = compoundOf(lap);
@@ -318,7 +326,13 @@ function RacerCard({
           mirror && "sm:flex-row-reverse sm:text-right",
         )}
       >
-        <div className="relative shrink-0">
+        <button
+          type="button"
+          onClick={onInspect}
+          disabled={!onInspect}
+          title="Open racer detail"
+          className="relative shrink-0 rounded-sm transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
+        >
           <DriverPortrait driver={driver} size={68} />
           <span
             className={cn(
@@ -333,7 +347,10 @@ function RacerCard({
           >
             {role === "Focus" ? "FOC" : "REF"}
           </span>
-        </div>
+          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-sm bg-[rgba(5,7,10,0.85)] px-1 font-mono text-[0.4rem] uppercase tracking-[0.12em] text-[var(--trace-cyan)]">
+            Card
+          </span>
+        </button>
 
         <div className={cn("min-w-0 flex-1", mirror && "sm:items-end")}>
           <div
@@ -349,7 +366,7 @@ function RacerCard({
                 textShadow: `0 0 28px ${accent.accent}66`,
               }}
             >
-              {driver.number ?? "—"}
+              {driver.number ?? "-"}
             </p>
             <div className={cn("min-w-0", mirror && "sm:text-right")}>
               {given ? (
@@ -445,7 +462,13 @@ function RacerCard({
           <p className="font-display text-2xl font-bold tabular-nums tracking-tight text-[var(--chalk)]">
             {formatLapTime(lap.timeMs)}
           </p>
-          <div className="opacity-80">
+          <button
+            type="button"
+            onClick={onInspect}
+            disabled={!onInspect}
+            title="Open racer detail"
+            className="opacity-90 transition hover:opacity-100 hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
+          >
             <CarSilhouette
               accent={accent.accent}
               second={accent.second}
@@ -453,7 +476,10 @@ function RacerCard({
               compoundLetter={compound[0]?.toUpperCase()}
               width={168}
             />
-          </div>
+            <span className="mt-0.5 block text-center font-mono text-[0.4rem] uppercase tracking-[0.12em] text-[var(--trace-cyan)]">
+              Inspect car
+            </span>
+          </button>
         </div>
 
         {/* Mobile lap time */}

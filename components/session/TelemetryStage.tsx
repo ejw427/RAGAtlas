@@ -68,7 +68,7 @@ export function TelemetryStage({
   onOpenCompare?: () => void;
   /** Stretch x-domain to match map zoom / sector. */
   viewWindow?: { startM: number; endM: number } | null;
-  /** Focus − Reference sector gaps (ms). Colors the stage green/amber. */
+  /** Focus - Reference sector gaps (ms). Colors the stage green/amber. */
   sectorDeltaMs?: [number, number, number] | null;
 }) {
   const channels = stageChannels(plotChannelIds);
@@ -263,7 +263,7 @@ export function TelemetryStage({
     };
   };
 
-  /** Area fill for Δ series above/below zero. */
+  /** Area fill for d series above/below zero. */
   const deltaAreaPaths = (
     series: { d: number[]; v: number[] },
     y0: number,
@@ -339,7 +339,7 @@ export function TelemetryStage({
             {channels.length} channels · distance
             {compareLapId ? " · racer vs racer" : ""}
             {viewWindow
-              ? ` · stretch ${Math.round(domainStart)}–${Math.round(domainEnd)} m`
+              ? ` · stretch ${Math.round(domainStart)}-${Math.round(domainEnd)} m`
               : ""}
             {" · "}
             <span className="text-[var(--mute)]">OF1</span>
@@ -441,12 +441,12 @@ export function TelemetryStage({
                 {s.label}
                 {delta != null ? (
                   <span className="font-bold tabular-nums">
-                    {delta > 0 ? "+" : "−"}
+                    {delta > 0 ? "+" : "-"}
                     {Math.abs(delta / 1000).toFixed(3)}
                   </span>
                 ) : (
                   <span className="text-[var(--mute)]">
-                    {Math.round(s.startM)}–{Math.round(s.endM)}
+                    {Math.round(s.startM)}-{Math.round(s.endM)}
                   </span>
                 )}
               </span>
@@ -568,7 +568,7 @@ export function TelemetryStage({
                 >
                   {s.label}
                   {delta != null
-                    ? ` ${delta > 0 ? "+" : "−"}${Math.abs(delta / 1000).toFixed(3)}`
+                    ? ` ${delta > 0 ? "+" : "-"}${Math.abs(delta / 1000).toFixed(3)}`
                     : ""}
                 </text>
               </g>
@@ -790,7 +790,7 @@ export function TelemetryStage({
                       fontFamily="var(--font-mono)"
                       fontWeight={700}
                     >
-                      {live != null ? formatChannelValue(ch, live) : "—"}
+                      {live != null ? formatChannelValue(ch, live) : "-"}
                     </text>
                     <text
                       x={W - 10}
@@ -815,7 +815,7 @@ export function TelemetryStage({
                         fontFamily="var(--font-mono)"
                         fontWeight={700}
                       >
-                        Δ{liveDelta >= 0 ? "+" : ""}
+                        d{liveDelta >= 0 ? "+" : ""}
                         {Math.abs(liveDelta) >= 10
                           ? liveDelta.toFixed(0)
                           : liveDelta.toFixed(1)}
@@ -832,7 +832,7 @@ export function TelemetryStage({
                     fontFamily="var(--font-mono)"
                     fontWeight={600}
                   >
-                    {live != null ? formatChannelValue(ch, live) : "—"}
+                    {live != null ? formatChannelValue(ch, live) : "-"}
                   </text>
                 )}
               </g>
@@ -894,7 +894,7 @@ export function TelemetryStage({
                     fontFamily="var(--font-mono)"
                     fontWeight={700}
                   >
-                    ΔSpd
+                    DeltaSpd
                   </text>
                   <text
                     x={padL - 6}
@@ -929,7 +929,7 @@ export function TelemetryStage({
                   >
                     {live != null
                       ? `${live >= 0 ? "+" : ""}${live.toFixed(1)} km/h`
-                      : "—"}
+                      : "-"}
                   </text>
                 </g>
               );

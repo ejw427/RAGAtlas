@@ -13,7 +13,7 @@ export type TeamAccent = {
   second: string;
 };
 
-/** Session accents — original Welch Software marks, not team assets. */
+/** Session accents - original Welch Software marks, not team assets. */
 export const TEAM_ACCENTS: Record<string, TeamAccent> = {
   Ferrari: { house: "ferrari", accent: "#E10600", second: "#F0E7D0" },
   Mercedes: { house: "mercedes", accent: "#00D2BE", second: "#C5CCD6" },
@@ -273,7 +273,7 @@ export function sectorDeltas(
 
 export function formatDeltaSec(ms: number): string {
   const s = ms / 1000;
-  const sign = s > 0 ? "+" : s < 0 ? "−" : "";
+  const sign = s > 0 ? "+" : s < 0 ? "-" : "";
   return `${sign}${Math.abs(s).toFixed(3)}`;
 }
 
@@ -311,8 +311,8 @@ export function biggestLossSector(
   };
 }
 
-/** Default dual-car / house walk-in — enough to argue the lap, not a starved trio. */
-/** Default stage pack — full driver / chassis story, not the starved Lap trio. */
+/** Default dual-car / house walk-in - enough to argue the lap, not a starved trio. */
+/** Default stage pack - full driver / chassis story, not the starved Lap trio. */
 export const RACE_PLOT_IDS = [
   "speed",
   "throttle",
@@ -339,7 +339,7 @@ export function channelPresets(): Record<string, string[]> {
       "oil_pressure",
     ],
     Power: ["rpm", "n_gear", "fuel_flow", "oil_pressure", "coolant_temp"],
-    /** Filled by caller with defaultPlotIds() when needed — placeholder key order. */
+    /** Filled by caller with defaultPlotIds() when needed - placeholder key order. */
     All: [],
   };
 }

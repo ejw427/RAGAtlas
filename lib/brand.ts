@@ -17,16 +17,16 @@ export const LIVE_URL = "https://citetrace.welchsoftware.net";
 export const LIVE_SESSION_URL = `${LIVE_URL}/session?driver=LEC&lap=10`;
 /** Default walk-in: Ferrari teammate compare on the pit wall */
 export const LIVE_COMPARE_URL = `${LIVE_URL}/session?house=ferrari`;
-/** Resume / LinkedIn deep link — interview demo script on */
+/** Resume / LinkedIn deep link - interview demo script on */
 export const LIVE_DEMO_URL = `${LIVE_URL}/session?demo=1&house=ferrari`;
 export const PORTFOLIO_URL = "https://www.welchsoftware.net/projects/citetrace";
-/** 90-second demo ask — keep this the money shot */
+/** 90-second demo ask - keep this the money shot */
 export const DEMO_ASK = "Why did brake temp spike in S3 on lap 10?";
 export const DEMO_NO_HIT = "Who is the championship leader?";
 export const DEMO_STEPS = [
-  "Land → Compare two cars (Ferrari house)",
+  "Land > Compare two cars (Ferrari house)",
   "Open the sector that owns the gap",
   `Ask: ${DEMO_ASK}`,
-  "Click the cite → playhead locks on the map and the traces",
+  "Click the cite > playhead locks on the map and the traces",
 ] as const;
-export const EMAIL_BLURB = `I built CiteTrace — a pit wall for a race session. Circuit on stage, any car vs any car, evidence-bound asks that lock the playhead. ${LIVE_DEMO_URL}`;
+export const EMAIL_BLURB = `I built CiteTrace - a pit wall for a race session. Circuit on stage, any car vs any car, evidence-bound asks that lock the playhead. ${LIVE_DEMO_URL}`;

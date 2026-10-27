@@ -34,7 +34,7 @@ export function resolveCites(citeIds: string[]): CiteTarget[] {
     .filter((c): c is CiteTarget => Boolean(c));
 }
 
-/** Deterministic QaMap answer — never invents physics. */
+/** Deterministic QaMap answer - never invents physics. */
 export function answerQuery(query: string): RagAnswer {
   const trimmed = query.trim();
   if (!trimmed) {

@@ -24,7 +24,7 @@ const STEPS: { id: DemoStep; label: string; hint: string }[] = [
   {
     id: 3,
     label: "4 · Cite",
-    hint: "Click Evidence — playhead locks.",
+    hint: "Click Evidence - playhead locks.",
   },
   {
     id: 4,
@@ -80,7 +80,7 @@ export function DemoGuide({
       </div>
       <p className="mt-1.5 font-mono text-[0.62rem] text-[var(--chalk)]">
         {step === 1
-          ? `Open ${gainLabel} — where the gap lives.`
+          ? `Open ${gainLabel} - where the gap lives.`
           : step === 4
             ? `Provenance: OF1 = OpenF1 · OVL = synthetic overlay. Probe: “${DEMO_NO_HIT}”`
             : STEPS[step].hint}

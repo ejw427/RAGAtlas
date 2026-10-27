@@ -3,7 +3,7 @@
 import type { TeamAccent } from "@/lib/identity";
 
 /**
- * Abstract house marks — Welch Software originals, not team trademarks.
+ * Abstract house marks - Welch Software originals, not team trademarks.
  * Geometry keyed by session accent house id.
  */
 export function HouseMark({
@@ -153,7 +153,7 @@ function markFor(
   }
 }
 
-/** Compact rail labels — keep short so vertical type fits the card. */
+/** Compact rail labels - keep short so vertical type fits the card. */
 const HOUSE_SHORT: Record<string, string> = {
   ferrari: "FERRARI",
   mercedes: "MERC",

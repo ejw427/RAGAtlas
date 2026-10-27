@@ -18,6 +18,7 @@ export function Plate({
   activeSector,
   sectorDeltasMs,
   onSelectSector,
+  onInspect,
   compact = false,
 }: {
   driver: Driver;
@@ -25,6 +26,7 @@ export function Plate({
   activeSector: string | null;
   sectorDeltasMs?: [number, number, number] | null;
   onSelectSector: (sector: string) => void;
+  onInspect?: () => void;
   compact?: boolean;
 }) {
   const accent = accentFor(driver);
@@ -49,10 +51,23 @@ export function Plate({
           boxShadow: `inset 0 0 24px ${accent.accent}14`,
         }}
       >
-        <DriverPortrait driver={driver} size={52} />
-        <div className="min-w-0 flex-1">
+        <button
+          type="button"
+          onClick={onInspect}
+          disabled={!onInspect}
+          title="Open racer detail"
+          className="rounded-sm transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
+        >
+          <DriverPortrait driver={driver} size={52} />
+        </button>
+        <button
+          type="button"
+          onClick={onInspect}
+          disabled={!onInspect}
+          className="min-w-0 flex-1 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
+        >
           <p className="font-mono text-[0.55rem] uppercase tracking-[0.12em] text-[var(--mute)]">
-            Focus
+            Focus · tap for card
           </p>
           <p className="truncate font-display text-sm font-semibold text-[var(--chalk)]">
             {driver.name}
@@ -60,14 +75,22 @@ export function Plate({
           <p className="truncate font-mono text-[0.62rem] text-[var(--mist)]">
             {driver.team} · {compound} · L{lap.number}
           </p>
-        </div>
-        <CarSilhouette
-          accent={accent.accent}
-          second={accent.second}
-          number={driver.number}
-          compoundLetter={compoundLetter(compound)}
-          width={168}
-        />
+        </button>
+        <button
+          type="button"
+          onClick={onInspect}
+          disabled={!onInspect}
+          title="Open racer detail"
+          className="transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
+        >
+          <CarSilhouette
+            accent={accent.accent}
+            second={accent.second}
+            number={driver.number}
+            compoundLetter={compoundLetter(compound)}
+            width={168}
+          />
+        </button>
       </div>
     );
   }
@@ -79,10 +102,16 @@ export function Plate({
         borderLeft: `4px solid ${accent.accent}`,
         boxShadow: `inset 12px 0 40px -24px ${accent.accent}55`,
       }}
-      aria-label={`${driver.name}, car ${driver.number ?? "—"}, ${driver.team ?? "team"}, ${compound} tyre, lap ${lap.number}`}
+      aria-label={`${driver.name}, car ${driver.number ?? "-"}, ${driver.team ?? "team"}, ${compound} tyre, lap ${lap.number}`}
     >
       <div className="panel-scroll min-h-0 flex-1 space-y-3 overflow-y-auto overflow-x-hidden overscroll-contain p-3">
-        <div className="flex items-start gap-3">
+        <button
+          type="button"
+          onClick={onInspect}
+          disabled={!onInspect}
+          title="Open full racer card"
+          className="flex w-full items-start gap-3 rounded-sm text-left transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
+        >
           <DriverPortrait driver={driver} size={92} />
           <div className="min-w-0 flex-1 pt-1">
             <p
@@ -92,7 +121,7 @@ export function Plate({
                 textShadow: `0 0 24px ${accent.accent}66`,
               }}
             >
-              {driver.number ?? "—"}
+              {driver.number ?? "-"}
             </p>
             <p className="mt-1 font-display text-[1rem] font-semibold leading-tight text-[var(--chalk)]">
               {driver.name}
@@ -100,8 +129,11 @@ export function Plate({
             <p className="font-mono text-[0.72rem] font-semibold" style={{ color: accent.accent }}>
               {driver.code}
             </p>
+            <p className="mt-1 font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--trace-cyan)]">
+              Tap portrait for detail
+            </p>
           </div>
-        </div>
+        </button>
 
         <p
           className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[var(--mist)]"
@@ -110,7 +142,13 @@ export function Plate({
           {driver.team ?? "Independent"}
         </p>
 
-        <div className="rounded-md border border-[var(--hairline)] bg-[rgba(5,7,10,0.45)] px-2 py-3">
+        <button
+          type="button"
+          onClick={onInspect}
+          disabled={!onInspect}
+          title="Open full racer card"
+          className="w-full rounded-md border border-[var(--hairline)] bg-[rgba(5,7,10,0.45)] px-2 py-3 transition hover:border-[var(--signal)]/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
+        >
           <CarSilhouette
             accent={accent.accent}
             second={accent.second}
@@ -118,7 +156,10 @@ export function Plate({
             compoundLetter={compoundLetter(compound)}
             width={248}
           />
-        </div>
+          <p className="mt-1 text-center font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--trace-cyan)]">
+            Inspect car
+          </p>
+        </button>
 
         <div className="space-y-1 font-mono text-[0.62rem] text-[var(--mist)]">
           <p>
@@ -232,7 +273,7 @@ function SectorCell({
             deltaPositive ? "text-[var(--trace-amber)]" : "text-[var(--signal)]",
           )}
         >
-          Δ {delta}
+          Delta {delta}
         </span>
       )}
     </button>

@@ -4,11 +4,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plate } from "@/components/identity/Plate";
+import { CircuitMapModal } from "@/components/session/CircuitMapModal";
 import { CompareDetailSheet } from "@/components/session/CompareDetailSheet";
 import { CompareDuo } from "@/components/session/CompareDuo";
 import { DeltaRibbon } from "@/components/session/DeltaRibbon";
 import { DemoGuide, type DemoStep } from "@/components/session/DemoGuide";
 import { HouseSwitcher } from "@/components/session/HouseSwitcher";
+import { RacerDetailSheet } from "@/components/session/RacerDetailSheet";
 import { SelectDock } from "@/components/session/SelectDock";
 import { TelemetryStage } from "@/components/session/TelemetryStage";
 import { TrackSchematic } from "@/components/session/TrackSchematic";
@@ -137,7 +139,7 @@ export function SessionShell() {
   const [plotChannelIds, setPlotChannelIds] = useState(() => {
     if (boot.initialChannels) {
       const ids = boot.initialChannels.split(",").filter(Boolean);
-      // Legacy house/demo URLs pinned Lap to speed,throttle,brake — upgrade.
+      // Legacy house/demo URLs pinned Lap to speed,throttle,brake - upgrade.
       if (
         ids.length > 0 &&
         ids.length <= 3 &&
@@ -163,6 +165,10 @@ export function SessionShell() {
   );
   const [askOpen, setAskOpen] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
+  const [mapOpen, setMapOpen] = useState(false);
+  const [racerSheet, setRacerSheet] = useState<"Focus" | "Reference" | null>(
+    null,
+  );
   const [mapWindow, setMapWindow] = useState<{
     startM: number;
     endM: number;
@@ -768,6 +774,12 @@ export function SessionShell() {
         onOtherCompound={fillOtherCompound}
         canOtherCompound={Boolean(otherCompoundLap(driverId, lap))}
         onOpenCompare={compareLapId ? openCompare : undefined}
+        onInspectFocus={() => setRacerSheet("Focus")}
+        onInspectReference={
+          referenceDriver && referenceLap
+            ? () => setRacerSheet("Reference")
+            : undefined
+        }
       />
 
       {deltas && (
@@ -799,6 +811,7 @@ export function SessionShell() {
               activeSector={activeSector}
               sectorDeltasMs={deltas?.sectorsMs ?? null}
               onSelectSector={selectSector}
+              onInspect={() => setRacerSheet("Focus")}
               compact
             />
           </div>
@@ -809,6 +822,7 @@ export function SessionShell() {
               activeSector={activeSector}
               sectorDeltasMs={deltas?.sectorsMs ?? null}
               onSelectSector={selectSector}
+              onInspect={() => setRacerSheet("Focus")}
             />
           </div>
         </div>
@@ -821,6 +835,7 @@ export function SessionShell() {
           <div className="h-[min(58vw,440px)] shrink-0 overflow-hidden md:h-[min(46vh,460px)] md:min-h-[320px]">
             <TrackSchematic
               stage
+              paintMode={compareLapId ? "both" : "sector"}
               activeSector={activeSector}
               playheadM={playheadM}
               evidence={evidence}
@@ -842,6 +857,7 @@ export function SessionShell() {
               speedDelta={speedDelta}
               onOpenCompare={compareLapId ? openCompare : undefined}
               onViewWindow={setMapWindow}
+              onExpand={() => setMapOpen(true)}
               lapId={lapId}
             />
           </div>
@@ -937,6 +953,66 @@ export function SessionShell() {
           playheadM={playheadM}
           onJumpSector={selectSector}
           onPlayhead={onPlayhead}
+        />
+      )}
+
+      <CircuitMapModal
+        open={mapOpen}
+        onOpenChange={setMapOpen}
+        activeSector={activeSector}
+        playheadM={playheadM}
+        evidence={evidence}
+        onPlayhead={onPlayhead}
+        onSector={selectSector}
+        focusAccent={focusAccent.accent}
+        referenceAccent={compareLapId ? referenceAccent.accent : undefined}
+        focusNumber={driver.number}
+        referenceNumber={referenceDriver?.number}
+        focusCode={driver.code}
+        referenceCode={referenceDriver?.code}
+        comparing={Boolean(compareLapId)}
+        traps={traps}
+        sectorDeltaMs={deltas?.sectorsMs ?? null}
+        gainSectorIndex={gain?.index ?? null}
+        lossSectorIndex={loss && loss.ms > 0 ? loss.index : null}
+        speedDelta={speedDelta}
+        onOpenCompare={compareLapId ? openCompare : undefined}
+        onViewWindow={setMapWindow}
+        lapId={lapId}
+      />
+
+      {racerSheet === "Focus" && (
+        <RacerDetailSheet
+          open
+          onOpenChange={(o) => {
+            if (!o) setRacerSheet(null);
+          }}
+          driver={driver}
+          lap={lap}
+          playheadM={playheadM}
+          role="Focus"
+          compareLap={referenceLap}
+          onSelectLap={selectLap}
+        />
+      )}
+
+      {racerSheet === "Reference" && referenceDriver && referenceLap && (
+        <RacerDetailSheet
+          open
+          onOpenChange={(o) => {
+            if (!o) setRacerSheet(null);
+          }}
+          driver={referenceDriver}
+          lap={referenceLap}
+          playheadM={playheadM}
+          role="Reference"
+          compareLap={lap}
+          onMakeFocus={() => {
+            selectDriver(referenceDriver.id);
+            selectLap(referenceLap.number);
+            setRacerSheet(null);
+          }}
+          onSelectLap={selectReferenceLap}
         />
       )}
 

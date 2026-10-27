@@ -97,7 +97,7 @@ function byPlotOrder(a: Channel, b: Channel): number {
   return (a.plotOrder ?? 99) - (b.plotOrder ?? 99);
 }
 
-/** Stage plots — selected ids, else every `plotDefault` channel in plotOrder. */
+/** Stage plots - selected ids, else every `plotDefault` channel in plotOrder. */
 export function stageChannels(selectedIds?: string[]): Channel[] {
   if (selectedIds?.length) {
     return selectedIds

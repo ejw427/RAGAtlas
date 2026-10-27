@@ -13,7 +13,7 @@ const BEATS = [
   {
     kicker: "Stadium S3",
     title: "Where brakes get loud",
-    body: "Heavy stops into the amphitheater — the money-shot cite for thermal overlays and pressure shape.",
+    body: "Heavy stops into the amphitheater - the money-shot cite for thermal overlays and pressure shape.",
   },
   {
     kicker: "Austin base",
@@ -53,7 +53,7 @@ export function AustinVenue() {
           <p className="mt-3 max-w-xl text-[0.95rem] leading-relaxed text-[var(--mist)]">
             Observation tower. T1 hill. Stadium section. CiteTrace is a
             performance-engineering workspace demo grounded in the US Grand Prix
-            circuit — not a generic telemetry toy.
+            circuit - not a generic telemetry toy.
           </p>
         </div>
       </div>

@@ -28,12 +28,12 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600"],
 });
 
-const description = `${WEDGE} ${TAGLINE} Evidence-bound session RAG on 2026 COTA FP2 telemetry — a ${STUDIO} portfolio piece.`;
+const description = `${WEDGE} ${TAGLINE} Evidence-bound session RAG on 2026 COTA FP2 telemetry - a ${STUDIO} portfolio piece.`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(LIVE_URL),
   title: {
-    default: `${PRODUCT} — ${STUDIO}`,
+    default: `${PRODUCT} - ${STUDIO}`,
     template: `%s · ${PRODUCT}`,
   },
   description,
@@ -54,21 +54,21 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: LIVE_URL,
-    siteName: `${PRODUCT} — ${STUDIO}`,
-    title: `${PRODUCT} — ${STUDIO}`,
+    siteName: `${PRODUCT} - ${STUDIO}`,
+    title: `${PRODUCT} - ${STUDIO}`,
     description,
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "CiteTrace — Circuit of the Americas Turn 1 climb, Austin",
+        alt: "CiteTrace - Circuit of the Americas Turn 1 climb, Austin",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${PRODUCT} — ${STUDIO}`,
+    title: `${PRODUCT} - ${STUDIO}`,
     description,
     images: ["/og-image.jpg"],
   },

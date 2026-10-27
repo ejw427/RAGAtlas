@@ -59,7 +59,7 @@ export function DeltaRibbon({
         );
       })}
       <p className="hidden font-mono text-[0.48rem] text-[var(--mute)] sm:inline">
-        click sector → stretch map + traces
+        {"click sector > stretch map + traces"}
       </p>
       {onOpenCompare && (
         <button
@@ -67,7 +67,7 @@ export function DeltaRibbon({
           onClick={onOpenCompare}
           className="ml-auto rounded-sm border border-[var(--trace-cyan)]/50 bg-[rgba(58,215,255,0.12)] px-2 py-1 font-mono text-[0.55rem] uppercase tracking-[0.1em] text-[var(--trace-cyan)] hover:bg-[rgba(58,215,255,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
         >
-          Full compare ▸
+          {"Full compare >"}
         </button>
       )}
     </div>

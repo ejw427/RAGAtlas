@@ -97,7 +97,7 @@ export function ElevationStrip({
         <p className="font-mono text-[0.52rem] uppercase tracking-[0.14em] text-[var(--mute)]">
           Elevation
           {viewWindow
-            ? ` · ${Math.round(domainStart)}–${Math.round(domainEnd)} m`
+            ? ` · ${Math.round(domainStart)}-${Math.round(domainEnd)} m`
             : ` · T1 climb +${COTA_CLIMB_M} m`}
         </p>
         <p className="font-mono text-[0.55rem] tabular-nums text-[var(--mist)]">
@@ -106,7 +106,7 @@ export function ElevationStrip({
           {viewWindow && (
             <span className="text-[var(--mute)]">
               {" "}
-              · Δz {zDelta >= 0 ? "+" : ""}
+              · dz {zDelta >= 0 ? "+" : ""}
               {zDelta.toFixed(0)} m
             </span>
           )}

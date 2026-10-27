@@ -16,19 +16,19 @@ const STEPS = [
   {
     n: "01",
     title: "Ask the lap",
-    body: "Query the COTA session pack — notes, channel docs, and distance windows on the US GP circuit — not the open web.",
+    body: "Query the COTA session pack - notes, channel docs, and distance windows on the US GP circuit - not the open web.",
     mark: "T1 · Esses · Stadium",
   },
   {
     n: "02",
     title: "Get a cite",
-    body: "Every claim binds to evidence chips. No match → fail closed. Deterministic QaMap, not an LLM inventing physics.",
+    body: "Every claim binds to evidence chips. No match > fail closed. Deterministic QaMap, not an LLM inventing physics.",
     mark: "S3 brake · Soft flyer",
   },
   {
     n: "03",
     title: "Lock the trace",
-    body: "Click a cite → playhead and evidence band lock on the waveforms. Walk a race team through what you can see.",
+    body: "Click a cite > playhead and evidence band lock on the waveforms. Walk a race team through what you can see.",
     mark: "Playhead + band",
   },
 ] as const;
@@ -70,8 +70,8 @@ export function HowItWorks() {
   const corpus = corpusSummary();
   const rates = corpus.ratesHz;
   const rateLabel = rates
-    ? `${rates.high ?? "—"}/${rates.mid ?? "—"}/${rates.low ?? "—"} Hz`
-    : "—";
+    ? `${rates.high ?? "-"}/${rates.mid ?? "-"}/${rates.low ?? "-"} Hz`
+    : "-";
 
   return (
     <section
@@ -103,7 +103,7 @@ export function HowItWorks() {
             {METHOD_HEADLINE}
           </h2>
           <p className="mt-2 max-w-xl text-[0.95rem] leading-relaxed text-[var(--mist)]">
-            {WEDGE} {TAGLINE} Demo it like a race team debrief — COTA asphalt,
+            {WEDGE} {TAGLINE} Demo it like a race team debrief - COTA asphalt,
             locked cites, honest provenance.
           </p>
         </div>

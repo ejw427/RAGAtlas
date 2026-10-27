@@ -88,7 +88,7 @@ export function CompareDetailSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="md:inset-x-auto md:right-0 md:top-0 md:bottom-0 md:max-h-none md:w-[min(100vw,440px)] md:rounded-none md:border-l">
-        <SheetTitle>Compare detail · Focus − Reference</SheetTitle>
+        <SheetTitle>Compare detail · Focus - Reference</SheetTitle>
 
         <div className="mt-4 space-y-4">
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
@@ -126,7 +126,7 @@ export function CompareDetailSheet({
                 {formatDeltaSec(deltas.lapMs)}
               </p>
               <p className="font-mono text-[0.5rem] uppercase tracking-[0.12em] text-[var(--mute)]">
-                lap Δ
+                lap Delta
               </p>
             </div>
             <div
@@ -155,7 +155,7 @@ export function CompareDetailSheet({
 
           {compoundsDiffer && (
             <p className="rounded-sm border border-[var(--trace-amber)]/40 bg-[var(--trace-amber)]/10 px-2.5 py-1.5 font-mono text-[0.62rem] text-[var(--trace-amber)]">
-              Compounds differ — read the delta with the Soft vs Hard story in
+              Compounds differ - read the delta with the Soft vs Hard story in
               mind.
             </p>
           )}
@@ -210,7 +210,7 @@ export function CompareDetailSheet({
           <div className="rounded-md border border-[var(--hairline)] bg-[var(--panel)] p-2.5">
             <div className="mb-1 flex items-baseline justify-between gap-2">
               <p className="font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--mute)]">
-                Δ speed · distance domain
+                Delta speed · distance domain
               </p>
               <p
                 className={cn(
@@ -222,7 +222,7 @@ export function CompareDetailSheet({
               >
                 {live != null
                   ? `${live >= 0 ? "+" : ""}${live.toFixed(1)} km/h @ ${Math.round(playheadM)} m`
-                  : "—"}
+                  : "-"}
               </p>
             </div>
             {spark && delta && (
@@ -286,7 +286,7 @@ export function CompareDetailSheet({
                 variant="ghost"
                 onClick={() => onPlayhead(peakLossM)}
               >
-                Scrub worst ΔSpd · {Math.round(peakLossM)} m
+                Scrub worst DeltaSpd · {Math.round(peakLossM)} m
               </Button>
             )}
             {gainLabel && (
