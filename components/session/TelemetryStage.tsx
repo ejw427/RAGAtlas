@@ -175,14 +175,15 @@ export function TelemetryStage({
   const n = Math.max(plots.length + (showDelta ? 1 : 0), 1);
   const axisH = 28;
   // Keep readable row height; overflow scrolls instead of crushing every channel.
-  const minRow = n >= 10 ? 48 : n >= 6 ? 56 : 64;
+  // Room for full channel names + OF1/OVL · unit under the label.
+  const minRow = n >= 10 ? 52 : n >= 6 ? 60 : 68;
   const fitted =
     shellH > 0 ? Math.floor((shellH - axisH - 4) / n) : minRow;
   const rowH = Math.max(minRow, Math.min(fitted, 88));
   const W = 960;
   const H = axisH + rowH * n + 4;
-  const padL = 68;
-  const padR = 78;
+  const padL = compareLapId ? 118 : 108;
+  const padR = compareLapId ? 92 : 78;
   const plotW = W - padL - padR;
   const plotTop = axisH;
   // Only stretch-to-fill when everything fits with roomy rows; else scroll.
@@ -708,26 +709,26 @@ export function TelemetryStage({
                 />
                 <text
                   x={10}
-                  y={y0 + (compare ? rowH / 2 - 4 : rowH / 2 + 3)}
+                  y={y0 + rowH / 2 - (compare ? 2 : 0)}
                   fill={focused ? "var(--chalk)" : "var(--mist)"}
-                  fontSize="9"
+                  fontSize="10"
                   fontFamily="var(--font-mono)"
-                  fontWeight={focused ? 600 : 400}
+                  fontWeight={focused ? 700 : 600}
                 >
-                  {ch.shortName ?? ch.name}
+                  {ch.displayName ?? ch.name}
                 </text>
                 <text
-                  x={padL - 6}
-                  y={y0 + rowH / 2 + 3}
-                  textAnchor="end"
+                  x={10}
+                  y={y0 + rowH / 2 + 11}
                   fill={
                     isOverlayChannel(ch) ? "var(--trace-amber)" : "var(--mute)"
                   }
                   fontSize="7"
                   fontFamily="var(--font-mono)"
-                  letterSpacing="0.04em"
+                  letterSpacing="0.06em"
                 >
                   {sourceBadge(ch)}
+                  {ch.unit ? ` · ${ch.unit}` : ""}
                 </text>
                 {fillBundle &&
                   fillBundle.gain.map((p, gi) => (

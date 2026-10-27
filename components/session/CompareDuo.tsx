@@ -451,7 +451,7 @@ function RacerCard({
               second={accent.second}
               number={driver.number}
               compoundLetter={compound[0]?.toUpperCase()}
-              width={112}
+              width={168}
             />
           </div>
         </div>

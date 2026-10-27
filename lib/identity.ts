@@ -312,6 +312,7 @@ export function biggestLossSector(
 }
 
 /** Default dual-car / house walk-in — enough to argue the lap, not a starved trio. */
+/** Default stage pack — full driver / chassis story, not the starved Lap trio. */
 export const RACE_PLOT_IDS = [
   "speed",
   "throttle",
@@ -320,6 +321,8 @@ export const RACE_PLOT_IDS = [
   "n_gear",
   "steering",
   "rpm",
+  "drs",
+  "g_long",
 ] as const;
 
 export function channelPresets(): Record<string, string[]> {

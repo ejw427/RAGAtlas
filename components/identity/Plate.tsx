@@ -66,7 +66,7 @@ export function Plate({
           second={accent.second}
           number={driver.number}
           compoundLetter={compoundLetter(compound)}
-          width={130}
+          width={168}
         />
       </div>
     );
@@ -110,12 +110,13 @@ export function Plate({
           {driver.team ?? "Independent"}
         </p>
 
-        <div className="rounded-md border border-[var(--hairline)] bg-[rgba(5,7,10,0.45)] px-2 py-2">
+        <div className="rounded-md border border-[var(--hairline)] bg-[rgba(5,7,10,0.45)] px-2 py-3">
           <CarSilhouette
             accent={accent.accent}
             second={accent.second}
             number={driver.number}
             compoundLetter={compoundLetter(compound)}
+            width={248}
           />
         </div>
 

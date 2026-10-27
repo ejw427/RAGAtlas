@@ -177,7 +177,7 @@ export function SelectDock({
                             }}
                           />
                           <span className="min-w-0 flex-1 truncate">
-                            {ch.shortName ?? ch.displayName ?? ch.name}
+                            {ch.displayName ?? ch.name}
                           </span>
                           <span
                             className={cn(

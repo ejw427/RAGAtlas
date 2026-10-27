@@ -137,9 +137,18 @@ export function SessionShell() {
   const [plotChannelIds, setPlotChannelIds] = useState(() => {
     if (boot.initialChannels) {
       const ids = boot.initialChannels.split(",").filter(Boolean);
+      // Legacy house/demo URLs pinned Lap to speed,throttle,brake — upgrade.
+      if (
+        ids.length > 0 &&
+        ids.length <= 3 &&
+        ids.includes("speed") &&
+        ids.includes("throttle") &&
+        ids.includes("brake")
+      ) {
+        return [...RACE_PLOT_IDS];
+      }
       if (ids.length) return ids;
     }
-    // Race pack for both solo and compare — never starve the stage to 3 rows.
     return [...RACE_PLOT_IDS];
   });
   const [playheadM, setPlayheadM] = useState(1800);
