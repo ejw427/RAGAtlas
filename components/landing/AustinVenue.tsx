@@ -33,17 +33,17 @@ export function AustinVenue() {
     >
       <div className="relative isolate min-h-[min(72vw,420px)] overflow-hidden">
         <Image
-          src="/cota-tower-dusk.jpg"
-          alt="Circuit of the Americas observation tower and amphitheater at dusk"
+          src="/cota-tower-day.jpg"
+          alt="Circuit of the Americas observation tower and star-spangled runoff in daylight"
           fill
-          className="object-cover object-[center_35%]"
+          className="object-cover object-[center_28%]"
           sizes="100vw"
         />
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(90deg, rgba(5,7,10,0.94) 0%, rgba(5,7,10,0.55) 45%, rgba(5,7,10,0.35) 100%), linear-gradient(0deg, rgba(5,7,10,0.92) 0%, rgba(5,7,10,0.2) 55%, rgba(5,7,10,0.45) 100%)",
+              "linear-gradient(90deg, rgba(5,7,10,0.82) 0%, rgba(5,7,10,0.38) 52%, rgba(5,7,10,0.18) 100%), linear-gradient(0deg, rgba(5,7,10,0.78) 0%, rgba(5,7,10,0.12) 58%, rgba(5,7,10,0.22) 100%)",
           }}
         />
         <div className="relative z-[1] mx-auto flex min-h-[min(72vw,420px)] max-w-[1120px] flex-col justify-end px-6 pb-12 pt-24">
@@ -84,8 +84,8 @@ export function AustinVenue() {
 
         <div className="relative mt-12 isolate min-h-[240px] overflow-hidden border border-[var(--hairline)] sm:min-h-[280px]">
           <Image
-            src="/austin-skyline-dusk.jpg"
-            alt="Austin skyline at dusk with Circuit of the Americas observation tower on the horizon"
+            src="/cota-track-day.jpg"
+            alt="Daytime Circuit of the Americas — race car on the red-white-blue runoff under clear sky"
             fill
             className="object-cover object-[center_40%]"
             sizes="(max-width: 1120px) 100vw, 1120px"
@@ -94,12 +94,12 @@ export function AustinVenue() {
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(90deg, rgba(5,7,10,0.9) 0%, rgba(5,7,10,0.45) 55%, rgba(5,7,10,0.55) 100%)",
+                "linear-gradient(90deg, rgba(5,7,10,0.88) 0%, rgba(5,7,10,0.4) 55%, rgba(5,7,10,0.5) 100%)",
             }}
           />
           <div className="relative z-[1] flex h-full min-h-[240px] flex-col justify-end p-6 sm:min-h-[280px] sm:p-8">
             <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-[var(--signal)]">
-              Home circuit energy
+              Home circuit · daylight
             </p>
             <p className="mt-2 max-w-lg font-display text-xl font-semibold tracking-tight text-[var(--chalk)] sm:text-2xl">
               Sell the craft on the track that defines the US GP weekend.
@@ -110,22 +110,32 @@ export function AustinVenue() {
             </p>
             <div className="mt-5 grid max-w-xl gap-3 sm:grid-cols-2">
               <CarStage track="cota" className="border-[var(--hairline-strong)]">
-                <CarLivery
-                  accent={TEAM_ACCENTS.Ferrari}
-                  number={16}
-                  compoundLetter="S"
-                  width={260}
-                  track="cota"
-                />
+                <div className="flex w-full flex-col gap-1">
+                  <span className="font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--signal)]">
+                    P1 · LEC Soft flyer
+                  </span>
+                  <CarLivery
+                    accent={TEAM_ACCENTS.Ferrari}
+                    number={16}
+                    compoundLetter="S"
+                    width={260}
+                    track="cota"
+                  />
+                </div>
               </CarStage>
               <CarStage track="cota" className="border-[var(--hairline-strong)]">
-                <CarLivery
-                  accent={TEAM_ACCENTS.Ferrari}
-                  number={44}
-                  compoundLetter="S"
-                  width={260}
-                  track="cota"
-                />
+                <div className="flex w-full flex-col gap-1">
+                  <span className="font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--mute)]">
+                    P2 · ANT Soft flyer
+                  </span>
+                  <CarLivery
+                    accent={TEAM_ACCENTS.Mercedes}
+                    number={12}
+                    compoundLetter="S"
+                    width={260}
+                    track="cota"
+                  />
+                </div>
               </CarStage>
             </div>
             <div className="mt-5">

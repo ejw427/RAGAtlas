@@ -181,11 +181,11 @@ export function Hero() {
     <section className="relative isolate flex min-h-dvh items-end overflow-hidden">
       <div className="absolute inset-0 z-0">
         <Image
-          src="/cota-hero-night.jpg"
-          alt="Circuit of the Americas Turn 1 climb at night with observation tower - United States Grand Prix atmosphere"
+          src="/cota-hero-day.jpg"
+          alt="Circuit of the Americas in daylight — Texas flag over the star-spangled runoff and race traffic"
           fill
           priority
-          className="object-cover object-[center_42%] hero-kenburns"
+          className="object-cover object-[center_45%] hero-kenburns"
           sizes="100vw"
         />
       </div>
@@ -194,7 +194,7 @@ export function Hero() {
         className="pointer-events-none absolute inset-0 z-[3]"
         style={{
           background:
-            "linear-gradient(90deg, rgba(5,7,10,0.92) 0%, rgba(5,7,10,0.55) 38%, rgba(5,7,10,0.15) 62%, rgba(5,7,10,0.7) 100%), linear-gradient(0deg, rgba(5,7,10,0.96) 0%, rgba(5,7,10,0.35) 42%, rgba(5,7,10,0.25) 100%)",
+            "linear-gradient(90deg, rgba(5,7,10,0.82) 0%, rgba(5,7,10,0.4) 42%, rgba(5,7,10,0.08) 72%, rgba(5,7,10,0.45) 100%), linear-gradient(0deg, rgba(5,7,10,0.88) 0%, rgba(5,7,10,0.22) 50%, rgba(5,7,10,0.12) 100%)",
         }}
       />
       <div className="cota-kerb pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-1.5" />
@@ -223,45 +223,46 @@ export function Hero() {
           >
             <span className="font-semibold leading-tight">Open COTA session</span>
             <span className="mt-0.5 font-mono text-[0.58rem] font-medium uppercase tracking-[0.1em] opacity-75">
-              Live telemetry desk · Ferrari house
+              Pit wall · ask → cite → playhead lock
             </span>
           </Link>
           <Link
-            href="/session?demo=1&house=ferrari&q=Why%20did%20brake%20temp%20spike%20in%20S3%20on%20lap%2010%3F"
+            href="/about"
             className="group flex min-w-[11rem] flex-col justify-center rounded-sm border border-[var(--hairline-strong)] bg-[var(--panel)]/80 px-4 py-3 text-[var(--chalk)] backdrop-blur-sm transition hover:border-[var(--signal)]/45 hover:bg-[var(--rail)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
           >
-            <span className="font-semibold leading-tight">Try a grounded ask</span>
+            <span className="font-semibold leading-tight">Method</span>
             <span className="mt-0.5 font-mono text-[0.58rem] font-medium uppercase tracking-[0.1em] text-[var(--mute)]">
-              Brake spike · cite locks playhead
-            </span>
-          </Link>
-          <Link
-            href="#how-it-works"
-            className="group flex min-w-[11rem] flex-col justify-center rounded-sm border border-transparent px-4 py-3 text-[var(--mist)] transition hover:border-[var(--hairline)] hover:text-[var(--chalk)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
-          >
-            <span className="font-semibold leading-tight">See the method</span>
-            <span className="mt-0.5 font-mono text-[0.58rem] font-medium uppercase tracking-[0.1em] text-[var(--mute)]">
-              Ask → cite → lock on map
+              Architecture · stack · craft signals
             </span>
           </Link>
         </div>
         <div className="mt-6 max-w-lg">
           <CarStage track="cota" showNote={false}>
             <div className="flex w-full items-end justify-between gap-3 px-1">
-              <CarLivery
-                accent={TEAM_ACCENTS.Ferrari}
-                number={16}
-                compoundLetter="S"
-                width={260}
-                track="cota"
-              />
-              <CarLivery
-                accent={TEAM_ACCENTS.Ferrari}
-                number={44}
-                compoundLetter="S"
-                width={210}
-                track="cota"
-              />
+              <div className="flex flex-col items-start gap-1">
+                <span className="font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--signal)]">
+                  P1 · LEC · 1:35.291 Soft
+                </span>
+                <CarLivery
+                  accent={TEAM_ACCENTS.Ferrari}
+                  number={16}
+                  compoundLetter="S"
+                  width={260}
+                  track="cota"
+                />
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <span className="font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--mute)]">
+                  P2 · ANT · 1:35.333 Soft
+                </span>
+                <CarLivery
+                  accent={TEAM_ACCENTS.Mercedes}
+                  number={12}
+                  compoundLetter="S"
+                  width={210}
+                  track="cota"
+                />
+              </div>
             </div>
           </CarStage>
         </div>

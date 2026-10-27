@@ -4,8 +4,9 @@ export const AUTHOR = "Eric";
 export const PRODUCT = "CiteTrace";
 export const TAGLINE = "Ask the lap. Trust the trace.";
 export const PRODUCT_LINE = `${STUDIO} · ${PRODUCT}`;
-/** Method / pitch headline */
-export const METHOD_HEADLINE = "Knowledge beside the traces";
+/** Method / pitch headline — technical sell on /about */
+export const METHOD_HEADLINE =
+  "Retrieve → generate → cite → lock the playhead";
 /** One-line wedge for hiring-manager skim */
 export const WEDGE =
   "Waveforms are table stakes. Grounded answers are the job.";
@@ -21,7 +22,7 @@ export const LIVE_COMPARE_URL = `${LIVE_URL}/session?house=ferrari`;
 export const LIVE_DEMO_URL = `${LIVE_URL}/session?demo=1&house=ferrari`;
 export const LIVE_AUDI_URL = `${LIVE_URL}/session?demo=1&house=audi`;
 export const PORTFOLIO_URL = "https://www.welchsoftware.net/projects/citetrace";
-/** 90-second demo ask - keep this the money shot */
+/** Money-shot ask — cite locks playhead on the stadium brake */
 export const DEMO_ASK = "Why did brake temp spike in S3 on lap 10?";
 export const DEMO_NO_HIT = "Who is the championship leader?";
 export const DEMO_STEPS = [

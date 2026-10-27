@@ -128,17 +128,17 @@ export default function AboutPage() {
             </Link>
           </div>
           <Button asChild size="sm">
-            <Link href="/session?demo=1&house=ferrari">90s demo</Link>
+            <Link href="/session?demo=1&house=ferrari">Open pit wall</Link>
           </Button>
         </div>
       </header>
 
       <div className="relative isolate h-40 overflow-hidden border-b border-[var(--hairline)] sm:h-52">
         <Image
-          src="/cota-tower-dusk.jpg"
-          alt="Circuit of the Americas observation tower at dusk"
+          src="/cota-tower-day.jpg"
+          alt="Circuit of the Americas observation tower in daylight"
           fill
-          className="object-cover object-[center_40%]"
+          className="object-cover object-[center_28%]"
           sizes="100vw"
           priority
         />
@@ -158,20 +158,25 @@ export default function AboutPage() {
 
       <article className="mx-auto max-w-[800px] px-6 py-12">
         <p className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-[var(--signal)]">
-          {STUDIO} · Method
+          {STUDIO} · Method · hiring-manager deep cut
         </p>
         <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-          {PRODUCT}: {METHOD_HEADLINE}
+          {METHOD_HEADLINE}
         </h1>
         <p className="mt-2 font-display text-lg text-[var(--chalk)]">{WEDGE}</p>
         <p className="mt-1 text-[var(--mist)]">{TAGLINE}</p>
         <p className="mt-4 text-[var(--mist)] leading-relaxed">
-          {PRODUCT} is a {STUDIO} portfolio prototype: React/TypeScript craft for
-          dense time-series workspaces, multi-store session literacy (samples +
-          metadata + notes), and evidence-bound retrieval — not a chatbot toy.
-          Independent work. Not affiliated with, endorsed by, or licensed by
-          Formula 1, the FIA, or any team. Session car and helmet graphics are
-          editorial public media for demo recognition only.
+          This page is the technical sell. {AUTHOR} at {STUDIO} just shipped{" "}
+          {PRODUCT} as a first-stab pit wall from{" "}
+          <span className="text-[var(--chalk)]">public OpenF1</span> for the{" "}
+          <span className="text-[var(--chalk)]">
+            2026 United States GP · Circuit of the Americas · FP2
+          </span>{" "}
+          (session found online, all 22 drivers). Not a chatbot bolted onto a
+          chart library — a distance-domain workspace where every claim is a
+          first-class cite that locks the playhead on the map and the traces, or
+          the system fails closed. Independent portfolio prototype. Not
+          affiliated with Formula 1, the FIA, or any team.
         </p>
         <p className="mt-3 font-mono text-[0.65rem] text-[var(--mute)]">
           Live:{" "}
@@ -190,11 +195,40 @@ export default function AboutPage() {
           </a>
         </p>
 
-        {/* 90-second demo */}
         <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
           <h2 className="font-display text-xl font-semibold">
-            What this proves in 90 seconds
+            Why a tools / Digital Solutions hiring manager should care
           </h2>
+          <ul className="list-disc space-y-2.5 pl-5 text-[var(--mist)]">
+            <li>
+              <span className="text-[var(--chalk)]">Race-weekend → product in days</span>{" "}
+              — pulled a live public corpus, shaped a multi-rate session pack,
+              and shipped a React/TypeScript pit wall with any-car compare and
+              evidence-bound asks. That is the delivery shape Digital Solutions /
+              performance-tools teams need under calendar pressure.
+            </li>
+            <li>
+              <span className="text-[var(--chalk)]">
+                Fail-closed session RAG, not LLM theatre
+              </span>{" "}
+              — QaMap + notes retrieve cites first; Cloudflare Workers AI may
+              only phrase from that set; offline{" "}
+              <span className="font-mono text-[0.78rem]">next dev</span> uses the
+              deterministic draft so the money-shot never flakes in a hallway demo.
+            </li>
+            <li>
+              <span className="text-[var(--chalk)]">ATLAS-shaped literacy without a clone</span>{" "}
+              — session / lap / channel / distance / compare vocabulary from public
+              ATLAS docs; OF1 vs OVL badges so synthetic plant overlays never pretend
+              to be SECU.
+            </li>
+            <li>
+              <span className="text-[var(--chalk)]">Dense operator UX</span> — SVG
+              waveforms, circuit scrub, Focus/Reference duo, sector deltas, compound
+              honesty. The same craft that ships under pressure on long-running
+              C#/.NET field systems (TRACS) and Meridian.
+            </li>
+          </ul>
           <p className="text-[var(--mist)] leading-relaxed">
             {CANDIDATE_LINE}. Money-shot ask:{" "}
             <span className="font-mono text-[var(--chalk)]">{DEMO_ASK}</span>
@@ -206,7 +240,7 @@ export default function AboutPage() {
           </ol>
           <div className="rounded-sm border border-[var(--hairline)] bg-[var(--panel)] px-3 py-2.5">
             <p className="font-mono text-[0.55rem] uppercase tracking-[0.12em] text-[var(--mute)]">
-              Email / LinkedIn blurb · {AUTHOR}
+              Paste into email / LinkedIn · {AUTHOR}
             </p>
             <p className="mt-1.5 text-[0.78rem] leading-relaxed text-[var(--chalk)]">
               {EMAIL_BLURB}
@@ -216,7 +250,7 @@ export default function AboutPage() {
             </p>
           </div>
           <Button asChild size="sm" className="mt-2">
-            <Link href="/session?demo=1&house=ferrari">Run the 90s demo</Link>
+            <Link href="/session?demo=1&house=ferrari">Open pit wall</Link>
           </Button>
         </section>
 
@@ -281,31 +315,31 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Problem > product */}
         <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
           <h2 className="font-display text-xl font-semibold">
-            {"Problem > product"}
+            Problem → product (the technical bet)
           </h2>
           <p className="text-[var(--mist)] leading-relaxed">
-            Session Q&amp;A without grounding invents physics: a fluent answer
-            that cannot point at a channel window, note, or sector is worse than
-            silence for performance users.
+            Unbound session Q&amp;A invents physics. A fluent sentence that cannot
+            point at a channel window, note, or sector is worse than silence for
+            performance users — and a liability in a debrief.
           </p>
           <p className="text-[var(--mist)] leading-relaxed">
-            {PRODUCT} binds every claim to a cite - then locks the playhead and
-            paints an evidence band on the traces. Out-of-window questions
-            fail closed. The wedge is not “AI on telemetry”; it is{" "}
+            {PRODUCT} treats cites as first-class objects: retrieve evidence →
+            generate only from that set → click a cite → lock playhead + paint an
+            evidence band on the distance-domain traces and the circuit. Out of
+            corpus → fail closed. The wedge is not “AI on telemetry”; it is{" "}
             <span className="text-[var(--chalk)]">
               evidence beside the traces
             </span>
-            .
+            , with provenance you can audit in the chrome (OF1 vs OVL).
           </p>
         </section>
 
-        {/* 90s demo */}
+        {/* Session walk-through */}
         <section className="mt-10 space-y-4 border-t border-[var(--hairline)] pt-8">
           <h2 className="font-display text-xl font-semibold">
-            What you can do in 90 seconds
+            What you can do in the session
           </h2>
           <ol className="list-decimal space-y-2 pl-5 text-[var(--mist)]">
             <li>Open the COTA session - LEC Soft flyer by default</li>
@@ -362,7 +396,7 @@ export default function AboutPage() {
             />
           </div>
           <Button asChild>
-            <Link href="/session?demo=1&house=ferrari">Run 90s demo</Link>
+            <Link href="/session?demo=1&house=ferrari">Open pit wall</Link>
           </Button>
         </section>
 
@@ -397,82 +431,97 @@ export default function AboutPage() {
           </p>
         </section>
 
-        {/* Engineering judgment */}
         <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
           <h2 className="font-display text-xl font-semibold">
-            Engineering judgment
+            Engineering judgment (what I chose and why)
           </h2>
-          <ul className="list-disc space-y-2 pl-5 text-[var(--mist)]">
+          <ul className="list-disc space-y-2.5 pl-5 text-[var(--mist)]">
             <li>
               <span className="text-[var(--chalk)]">
-                Retrieve → generate → cite
+                Retrieve → generate → cite → stage lock
               </span>{" "}
-              - QaMap + notes retrieve evidence first; Cloudflare Workers AI
-              phrases the claim only from that set. No evidence → fail closed.
-              Offline /{" "}
-              <span className="font-mono text-[0.78rem]">next dev</span> falls
-              back to the deterministic draft so the money-shot never flakes.
+              — QaMap + session notes are the retrieval layer; Workers AI is a
+              phrasing step, not a knowledge store. No evidence → silence. That
+              contract is what I would defend in a tools interview.
             </li>
             <li>
               <span className="text-[var(--chalk)]">
-                OpenF1 subset + labeled overlays
+                OpenF1 subset + labeled ATLAS-shaped overlays
               </span>{" "}
-              - real broadcast car_data, pits, weather series, and team radio
-              for the field; synthetic rear/front brake temp, brake pressure,
-              tyre surface, steering, long-g, fuel flow, oil, and coolant where
-              public feeds have no ATLAS-class plant channels - provenance is
-              explicit in the chrome.
+              — real broadcast car_data, pits, weather, team radio for the field;
+              synthetic brake temp / pressure, tyre surface, steering, long-g,
+              fuel flow, oil, coolant where public feeds have no plant channel.
+              OF1 vs OVL is painted in-product so a hiring manager never has to
+              ask “is that real?”
             </li>
             <li>
               <span className="text-[var(--chalk)]">Distance-domain stage</span>{" "}
-              - whole-lap and sector focus, playhead scrub, compare overlays;
-              matches how engineers argue about the lap.
+              — metres, not wall-clock only: whole-lap and S1–S3 focus, dual-car
+              overlays, sector deltas, compound labels. Matches how engineers
+              argue the lap.
             </li>
             <li>
-              <span className="text-[var(--chalk)]">Field + depth</span> - best
-              flyer for all {corpus.drivers} cars; LEC Hard / Soft / long-run
-              trio for Soft-vs-Hard narrative depth.
+              <span className="text-[var(--chalk)]">Field + depth</span> — best
+              flyer for all {corpus.drivers} cars; LEC Soft / Hard / long-run trio
+              for compound narratives; house walk-ins for every 2026 team on the
+              wall.
+            </li>
+            <li>
+              <span className="text-[var(--chalk)]">Ship path</span> — static
+              session pack + Cloudflare Workers Assets + GitHub Actions
+              push-to-prod; fetch/enrich scripts for regenerating the COTA pack
+              without rewriting the UI.
             </li>
           </ul>
         </section>
 
-        {/* Craft signals */}
         <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
-          <h2 className="font-display text-xl font-semibold">Craft signals</h2>
-          <ul className="list-disc space-y-2 pl-5 text-[var(--mist)]">
+          <h2 className="font-display text-xl font-semibold">
+            Craft signals (read this as a résumé for the screen)
+          </h2>
+          <ul className="list-disc space-y-2.5 pl-5 text-[var(--mist)]">
             <li>
-              <span className="text-[var(--chalk)]">React / TypeScript UX</span>{" "}
-              - dense pit-wall chrome, SVG waveforms, keyboard-focusable controls.
+              <span className="text-[var(--chalk)]">React / TypeScript</span> —
+              dense pit-wall chrome, SVG waveforms, keyboard-focusable controls,
+              URL-addressable Focus/Reference compares.
             </li>
             <li>
-              <span className="text-[var(--chalk)]">Multi-store literacy</span>{" "}
-              - samples, session metadata, and notes as one grounded corpus.
+              <span className="text-[var(--chalk)]">Multi-store literacy</span> —
+              samples + session metadata + notes as one grounded corpus; cites
+              resolve to windows, not chat footnotes.
             </li>
             <li>
-              <span className="text-[var(--chalk)]">Telemetry vocabulary</span>{" "}
-              - session, lap, channel, compare, notes, events - shaped like public
-              ATLAS docs without cloning vendor UI.
+              <span className="text-[var(--chalk)]">
+                Polyglot delivery habit
+              </span>{" "}
+              — Cursor-first day-to-day on long-running C#/.NET field systems and
+              Meridian; this slice proves the same ownership shape in modern
+              React/TS edge deploy.
             </li>
             <li>
-              <span className="text-[var(--chalk)]">Provenance labeling</span> -
-              OpenF1 vs synthetic overlay called out in-product; fail-closed when
-              the window cannot support the claim.
+              <span className="text-[var(--chalk)]">Provenance discipline</span> —
+              OpenF1 vs synthetic overlay labeled; fail-closed when the window
+              cannot support the claim; editorial kit marks only — no fake team
+              affiliation.
             </li>
           </ul>
         </section>
 
-        {/* Stack */}
         <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
           <h2 className="font-display text-xl font-semibold">Stack</h2>
           <div className="flex flex-wrap gap-1.5">
             {[
               "Next.js App Router",
               "TypeScript",
+              "React 19",
               "Tailwind",
-              "SVG stage",
+              "SVG stage / waveforms",
               "In-process QaMap",
-              "OpenF1 fetch script",
-              "Static session pack",
+              "Cloudflare Workers AI",
+              "Workers Assets",
+              "OpenF1 fetch + enrich",
+              "Static COTA session pack",
+              "GitHub Actions deploy",
             ].map((s) => (
               <span
                 key={s}
@@ -527,12 +576,17 @@ export default function AboutPage() {
             {pack.dataProvenance?.shapedLike.map((s) => (
               <li key={s}>Shaped like: {s}</li>
             ))}
+            <li>
+              Venue photographs: Circuit of the Americas daytime track / tower
+              stills via Unsplash (Charlie Schroeder, Sai Kiran Belana) and
+              Wikimedia Commons (Steve / mrlaugh — CC BY-SA 2.0 main straight)
+            </li>
           </ul>
         </section>
 
         <div className="mt-12 flex flex-wrap gap-4 border-t border-[var(--hairline)] pt-8">
           <Button asChild>
-            <Link href="/session?demo=1&house=ferrari">Run 90s demo</Link>
+            <Link href="/session?demo=1&house=ferrari">Open pit wall</Link>
           </Button>
           <Button asChild variant="rail">
             <Link href="/session?driver=LEC&lap=10&citeId=cite_brake_spike">
