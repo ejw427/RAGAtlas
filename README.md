@@ -90,15 +90,21 @@ The session screen is specified as a pit wall: the COTA map on stage, any car ag
 
 ## Job applications
 
-Use these links (not the private GitHub repo):
+**Story to lead every email:** Just shipped CiteTrace — a **first stab** built from **public OpenF1** results for the **2026 United States GP · Circuit of the Americas · FP2** (session found online, all 22 drivers). Circuit on stage · any-car compare · cite→playhead lock · labeled ATLAS-shaped overlays (OF1 vs OVL). Independent portfolio prototype — not a team tool.
+
+Send-ready emails: `D:\welch-website\public\private\ew-f1-20261024\emails.html` (+ `EMAIL-*.txt`). Never send the private GitHub repo.
 
 | Where | What to paste |
 |-------|----------------|
 | Resume / LinkedIn / email | `https://citetrace.welchsoftware.net` |
 | Portfolio context | `https://www.welchsoftware.net/projects/citetrace` |
 | Resume / interview demo | `https://citetrace.welchsoftware.net/session?demo=1&house=ferrari` |
-| Compare walk-in | `https://citetrace.welchsoftware.net/session?house=ferrari` |
-| Deep-link demo | `https://citetrace.welchsoftware.net/session?driver=LEC&lap=10` |
+| Audi Revolut F1 walk-in | `https://citetrace.welchsoftware.net/session?demo=1&house=audi` |
+| McLaren walk-in | `https://citetrace.welchsoftware.net/session?demo=1&house=mclaren` |
+| Williams walk-in | `https://citetrace.welchsoftware.net/session?demo=1&house=williams` |
+| Red Bull walk-in | `https://citetrace.welchsoftware.net/session?demo=1&house=redbull` |
+| Motion / ATLAS money shot | Ferrari walk-in + ask brake-temp S3 L10 (OF1 vs OVL) |
 
 **Pitch:** Waveforms are table stakes. Grounded answers are the job.  
-**Ask:** `Why did brake temp spike in S3 on lap 10?` → click cite → playhead locks.
+**Ask:** `Why did brake temp spike in S3 on lap 10?` → click cite → playhead locks.  
+**Audi line:** Medium beating Soft by 0.208 — compounds labeled before the delta.

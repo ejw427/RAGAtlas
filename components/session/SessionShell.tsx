@@ -16,7 +16,10 @@ import { TelemetryStage } from "@/components/session/TelemetryStage";
 import { TrackSchematic } from "@/components/session/TrackSchematic";
 import { RagRail } from "@/components/session/RagRail";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { speedDeltaSeries } from "@/lib/compare-series";
+import {
+  channelDeltaSeries,
+  deltaChannelLegend,
+} from "@/lib/compare-series";
 import {
   accentFor,
   bestFlyerFor,
@@ -173,6 +176,8 @@ export function SessionShell() {
     startM: number;
     endM: number;
   } | null>(null);
+  /** Channel driving green/red map + compare paint when dual-car. */
+  const [deltaChannelId, setDeltaChannelId] = useState("speed");
   const [demoOpen, setDemoOpen] = useState(true);
   const [demoStep, setDemoStep] = useState<DemoStep>(0);
   const [askTrigger, setAskTrigger] = useState<{
@@ -235,13 +240,46 @@ export function SessionShell() {
   const deltas = sectorDeltas(lap, referenceLap);
   const gain = biggestGainSector(deltas);
   const loss = biggestLossSector(deltas);
-  const speedDelta = useMemo(
+  const activeDeltaChannel =
+    compareLapId && getSample(deltaChannelId, lapId) && getSample(deltaChannelId, compareLapId)
+      ? deltaChannelId
+      : compareLapId
+        ? "speed"
+        : deltaChannelId;
+  const channelDelta = useMemo(
     () =>
       compareLapId
-        ? speedDeltaSeries(lapId, compareLapId, lengthM, 200)
+        ? channelDeltaSeries(
+            activeDeltaChannel,
+            lapId,
+            compareLapId,
+            lengthM,
+            200,
+          )
         : null,
-    [compareLapId, lapId, lengthM],
+    [compareLapId, lapId, lengthM, activeDeltaChannel],
   );
+  const deltaLegend = deltaChannelLegend(activeDeltaChannel);
+  const setCompareChannel = useCallback(
+    (id: string) => {
+      if (!compareLapId) return;
+      if (!getSample(id, lapId) || !getSample(id, compareLapId)) return;
+      setDeltaChannelId(id);
+    },
+    [compareLapId, lapId],
+  );
+  useEffect(() => {
+    if (!compareLapId) {
+      setDeltaChannelId("speed");
+      return;
+    }
+    if (
+      !getSample(deltaChannelId, lapId) ||
+      !getSample(deltaChannelId, compareLapId)
+    ) {
+      setDeltaChannelId("speed");
+    }
+  }, [compareLapId, deltaChannelId, lapId]);
   const openCompare = useCallback(() => {
     if (compareLapId) setCompareOpen(true);
   }, [compareLapId]);
@@ -877,7 +915,10 @@ export function SessionShell() {
               lossSectorIndex={
                 loss && loss.ms > 0 ? loss.index : null
               }
-              speedDelta={speedDelta}
+              channelDelta={channelDelta}
+              deltaChannelLabel={deltaLegend.label}
+              deltaAheadLabel={deltaLegend.ahead}
+              deltaBehindLabel={deltaLegend.behind}
               onOpenCompare={compareLapId ? openCompare : undefined}
               onViewWindow={setMapWindow}
               viewWindow={mapWindow}
@@ -889,6 +930,7 @@ export function SessionShell() {
                   : undefined
               }
               lapId={lapId}
+              compareLapId={compareLapId}
             />
           </div>
           <div className="flex min-h-[720px] flex-1 flex-col gap-1.5 md:min-h-[620px]">
@@ -927,6 +969,8 @@ export function SessionShell() {
               viewWindow={mapWindow}
               onViewWindow={setMapWindow}
               sectorDeltaMs={deltas?.sectorsMs ?? null}
+              deltaChannelId={compareLapId ? activeDeltaChannel : null}
+              onDeltaChannel={compareLapId ? setCompareChannel : undefined}
             />
           </div>
         </main>
@@ -934,6 +978,7 @@ export function SessionShell() {
         <div className="min-h-[360px] border-t border-[var(--hairline)] md:min-h-0 md:overflow-y-auto md:overscroll-contain md:border-t-0">
           <SelectDock
             lapId={lapId}
+            compareLapId={compareLapId}
             playheadM={playheadM}
             activeCiteId={selectedCite?.id ?? null}
             onTimelineCite={(id) => {
@@ -943,6 +988,8 @@ export function SessionShell() {
             plotChannelIds={plotChannelIds}
             onTogglePlot={togglePlot}
             onSetPlots={setPlots}
+            deltaChannelId={compareLapId ? activeDeltaChannel : null}
+            onDeltaChannel={compareLapId ? setCompareChannel : undefined}
             emphasizeBrake={driverId === pack.primaryDriverId}
             driverLaps={driverLaps}
             lapNumber={lapNumber}
@@ -989,6 +1036,9 @@ export function SessionShell() {
           playheadM={playheadM}
           onJumpSector={selectSector}
           onPlayhead={onPlayhead}
+          deltaChannelId={activeDeltaChannel}
+          onDeltaChannel={setCompareChannel}
+          channelDelta={channelDelta}
         />
       )}
 
@@ -1011,7 +1061,12 @@ export function SessionShell() {
         sectorDeltaMs={deltas?.sectorsMs ?? null}
         gainSectorIndex={gain?.index ?? null}
         lossSectorIndex={loss && loss.ms > 0 ? loss.index : null}
-        speedDelta={speedDelta}
+        channelDelta={channelDelta}
+        deltaChannelId={activeDeltaChannel}
+        deltaChannelLabel={deltaLegend.label}
+        deltaAheadLabel={deltaLegend.ahead}
+        deltaBehindLabel={deltaLegend.behind}
+        onDeltaChannel={compareLapId ? setCompareChannel : undefined}
         onOpenCompare={compareLapId ? openCompare : undefined}
         onViewWindow={setMapWindow}
         viewWindow={mapWindow}
@@ -1022,6 +1077,7 @@ export function SessionShell() {
             : undefined
         }
         lapId={lapId}
+        compareLapId={compareLapId}
       />
 
       {racerSheet === "Focus" && (

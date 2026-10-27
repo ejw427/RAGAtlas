@@ -12,10 +12,31 @@ import {
   compoundOf,
   formatDeltaSec,
 } from "@/lib/identity";
-import { speedDeltaSeries } from "@/lib/compare-series";
-import { getTrackPackage, lapDistanceM } from "@/lib/session";
+import {
+  channelDeltaSeries,
+  deltaChannelLegend,
+} from "@/lib/compare-series";
+import {
+  formatChannelValue,
+  getChannel,
+  getSample,
+  getTrackPackage,
+  lapDistanceM,
+} from "@/lib/session";
 import type { Driver, Lap } from "@/lib/types";
 import { formatLapTime, interpolateAt, cn } from "@/lib/utils";
+
+const COMPARE_PICKS = [
+  "speed",
+  "throttle",
+  "brake",
+  "brake_pressure",
+  "n_gear",
+  "steering",
+  "rpm",
+  "drs",
+  "g_long",
+] as const;
 
 export function CompareDetailSheet({
   open,
@@ -30,6 +51,9 @@ export function CompareDetailSheet({
   playheadM,
   onJumpSector,
   onPlayhead,
+  deltaChannelId = "speed",
+  onDeltaChannel,
+  channelDelta,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -43,6 +67,9 @@ export function CompareDetailSheet({
   playheadM: number;
   onJumpSector: (sector: string) => void;
   onPlayhead: (m: number) => void;
+  deltaChannelId?: string;
+  onDeltaChannel?: (channelId: string) => void;
+  channelDelta?: { d: number[]; v: number[] } | null;
 }) {
   const focusAccent = accentFor(focusDriver);
   const refAccent = accentFor(referenceDriver);
@@ -50,10 +77,35 @@ export function CompareDetailSheet({
   const lengthM = lapDistanceM();
   const compoundsDiffer =
     compoundOf(focusLap) !== compoundOf(referenceLap);
+  const legend = deltaChannelLegend(deltaChannelId);
+  const channel = getChannel(deltaChannelId);
 
   const delta = useMemo(
-    () => speedDeltaSeries(focusLap.id, referenceLap.id, lengthM, 200),
-    [focusLap.id, referenceLap.id, lengthM],
+    () =>
+      channelDelta ??
+      channelDeltaSeries(
+        deltaChannelId,
+        focusLap.id,
+        referenceLap.id,
+        lengthM,
+        200,
+      ),
+    [
+      channelDelta,
+      deltaChannelId,
+      focusLap.id,
+      referenceLap.id,
+      lengthM,
+    ],
+  );
+
+  const picks = useMemo(
+    () =>
+      COMPARE_PICKS.filter(
+        (id) =>
+          getSample(id, focusLap.id) && getSample(id, referenceLap.id),
+      ),
+    [focusLap.id, referenceLap.id],
   );
 
   const live = delta ? interpolateAt(delta, playheadM) : null;
@@ -144,7 +196,7 @@ export function CompareDetailSheet({
                   "font-display text-xl font-black tabular-nums",
                   deltas.lapMs <= 0
                     ? "text-[var(--signal)]"
-                    : "text-[var(--trace-amber)]",
+                    : "text-[var(--fault)]",
                 )}
               >
                 {formatDeltaSec(deltas.lapMs)}
@@ -219,7 +271,7 @@ export function CompareDetailSheet({
                       "rounded-md border px-2 py-2 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
                       ahead
                         ? "border-[var(--signal)]/40 bg-[var(--signal-dim)]/50"
-                        : "border-[var(--trace-amber)]/40 bg-[var(--trace-amber)]/10",
+                        : "border-[var(--fault)]/40 bg-[rgba(255,77,94,0.12)]",
                     )}
                   >
                     <span className="block font-mono text-[0.5rem] uppercase text-[var(--mute)]">
@@ -235,7 +287,7 @@ export function CompareDetailSheet({
                         "mt-0.5 block font-display text-lg font-bold tabular-nums",
                         ahead
                           ? "text-[var(--signal)]"
-                          : "text-[var(--trace-amber)]",
+                          : "text-[var(--fault)]",
                       )}
                     >
                       {formatDeltaSec(ms)}
@@ -247,20 +299,43 @@ export function CompareDetailSheet({
           </div>
 
           <div className="rounded-md border border-[var(--hairline)] bg-[var(--panel)] p-2.5">
+            <div className="mb-1.5 flex flex-wrap gap-1">
+              {picks.map((id) => {
+                const ch = getChannel(id);
+                const hot = id === deltaChannelId;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => onDeltaChannel?.(id)}
+                    className={cn(
+                      "rounded-sm border px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-[0.08em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
+                      hot
+                        ? "border-[var(--signal)] bg-[var(--signal-dim)] text-[var(--signal)]"
+                        : "border-[var(--hairline)] text-[var(--mist)] hover:border-[var(--signal)]/40",
+                    )}
+                  >
+                    {ch?.displayName ?? ch?.name ?? id}
+                  </button>
+                );
+              })}
+            </div>
             <div className="mb-1 flex items-baseline justify-between gap-2">
               <p className="font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--mute)]">
-                Delta speed · distance domain
+                Δ{legend.label} · distance domain
               </p>
               <p
                 className={cn(
                   "font-mono text-[0.7rem] font-semibold tabular-nums",
                   live != null && live < 0
-                    ? "text-[var(--trace-amber)]"
+                    ? "text-[var(--fault)]"
                     : "text-[var(--signal)]",
                 )}
               >
                 {live != null
-                  ? `${live >= 0 ? "+" : ""}${live.toFixed(1)} km/h @ ${Math.round(playheadM)} m`
+                  ? `${live >= 0 ? "+" : ""}${
+                      Math.abs(live) >= 10 ? live.toFixed(0) : live.toFixed(1)
+                    }${legend.unit ? ` ${legend.unit}` : ""} @ ${Math.round(playheadM)} m`
                   : "-"}
               </p>
             </div>
@@ -269,7 +344,7 @@ export function CompareDetailSheet({
                 viewBox={`0 0 ${spark.W} ${spark.H}`}
                 className="h-24 w-full cursor-crosshair"
                 role="img"
-                aria-label="Speed delta sparkline Focus minus Reference"
+                aria-label={`${legend.label} delta sparkline Focus minus Reference`}
                 onPointerDown={(e) => {
                   const rect = (
                     e.currentTarget as SVGSVGElement
@@ -289,7 +364,11 @@ export function CompareDetailSheet({
                 <path
                   d={spark.line}
                   fill="none"
-                  stroke="var(--signal)"
+                  stroke={
+                    live != null && live < 0
+                      ? "var(--fault)"
+                      : "var(--signal)"
+                  }
                   strokeWidth="2"
                   strokeLinejoin="round"
                 />
@@ -298,10 +377,23 @@ export function CompareDetailSheet({
                   x2={spark.xAt(playheadM)}
                   y1={8}
                   y2={spark.H - 8}
-                  stroke="var(--signal)"
+                  stroke="var(--trace-cyan)"
                   strokeWidth="1.25"
                 />
               </svg>
+            )}
+            {channel && (
+              <p className="mt-1 font-mono text-[0.55rem] text-[var(--mute)]">
+                {legend.ahead} (green) · {legend.behind} (red)
+                {(() => {
+                  const a = getSample(deltaChannelId, focusLap.id);
+                  const b = getSample(deltaChannelId, referenceLap.id);
+                  const va = a ? interpolateAt(a.series, playheadM) : null;
+                  const vb = b ? interpolateAt(b.series, playheadM) : null;
+                  if (va == null || vb == null) return null;
+                  return ` · live ${formatChannelValue(channel, va)} vs ${formatChannelValue(channel, vb)}`;
+                })()}
+              </p>
             )}
           </div>
 
@@ -343,8 +435,9 @@ export function CompareDetailSheet({
           </div>
 
           <p className="font-mono text-[0.55rem] leading-relaxed text-[var(--mute)]">
-            Same metre for both cars. Green = Focus faster / higher speed. Amber
-            = Reference ahead. Map ribbon and traces share this playhead.
+            Same metre for both cars. Green = {legend.ahead}. Red ={" "}
+            {legend.behind}. Map ribbon, expanded circuit, and stage traces share
+            this channel and playhead.
           </p>
         </div>
       </SheetContent>

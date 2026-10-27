@@ -133,7 +133,7 @@ export function CompareDuo({
                     className={cn(
                       "font-display text-xl font-bold tabular-nums leading-none",
                       deltas.lapMs > 0
-                        ? "text-[var(--trace-amber)]"
+                        ? "text-[var(--fault)]"
                         : "text-[var(--signal)]",
                     )}
                   >
@@ -223,7 +223,7 @@ export function CompareDuo({
                   <span
                     className={
                       deltas.sectorsMs[i] > 0
-                        ? "font-semibold text-[var(--trace-amber)]"
+                        ? "font-semibold text-[var(--fault)]"
                         : "font-semibold text-[var(--signal)]"
                     }
                   >

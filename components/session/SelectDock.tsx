@@ -49,12 +49,15 @@ type Tab = "channels" | "laps" | "notes";
 
 export function SelectDock({
   lapId,
+  compareLapId = null,
   playheadM,
   activeCiteId,
   onTimelineCite,
   plotChannelIds,
   onTogglePlot,
   onSetPlots,
+  deltaChannelId = null,
+  onDeltaChannel,
   emphasizeBrake,
   driverLaps,
   lapNumber,
@@ -62,12 +65,15 @@ export function SelectDock({
   onAsk,
 }: {
   lapId: string;
+  compareLapId?: string | null;
   playheadM: number;
   activeCiteId: string | null;
   onTimelineCite: (citeId: string) => void;
   plotChannelIds: string[];
   onTogglePlot: (channelId: string) => void;
   onSetPlots: (ids: string[]) => void;
+  deltaChannelId?: string | null;
+  onDeltaChannel?: (channelId: string) => void;
   emphasizeBrake?: boolean;
   driverLaps: Lap[];
   lapNumber: number;
@@ -88,6 +94,17 @@ export function SelectDock({
     const sample = getSample(ch.id, lapId);
     if (!sample) return null;
     return interpolateAt(sample.series, playheadM);
+  };
+
+  const liveDelta = (ch: Channel) => {
+    if (!compareLapId) return null;
+    const a = getSample(ch.id, lapId);
+    const b = getSample(ch.id, compareLapId);
+    if (!a || !b) return null;
+    const va = interpolateAt(a.series, playheadM);
+    const vb = interpolateAt(b.series, playheadM);
+    if (va == null || vb == null) return null;
+    return va - vb;
   };
 
   const activePreset = PRESET_ORDER.find((name) => {
@@ -142,8 +159,10 @@ export function SelectDock({
               })}
             </div>
             <p className="font-mono text-[0.55rem] text-[var(--mute)]">
-              {plotChannelIds.length}/{totalChannels} on stage · toggle below ·
-              scroll traces for the full pack
+              {plotChannelIds.length}/{totalChannels} on stage · toggle below
+              {compareLapId
+                ? " · when dual-car, tap a plotted channel to paint map Δ"
+                : " · scroll traces for the full pack"}
             </p>
             {apps.map((app) => (
               <div key={app}>
@@ -153,7 +172,10 @@ export function SelectDock({
                 <ul className="space-y-px">
                   {byApp[app].map((ch) => {
                     const val = liveValue(ch);
+                    const dlt = liveDelta(ch);
                     const plotted = plotChannelIds.includes(ch.id);
+                    const isMapDelta =
+                      Boolean(compareLapId) && deltaChannelId === ch.id;
                     const active =
                       emphasizeBrake && ch.id === "brake_temp"
                         ? true
@@ -162,22 +184,58 @@ export function SelectDock({
                       <li key={ch.id}>
                         <button
                           type="button"
-                          onClick={() => onTogglePlot(ch.id)}
-                          title={ch.description}
+                          onClick={() => {
+                            const canDelta =
+                              Boolean(compareLapId) &&
+                              Boolean(onDeltaChannel) &&
+                              Boolean(
+                                compareLapId &&
+                                  getSample(ch.id, compareLapId),
+                              );
+                            if (!plotted) {
+                              onTogglePlot(ch.id);
+                              if (canDelta) onDeltaChannel?.(ch.id);
+                              return;
+                            }
+                            if (
+                              canDelta &&
+                              deltaChannelId !== ch.id
+                            ) {
+                              onDeltaChannel?.(ch.id);
+                              return;
+                            }
+                            onTogglePlot(ch.id);
+                          }}
+                          title={
+                            compareLapId
+                              ? plotted && deltaChannelId !== ch.id
+                                ? `Paint map Δ ${ch.displayName ?? ch.name}`
+                                : ch.description
+                              : ch.description
+                          }
                           className={cn(
                             "flex w-full items-center gap-1.5 rounded-sm px-0.5 py-px text-left font-mono text-[0.62rem] text-[var(--mist)] hover:bg-[var(--signal-dim)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
                             active && "text-[var(--chalk)]",
-                            plotted && "bg-[var(--signal-dim)]/35",
+                            plotted && !isMapDelta && "bg-[var(--signal-dim)]/35",
+                            isMapDelta &&
+                              (dlt != null && dlt < 0
+                                ? "bg-[rgba(255,77,94,0.18)] text-[var(--chalk)]"
+                                : "bg-[var(--signal-dim)] text-[var(--chalk)]"),
                           )}
                         >
                           <span
                             className="inline-block h-[3px] w-2 shrink-0 rounded-sm"
                             style={{
-                              background: COLOR[ch.colorToken] ?? "var(--mist)",
+                              background: isMapDelta
+                                ? dlt != null && dlt < 0
+                                  ? "var(--fault)"
+                                  : "var(--signal)"
+                                : COLOR[ch.colorToken] ?? "var(--mist)",
                             }}
                           />
                           <span className="min-w-0 flex-1 truncate">
                             {ch.displayName ?? ch.name}
+                            {isMapDelta ? " · MAP" : ""}
                           </span>
                           <span
                             className={cn(
@@ -189,8 +247,25 @@ export function SelectDock({
                           >
                             {sourceBadge(ch)}
                           </span>
-                          <span className="w-[3.6rem] shrink-0 text-right tabular-nums text-[var(--chalk)]">
-                            {val != null ? formatChannelValue(ch, val) : "-"}
+                          <span className="flex w-[3.6rem] shrink-0 flex-col items-end tabular-nums text-[var(--chalk)]">
+                            <span>
+                              {val != null ? formatChannelValue(ch, val) : "-"}
+                            </span>
+                            {dlt != null && (
+                              <span
+                                className={cn(
+                                  "text-[0.5rem] font-bold",
+                                  dlt >= 0
+                                    ? "text-[var(--signal)]"
+                                    : "text-[var(--fault)]",
+                                )}
+                              >
+                                {dlt >= 0 ? "+" : ""}
+                                {Math.abs(dlt) >= 10
+                                  ? dlt.toFixed(0)
+                                  : dlt.toFixed(1)}
+                              </span>
+                            )}
                           </span>
                         </button>
                       </li>

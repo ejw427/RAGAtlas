@@ -129,7 +129,11 @@ export function TrackSchematic({
   stage = false,
   expanded = false,
   paintMode = "both",
+  channelDelta = null,
   speedDelta = null,
+  deltaChannelLabel = "Speed",
+  deltaAheadLabel = "Focus higher",
+  deltaBehindLabel = "Focus lower",
   onOpenCompare,
   onViewWindow,
   viewWindow: externalWindow,
@@ -137,6 +141,7 @@ export function TrackSchematic({
   onInspectFocus,
   onInspectReference,
   lapId,
+  compareLapId,
 }: {
   activeSector: string | null;
   playheadM: number;
@@ -159,7 +164,13 @@ export function TrackSchematic({
   expanded?: boolean;
   /** Compare paint stack: green/red delta, sector colors, or clean road. */
   paintMode?: "both" | "delta" | "sector" | "clean";
+  /** Focus − Reference series for the active compare channel (map ribbon). */
+  channelDelta?: { d: number[]; v: number[] } | null;
+  /** @deprecated Prefer channelDelta — kept for callers still passing speed. */
   speedDelta?: { d: number[]; v: number[] } | null;
+  deltaChannelLabel?: string;
+  deltaAheadLabel?: string;
+  deltaBehindLabel?: string;
   onOpenCompare?: () => void;
   /** Fired when map zoom window changes - stretch traces to match. */
   onViewWindow?: (window: DistWindow | null) => void;
@@ -175,11 +186,14 @@ export function TrackSchematic({
   onInspectReference?: () => void;
   /** Focus lap - used for area speed / channel readout. */
   lapId?: string;
+  /** Reference lap — enables dual live readouts in the area panel. */
+  compareLapId?: string | null;
 }) {
+  const deltaSeries = channelDelta ?? speedDelta;
   const showDeltaPaint =
     comparing &&
     (paintMode === "both" || paintMode === "delta") &&
-    Boolean(speedDelta);
+    Boolean(deltaSeries);
   const showSectorPaint =
     paintMode === "both" || paintMode === "sector";
   const pack = getSessionPack();
@@ -337,15 +351,15 @@ export function TrackSchematic({
   const tower = useMemo(() => pointAt(d, x, y, 180), [d, x, y]);
 
   const deltaRibbon = useMemo(() => {
-    if (!showDeltaPaint || !speedDelta || speedDelta.d.length < 2) return [];
+    if (!showDeltaPaint || !deltaSeries || deltaSeries.d.length < 2) return [];
     const segs: { path: string; gain: boolean }[] = [];
-    const step = Math.max(1, Math.floor(speedDelta.d.length / 90));
-    for (let i = 0; i < speedDelta.d.length - step; i += step) {
-      const m0 = speedDelta.d[i];
-      const m1 = speedDelta.d[Math.min(i + step, speedDelta.d.length - 1)];
+    const step = Math.max(1, Math.floor(deltaSeries.d.length / 90));
+    for (let i = 0; i < deltaSeries.d.length - step; i += step) {
+      const m0 = deltaSeries.d[i];
+      const m1 = deltaSeries.d[Math.min(i + step, deltaSeries.d.length - 1)];
       const vAvg =
-        (speedDelta.v[i] +
-          speedDelta.v[Math.min(i + step, speedDelta.v.length - 1)]) /
+        (deltaSeries.v[i] +
+          deltaSeries.v[Math.min(i + step, deltaSeries.v.length - 1)]) /
         2;
       const pts: string[] = [];
       for (let j = 0; j < d.length; j++) {
@@ -358,7 +372,7 @@ export function TrackSchematic({
       if (pts.length >= 2) segs.push({ path: pts.join(" "), gain: vAvg >= 0 });
     }
     return segs;
-  }, [showDeltaPaint, speedDelta, d, x, y]);
+  }, [showDeltaPaint, deltaSeries, d, x, y]);
 
   const clientToSvg = (clientX: number, clientY: number) => {
     const svg = svgRef.current;
@@ -533,12 +547,12 @@ export function TrackSchematic({
     }
 
     let deltaAvg: number | null = null;
-    if (speedDelta && speedDelta.d.length) {
+    if (deltaSeries && deltaSeries.d.length) {
       let sum = 0;
       let n = 0;
-      for (let i = 0; i < speedDelta.d.length; i++) {
-        if (speedDelta.d[i] < startM || speedDelta.d[i] > endM) continue;
-        sum += speedDelta.v[i];
+      for (let i = 0; i < deltaSeries.d.length; i++) {
+        if (deltaSeries.d[i] < startM || deltaSeries.d[i] > endM) continue;
+        sum += deltaSeries.v[i];
         n += 1;
       }
       if (n) deltaAvg = sum / n;
@@ -565,7 +579,7 @@ export function TrackSchematic({
       z1,
       grade,
     };
-  }, [activeWindow, lapId, playheadM, pack.sectors, speedDelta]);
+  }, [activeWindow, lapId, playheadM, pack.sectors, deltaSeries]);
 
   const sectorColor = (index: number, active: boolean) => {
     if (comparing && sectorDeltaMs) {
@@ -1154,8 +1168,11 @@ export function TrackSchematic({
                       : "text-[var(--fault)]"
                   }
                 >
-                  dv {areaInsight.deltaAvg >= 0 ? "+" : ""}
-                  {areaInsight.deltaAvg.toFixed(1)} km/h
+                  Δ{deltaChannelLabel}{" "}
+                  {areaInsight.deltaAvg >= 0 ? "+" : ""}
+                  {Math.abs(areaInsight.deltaAvg) >= 10
+                    ? areaInsight.deltaAvg.toFixed(0)
+                    : areaInsight.deltaAvg.toFixed(1)}
                 </span>
               )}
             </div>
@@ -1241,7 +1258,7 @@ export function TrackSchematic({
                 className={cn(
                   "ml-1 font-semibold",
                   sectorDeltaMs[i] > 0
-                    ? "text-[var(--trace-amber)]"
+                    ? "text-[var(--fault)]"
                     : "text-[var(--signal)]",
                 )}
               >
@@ -1251,15 +1268,18 @@ export function TrackSchematic({
             )}
           </button>
         ))}
-        {comparing && (
+        {comparing && showDeltaPaint && (
           <span className="hidden items-center gap-2 sm:inline-flex">
+            <span className="font-mono text-[0.5rem] uppercase tracking-[0.1em] text-[var(--mute)]">
+              Δ{deltaChannelLabel}
+            </span>
             <span className="inline-flex items-center gap-1 text-[var(--signal)]">
               <span className="inline-block h-1.5 w-3 rounded-sm bg-[var(--signal)]" />
-              faster
+              {deltaAheadLabel}
             </span>
-            <span className="inline-flex items-center gap-1 text-[var(--trace-amber)]">
-              <span className="inline-block h-1.5 w-3 rounded-sm bg-[var(--trace-amber)]" />
-              slower
+            <span className="inline-flex items-center gap-1 text-[var(--fault)]">
+              <span className="inline-block h-1.5 w-3 rounded-sm bg-[var(--fault)]" />
+              {deltaBehindLabel}
             </span>
           </span>
         )}

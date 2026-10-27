@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { TrackSchematic } from "@/components/session/TrackSchematic";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { deltaChannelLegend } from "@/lib/compare-series";
 import {
   formatChannelValue,
   getChannel,
@@ -21,6 +22,8 @@ const DETAIL_CHANNELS = [
   "steering",
   "rpm",
   "drs",
+  "brake_pressure",
+  "g_long",
 ] as const;
 
 export function CircuitMapModal({
@@ -42,13 +45,20 @@ export function CircuitMapModal({
   sectorDeltaMs,
   gainSectorIndex,
   lossSectorIndex,
+  channelDelta,
   speedDelta,
+  deltaChannelId = "speed",
+  deltaChannelLabel,
+  deltaAheadLabel,
+  deltaBehindLabel,
+  onDeltaChannel,
   onOpenCompare,
   onViewWindow,
   viewWindow = null,
   onInspectFocus,
   onInspectReference,
   lapId,
+  compareLapId,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -68,29 +78,42 @@ export function CircuitMapModal({
   sectorDeltaMs?: [number, number, number] | null;
   gainSectorIndex?: number | null;
   lossSectorIndex?: number | null;
+  channelDelta?: { d: number[]; v: number[] } | null;
+  /** @deprecated Prefer channelDelta */
   speedDelta?: { d: number[]; v: number[] } | null;
+  deltaChannelId?: string;
+  deltaChannelLabel?: string;
+  deltaAheadLabel?: string;
+  deltaBehindLabel?: string;
+  onDeltaChannel?: (channelId: string) => void;
   onOpenCompare?: () => void;
   onViewWindow?: (window: { startM: number; endM: number } | null) => void;
   viewWindow?: { startM: number; endM: number } | null;
   onInspectFocus?: () => void;
   onInspectReference?: () => void;
   lapId?: string;
+  compareLapId?: string | null;
 }) {
   const pack = getSessionPack();
   const [paintMode, setPaintMode] = useState<MapPaintMode>(
     comparing ? "both" : "sector",
   );
+  const deltaSeries = channelDelta ?? speedDelta;
+  const legend = deltaChannelLegend(deltaChannelId);
+  const aheadLabel = deltaAheadLabel ?? legend.ahead;
+  const behindLabel = deltaBehindLabel ?? legend.behind;
+  const channelLabel = deltaChannelLabel ?? legend.label;
 
   const modes: { id: MapPaintMode; label: string; hint: string }[] = [
     {
       id: "both",
       label: "RGB stack",
-      hint: "Green/red delta ribbon + sector paint + cyan playhead",
+      hint: `Green/red Δ${channelLabel} ribbon + sector paint + cyan playhead`,
     },
     {
       id: "delta",
       label: "Delta only",
-      hint: "Where Focus is faster (green) or slower (red)",
+      hint: `Where Focus is ahead (green) or behind (red) on ${channelLabel}`,
     },
     {
       id: "sector",
@@ -109,15 +132,21 @@ export function CircuitMapModal({
     return DETAIL_CHANNELS.map((id) => {
       const ch = getChannel(id);
       const sample = getSample(id, lapId);
+      const refSample =
+        comparing && compareLapId ? getSample(id, compareLapId) : undefined;
       const v = sample ? interpolateAt(sample.series, playheadM) : null;
-      return { id, ch, v };
+      const rv = refSample
+        ? interpolateAt(refSample.series, playheadM)
+        : null;
+      const dlt = v != null && rv != null ? v - rv : null;
+      return { id, ch, v, rv, dlt };
     }).filter((row) => row.ch && row.v != null);
-  }, [lapId, playheadM]);
+  }, [lapId, compareLapId, comparing, playheadM]);
 
   const deltaAtPlayhead = useMemo(() => {
-    if (!speedDelta || speedDelta.d.length < 2) return null;
-    return interpolateAt(speedDelta, playheadM);
-  }, [speedDelta, playheadM]);
+    if (!deltaSeries || deltaSeries.d.length < 2) return null;
+    return interpolateAt(deltaSeries, playheadM);
+  }, [deltaSeries, playheadM]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -128,11 +157,11 @@ export function CircuitMapModal({
               Circuit of the Americas - expanded map
             </SheetTitle>
             <p className="mt-1 max-w-3xl font-mono text-[0.62rem] leading-relaxed text-[var(--mist)]">
-              Stretch a box, pan when zoomed, scrub the playhead. Green = Focus
-              faster, red = behind, cyan = playhead / evidence. Telemetry traces
-              on the desk follow this window.
+              Stretch a box, pan when zoomed, scrub the playhead. Click a live
+              channel to paint the ribbon green/red for that signal. Cyan =
+              playhead / evidence. Desk traces follow this window.
               {comparing && focusCode && referenceCode
-                ? ` Comparing ${focusCode} vs ${referenceCode}.`
+                ? ` Comparing ${focusCode} vs ${referenceCode} · Δ${channelLabel}.`
                 : ""}
             </p>
           </div>
@@ -167,13 +196,14 @@ export function CircuitMapModal({
             </button>
           ))}
           <span className="ml-auto inline-flex flex-wrap items-center gap-3 font-mono text-[0.55rem]">
+            <span className="text-[var(--mute)]">Δ{channelLabel}</span>
             <span className="inline-flex items-center gap-1 text-[var(--signal)]">
               <span className="h-2 w-2 rounded-sm bg-[var(--signal)] shadow-[0_0_8px_rgba(198,255,74,0.8)]" />
-              Focus ahead
+              {aheadLabel}
             </span>
             <span className="inline-flex items-center gap-1 text-[var(--fault)]">
               <span className="h-2 w-2 rounded-sm bg-[var(--fault)] shadow-[0_0_8px_rgba(255,77,94,0.7)]" />
-              behind
+              {behindLabel}
             </span>
             <span className="inline-flex items-center gap-1 text-[var(--trace-cyan)]">
               <span className="h-2 w-2 rounded-sm bg-[var(--trace-cyan)]" />
@@ -204,13 +234,17 @@ export function CircuitMapModal({
               sectorDeltaMs={sectorDeltaMs}
               gainSectorIndex={gainSectorIndex}
               lossSectorIndex={lossSectorIndex}
-              speedDelta={speedDelta}
+              channelDelta={deltaSeries}
+              deltaChannelLabel={channelLabel}
+              deltaAheadLabel={aheadLabel}
+              deltaBehindLabel={behindLabel}
               onOpenCompare={onOpenCompare}
               onViewWindow={onViewWindow}
               viewWindow={viewWindow}
               onInspectFocus={onInspectFocus}
               onInspectReference={onInspectReference}
               lapId={lapId}
+              compareLapId={compareLapId}
             />
           </div>
 
@@ -237,8 +271,11 @@ export function CircuitMapModal({
                       : "text-[var(--fault)]",
                   )}
                 >
-                  DeltaSpd {deltaAtPlayhead >= 0 ? "+" : ""}
-                  {deltaAtPlayhead.toFixed(1)} km/h
+                  Δ{channelLabel} {deltaAtPlayhead >= 0 ? "+" : ""}
+                  {Math.abs(deltaAtPlayhead) >= 10
+                    ? deltaAtPlayhead.toFixed(0)
+                    : deltaAtPlayhead.toFixed(1)}
+                  {legend.unit ? ` ${legend.unit}` : ""}
                 </p>
               )}
             </div>
@@ -289,22 +326,87 @@ export function CircuitMapModal({
 
             <div className="rounded-md border border-[var(--hairline)] bg-[var(--panel)] px-2.5 py-2">
               <p className="mb-1.5 font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--mute)]">
-                Live channels
+                {comparing
+                  ? "Live channels · tap to paint map"
+                  : "Live channels"}
               </p>
               <ul className="space-y-1">
-                {live.map(({ id, ch, v }) => (
-                  <li
-                    key={id}
-                    className="flex items-center justify-between gap-2 font-mono text-[0.62rem]"
-                  >
-                    <span className="truncate text-[var(--mist)]">
-                      {ch!.displayName ?? ch!.name}
-                    </span>
-                    <span className="shrink-0 tabular-nums text-[var(--chalk)]">
-                      {formatChannelValue(ch!, v!)}
-                    </span>
-                  </li>
-                ))}
+                {live.map(({ id, ch, v, rv, dlt }) => {
+                  const active = comparing && deltaChannelId === id;
+                  const ahead = dlt != null && dlt >= 0;
+                  const behind = dlt != null && dlt < 0;
+                  const row = (
+                    <>
+                      <span className="min-w-0 truncate text-[var(--mist)]">
+                        {ch!.displayName ?? ch!.name}
+                        {active ? " · MAP" : ""}
+                      </span>
+                      <span className="flex shrink-0 flex-col items-end gap-0.5">
+                        <span className="tabular-nums text-[var(--chalk)]">
+                          {formatChannelValue(ch!, v!)}
+                        </span>
+                        {rv != null && (
+                          <span
+                            className="tabular-nums text-[0.55rem]"
+                            style={{ color: referenceAccent ?? "var(--mute)" }}
+                          >
+                            {formatChannelValue(ch!, rv)}
+                          </span>
+                        )}
+                        {dlt != null && (
+                          <span
+                            className={cn(
+                              "tabular-nums text-[0.55rem] font-bold",
+                              ahead
+                                ? "text-[var(--signal)]"
+                                : "text-[var(--fault)]",
+                            )}
+                          >
+                            {dlt >= 0 ? "+" : ""}
+                            {Math.abs(dlt) >= 10
+                              ? dlt.toFixed(0)
+                              : dlt.toFixed(1)}
+                          </span>
+                        )}
+                      </span>
+                    </>
+                  );
+                  if (comparing && onDeltaChannel) {
+                    return (
+                      <li key={id}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onDeltaChannel(id);
+                            if (paintMode === "clean" || paintMode === "sector") {
+                              setPaintMode("both");
+                            }
+                          }}
+                          className={cn(
+                            "flex w-full items-center justify-between gap-2 rounded-sm border px-1.5 py-1 text-left font-mono text-[0.62rem] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
+                            active
+                              ? ahead
+                                ? "border-[var(--signal)]/55 bg-[var(--signal-dim)]/50"
+                                : behind
+                                  ? "border-[var(--fault)]/55 bg-[rgba(255,77,94,0.14)]"
+                                  : "border-[var(--signal)]/40 bg-[var(--signal-dim)]/40"
+                              : "border-transparent hover:border-[var(--hairline)] hover:bg-[rgba(255,255,255,0.03)]",
+                          )}
+                        >
+                          {row}
+                        </button>
+                      </li>
+                    );
+                  }
+                  return (
+                    <li
+                      key={id}
+                      className="flex items-center justify-between gap-2 font-mono text-[0.62rem]"
+                    >
+                      {row}
+                    </li>
+                  );
+                })}
                 {live.length === 0 && (
                   <li className="font-mono text-[0.58rem] text-[var(--mute)]">
                     No samples at playhead

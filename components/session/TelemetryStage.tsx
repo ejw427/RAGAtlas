@@ -12,7 +12,10 @@ import {
   sourceBadge,
   stageChannels,
 } from "@/lib/session";
-import { speedDeltaSeries } from "@/lib/compare-series";
+import {
+  channelDeltaSeries,
+  deltaChannelLegend,
+} from "@/lib/compare-series";
 import { interpolateAt, peakInWindow, cn } from "@/lib/utils";
 import { prefersReducedMotion } from "@/lib/motion";
 import type { Channel, CiteTarget } from "@/lib/types";
@@ -53,6 +56,8 @@ export function TelemetryStage({
   viewWindow = null,
   onViewWindow,
   sectorDeltaMs = null,
+  deltaChannelId = null,
+  onDeltaChannel,
 }: {
   lapId: string;
   compareLapId: string | null;
@@ -73,6 +78,10 @@ export function TelemetryStage({
   onViewWindow?: (window: { startM: number; endM: number } | null) => void;
   /** Focus - Reference sector gaps (ms). Colors the stage green/amber. */
   sectorDeltaMs?: [number, number, number] | null;
+  /** Channel painted green/red on the circuit maps. */
+  deltaChannelId?: string | null;
+  /** Click a channel row to drive map compare paint. */
+  onDeltaChannel?: (channelId: string) => void;
 }) {
   const channels = stageChannels(plotChannelIds);
   const uid = useId();
@@ -196,23 +205,21 @@ export function TelemetryStage({
     });
   }, [channels, lapId, compareLapId, playheadM]);
 
-  const speedDelta = useMemo(
+  const mapDeltaId = deltaChannelId ?? "speed";
+  const mapDelta = useMemo(
     () =>
       compareLapId
-        ? speedDeltaSeries(lapId, compareLapId, lengthM, 240)
+        ? channelDeltaSeries(mapDeltaId, lapId, compareLapId, lengthM, 240)
         : null,
-    [compareLapId, lapId, lengthM],
+    [compareLapId, lapId, lengthM, mapDeltaId],
   );
+  const mapDeltaLegend = deltaChannelLegend(mapDeltaId);
 
-  const speedBand = useMemo(() => {
-    if (!compareLapId) return null;
-    const a = getSample("speed", lapId);
-    const b = getSample("speed", compareLapId);
-    if (!a || !b) return null;
-    return { focus: a.series, reference: b.series };
-  }, [compareLapId, lapId]);
+  const showDelta = Boolean(mapDelta);
 
-  const showDelta = Boolean(speedDelta);
+  const selectCompareChannel = (channelId: string) => {
+    onDeltaChannel?.(channelId);
+  };
   const n = Math.max(plots.length + (showDelta ? 1 : 0), 1);
   const axisH = 28;
   // Readable rows; expanded channel gets a hero band so you can scrub detail.
@@ -396,7 +403,9 @@ export function TelemetryStage({
             <span className="text-[var(--trace-amber)]">OVL</span>
             {" · "}
             <span className="text-[var(--mist)]">
-              click name to enlarge · Ctrl+wheel zoom
+              {compareLapId
+                ? "click channel → map green/red · enlarge · Ctrl+wheel"
+                : "click name to enlarge · Ctrl+wheel zoom"}
             </span>
           </p>
           {focusLabel && (
@@ -436,17 +445,16 @@ export function TelemetryStage({
               )}
               {compareLapId && (
                 <span className="inline-flex items-center gap-2 rounded-sm border border-[var(--hairline)] px-1.5 py-0.5">
+                  <span className="font-mono text-[0.55rem] uppercase tracking-[0.08em] text-[var(--mute)]">
+                    map Δ{mapDeltaLegend.label}
+                  </span>
                   <span className="inline-flex items-center gap-1 text-[var(--signal)]">
                     <span className="inline-block h-2 w-2 rounded-sm bg-[var(--signal)] shadow-[0_0_8px_rgba(198,255,74,0.8)]" />
-                    Focus ahead
+                    {mapDeltaLegend.ahead}
                   </span>
                   <span className="inline-flex items-center gap-1 text-[var(--fault)]">
                     <span className="inline-block h-2 w-2 rounded-sm bg-[var(--fault)] shadow-[0_0_8px_rgba(255,77,94,0.7)]" />
-                    behind
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[var(--trace-cyan)]">
-                    <span className="inline-block h-2 w-2 rounded-sm bg-[var(--trace-cyan)]" />
-                    cyan = playhead
+                    {mapDeltaLegend.behind}
                   </span>
                 </span>
               )}
@@ -705,11 +713,16 @@ export function TelemetryStage({
               referenceAccent.toLowerCase() !== stroke.toLowerCase()
                 ? referenceAccent
                 : "#F4B942";
-            const focused = focusChannelId === ch.id || expandedId === ch.id;
+            const isMapDelta = compareLapId != null && mapDeltaId === ch.id;
+            const focused =
+              focusChannelId === ch.id ||
+              expandedId === ch.id ||
+              isMapDelta;
             const dimmed =
-              Boolean(focusChannelId || expandedId) &&
+              Boolean(focusChannelId || expandedId || deltaChannelId) &&
               focusChannelId !== ch.id &&
-              expandedId !== ch.id;
+              expandedId !== ch.id &&
+              !isMapDelta;
             const dash = ch.id === "throttle" || ch.id === "drs" ? "5 4" : undefined;
             const isExpanded = expandedId === ch.id;
             const liveRef =
@@ -732,6 +745,17 @@ export function TelemetryStage({
                 onPointerEnter={() => setHoverId(ch.id)}
                 opacity={dimmed ? 0.28 : 1}
                 style={{ transition: "opacity 120ms var(--ease)" }}
+                className={compareLapId ? "cursor-pointer" : undefined}
+                onClick={
+                  compareLapId && onDeltaChannel
+                    ? () => {
+                        selectCompareChannel(ch.id);
+                        setExpandedId((cur) =>
+                          cur === ch.id && isMapDelta ? null : ch.id,
+                        );
+                      }
+                    : undefined
+                }
               >
                 <rect
                   x={0}
@@ -739,15 +763,19 @@ export function TelemetryStage({
                   width={W}
                   height={rowH}
                   fill={
-                    focused
-                      ? "rgba(198,255,74,0.08)"
-                      : liveDelta != null && liveDelta > 0
-                        ? "rgba(198,255,74,0.05)"
-                        : liveDelta != null && liveDelta < 0
-                          ? "rgba(255,77,94,0.05)"
-                          : idx % 2 === 0
-                            ? "rgba(255,255,255,0.015)"
-                            : "transparent"
+                    isMapDelta
+                      ? liveDelta != null && liveDelta < 0
+                        ? "rgba(255,77,94,0.12)"
+                        : "rgba(198,255,74,0.12)"
+                      : focused
+                        ? "rgba(198,255,74,0.08)"
+                        : liveDelta != null && liveDelta > 0
+                          ? "rgba(198,255,74,0.05)"
+                          : liveDelta != null && liveDelta < 0
+                            ? "rgba(255,77,94,0.05)"
+                            : idx % 2 === 0
+                              ? "rgba(255,255,255,0.015)"
+                              : "transparent"
                   }
                 />
                 <line
@@ -763,7 +791,13 @@ export function TelemetryStage({
                   width={3}
                   height={rowH - 16}
                   rx={1}
-                  fill={stroke}
+                  fill={
+                    isMapDelta
+                      ? liveDelta != null && liveDelta < 0
+                        ? "var(--fault)"
+                        : "var(--signal)"
+                      : stroke
+                  }
                   opacity={focused ? 1 : 0.85}
                   strokeDasharray={isOverlayChannel(ch) ? "2 2" : undefined}
                   stroke={isOverlayChannel(ch) ? stroke : undefined}
@@ -779,11 +813,24 @@ export function TelemetryStage({
                   className="cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
+                    if (compareLapId && onDeltaChannel) {
+                      selectCompareChannel(ch.id);
+                      setExpandedId((cur) =>
+                        cur === ch.id && isMapDelta ? null : ch.id,
+                      );
+                      return;
+                    }
                     setExpandedId((cur) => (cur === ch.id ? null : ch.id));
                   }}
                 >
                   {ch.displayName ?? ch.name}
-                  {isExpanded ? " · shrink" : " · enlarge"}
+                  {isMapDelta
+                    ? " · MAP Δ"
+                    : isExpanded
+                      ? " · shrink"
+                      : compare
+                        ? " · compare"
+                        : " · enlarge"}
                 </text>
                 <text
                   x={10}
@@ -908,21 +955,23 @@ export function TelemetryStage({
             );
           })}
 
-          {speedDelta &&
+          {mapDelta &&
             (() => {
               const rowH = deltaRowH || normalRow;
               const y0 = rowTop(plots.length);
               const y1 = y0 + rowH;
-              const live = interpolateAt(speedDelta, playheadM);
-              const areas = deltaAreaPaths(speedDelta, y0, y1);
+              const live = interpolateAt(mapDelta, playheadM);
+              const areas = deltaAreaPaths(mapDelta, y0, y1);
+              const deltaTitle = `Δ${mapDeltaLegend.label}`;
               return (
                 <g
-                  key="delta-speed"
-                  onClick={() =>
+                  key={`delta-${mapDeltaId}`}
+                  onClick={() => {
+                    onDeltaChannel?.(mapDeltaId);
                     setExpandedId((cur) =>
                       cur === "__delta" ? null : "__delta",
-                    )
-                  }
+                    );
+                  }}
                   className="cursor-pointer"
                 >
                   <rect
@@ -971,8 +1020,8 @@ export function TelemetryStage({
                     fontFamily="var(--font-mono)"
                     fontWeight={700}
                   >
-                    DeltaSpd
-                    {expandedId === "__delta" ? " · shrink" : " · enlarge"}
+                    {deltaTitle}
+                    {expandedId === "__delta" ? " · shrink" : " · MAP"}
                   </text>
                   <text
                     x={padL - 6}
@@ -985,7 +1034,7 @@ export function TelemetryStage({
                     CMP
                   </text>
                   <path
-                    d={pathFor(clipSeries(speedDelta), y0, y1, areas.range)}
+                    d={pathFor(clipSeries(mapDelta), y0, y1, areas.range)}
                     fill="none"
                     stroke="var(--chalk)"
                     strokeWidth={expandedId === "__delta" ? 3.2 : 2.4}
