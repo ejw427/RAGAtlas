@@ -1,0 +1,134 @@
+{
+  "nor": {
+    "file": "/drivers/nor.png",
+    "number": 1,
+    "name": "Lando NORRIS",
+    "team": "McLaren"
+  },
+  "ver": {
+    "file": "/drivers/ver.png",
+    "number": 3,
+    "name": "Max VERSTAPPEN",
+    "team": "Red Bull Racing"
+  },
+  "bor": {
+    "file": "/drivers/bor.png",
+    "number": 5,
+    "name": "Gabriel BORTOLETO",
+    "team": "Audi"
+  },
+  "had": {
+    "file": "/drivers/had.png",
+    "number": 6,
+    "name": "Isack HADJAR",
+    "team": "Red Bull Racing"
+  },
+  "gas": {
+    "file": "/drivers/gas.png",
+    "number": 10,
+    "name": "Pierre GASLY",
+    "team": "Alpine"
+  },
+  "per": {
+    "file": "/drivers/per.png",
+    "number": 11,
+    "name": "Sergio PEREZ",
+    "team": "Cadillac"
+  },
+  "ant": {
+    "file": "/drivers/ant.png",
+    "number": 12,
+    "name": "Kimi ANTONELLI",
+    "team": "Mercedes"
+  },
+  "alo": {
+    "file": "/drivers/alo.png",
+    "number": 14,
+    "name": "Fernando ALONSO",
+    "team": "Aston Martin"
+  },
+  "lec": {
+    "file": "/drivers/lec.png",
+    "number": 16,
+    "name": "Charles LECLERC",
+    "team": "Ferrari"
+  },
+  "str": {
+    "file": "/drivers/str.png",
+    "number": 18,
+    "name": "Lance STROLL",
+    "team": "Aston Martin"
+  },
+  "alb": {
+    "file": "/drivers/alb.png",
+    "number": 23,
+    "name": "Alexander ALBON",
+    "team": "Williams"
+  },
+  "hul": {
+    "file": "/drivers/hul.png",
+    "number": 27,
+    "name": "Nico HULKENBERG",
+    "team": "Audi"
+  },
+  "law": {
+    "file": "/drivers/law.png",
+    "number": 30,
+    "name": "Liam LAWSON",
+    "team": "Racing Bulls"
+  },
+  "oco": {
+    "file": "/drivers/oco.png",
+    "number": 31,
+    "name": "Esteban OCON",
+    "team": "Haas F1 Team"
+  },
+  "lin": {
+    "file": "/drivers/lin.png",
+    "number": 41,
+    "name": "Arvid LINDBLAD",
+    "team": "Racing Bulls"
+  },
+  "col": {
+    "file": "/drivers/col.png",
+    "number": 43,
+    "name": "Franco COLAPINTO",
+    "team": "Alpine"
+  },
+  "ham": {
+    "file": "/drivers/ham.png",
+    "number": 44,
+    "name": "Lewis HAMILTON",
+    "team": "Ferrari"
+  },
+  "sai": {
+    "file": "/drivers/sai.png",
+    "number": 55,
+    "name": "Carlos SAINZ",
+    "team": "Williams"
+  },
+  "rus": {
+    "file": "/drivers/rus.png",
+    "number": 63,
+    "name": "George RUSSELL",
+    "team": "Mercedes"
+  },
+  "bot": {
+    "file": "/drivers/bot.png",
+    "number": 77,
+    "name": "Valtteri BOTTAS",
+    "team": "Cadillac"
+  },
+  "pia": {
+    "file": "/drivers/pia.png",
+    "number": 81,
+    "name": "Oscar PIASTRI",
+    "team": "McLaren"
+  },
+  "bea": {
+    "file": "/drivers/bea.png",
+    "number": 87,
+    "name": "Oliver BEARMAN",
+    "team": "Haas F1 Team"
+  }
+}

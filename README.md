@@ -26,7 +26,8 @@ Open [http://127.0.0.1:43127](http://127.0.0.1:43127).
 | Route | Purpose |
 |-------|---------|
 | `/` | Landing — COTA night hero + real track path |
-| `/session?driver=LEC&lap=10` | Workspace (22-car switcher; Lap / S1–S3 focus) |
+| `/session?house=ferrari` | Pit wall — map + Focus/Reference compare (any house) |
+| `/session?driver=LEC&lap=10` | Workspace deep link (legacy params still work) |
 | `/about` | Method, disclaimer, credits |
 
 ## 90-second demo
@@ -73,6 +74,10 @@ Required GitHub repository secrets (same names as DropToPhone / the company site
 | `CLOUDFLARE_ZONE_ID` | Optional — purge CDN for `citetrace.welchsoftware.net` after deploy |
 | `CF_WEB_ANALYTICS_TOKEN` | Optional — Cloudflare Web Analytics beacon |
 
+## Workspace UI
+
+The session screen is specified as a pit wall: the COTA map on stage, any car against any other car, and a driver plate (number, team, original helmet mark, car). Graphs stay the instrument underneath. Walk-in copy for every 2026 team, plus Motion Applied, is in [docs/ui-workspace.md](docs/ui-workspace.md).
+
 ## Job applications
 
 Use these links (not the private GitHub repo):
@@ -81,6 +86,8 @@ Use these links (not the private GitHub repo):
 |-------|----------------|
 | Resume / LinkedIn / email | `https://citetrace.welchsoftware.net` |
 | Portfolio context | `https://www.welchsoftware.net/projects/citetrace` |
+| Resume / interview demo | `https://citetrace.welchsoftware.net/session?demo=1&house=ferrari` |
+| Compare walk-in | `https://citetrace.welchsoftware.net/session?house=ferrari` |
 | Deep-link demo | `https://citetrace.welchsoftware.net/session?driver=LEC&lap=10` |
 
 **Pitch:** Waveforms are table stakes. Grounded answers are the job.  

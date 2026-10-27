@@ -44,6 +44,10 @@ export function TelemetryStage({
   activeCite,
   drawKey,
   plotChannelIds,
+  focusAccent,
+  referenceAccent,
+  focusLabel,
+  referenceLabel,
 }: {
   lapId: string;
   compareLapId: string | null;
@@ -53,6 +57,10 @@ export function TelemetryStage({
   activeCite: CiteTarget | null;
   drawKey: string;
   plotChannelIds: string[];
+  focusAccent?: string;
+  referenceAccent?: string;
+  focusLabel?: string;
+  referenceLabel?: string;
 }) {
   const channels = stageChannels(plotChannelIds);
   const uid = useId();
@@ -135,18 +143,43 @@ export function TelemetryStage({
     });
   }, [channels, lapId, compareLapId, playheadM]);
 
-  const n = Math.max(plots.length, 1);
+  const speedDelta = useMemo(() => {
+    if (!compareLapId) return null;
+    const a = getSample("speed", lapId);
+    const b = getSample("speed", compareLapId);
+    if (!a || !b) return null;
+    const n = Math.min(a.series.d.length, b.series.d.length, 240);
+    const d: number[] = [];
+    const v: number[] = [];
+    for (let i = 0; i < n; i++) {
+      const t = i / Math.max(n - 1, 1);
+      const m = t * lengthM;
+      const va = interpolateAt(a.series, m);
+      const vb = interpolateAt(b.series, m);
+      if (va == null || vb == null) continue;
+      d.push(m);
+      v.push(va - vb);
+    }
+    if (d.length < 2) return null;
+    return { d, v };
+  }, [compareLapId, lapId, lengthM]);
+
+  const showDelta = Boolean(speedDelta);
+  const n = Math.max(plots.length + (showDelta ? 1 : 0), 1);
   const axisH = 28;
-  const minRow = n >= 12 ? 38 : n >= 8 ? 44 : 52;
-  const fitted = shellH > 0 ? Math.floor((shellH - axisH - 4) / n) : minRow;
-  const rowH = Math.max(minRow, fitted);
+  // Keep readable row height; overflow scrolls instead of crushing every channel.
+  const minRow = n >= 10 ? 48 : n >= 6 ? 56 : 64;
+  const fitted =
+    shellH > 0 ? Math.floor((shellH - axisH - 4) / n) : minRow;
+  const rowH = Math.max(minRow, Math.min(fitted, 88));
   const W = 960;
   const H = axisH + rowH * n + 4;
   const padL = 68;
   const padR = 78;
   const plotW = W - padL - padR;
   const plotTop = axisH;
-  const fillsShell = shellH > 0 && H <= shellH + 1;
+  // Only stretch-to-fill when everything fits with roomy rows; else scroll.
+  const fillsShell = shellH > 0 && H <= shellH + 1 && rowH >= minRow;
 
   const xOf = (m: number) => padL + (m / lengthM) * plotW;
 
@@ -199,7 +232,7 @@ export function TelemetryStage({
   const tickMs = [0, 0.25, 0.5, 0.75, 1].map((t) => Math.round(t * lengthM));
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-1.5">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-1.5 overflow-hidden">
       <div className="flex shrink-0 flex-wrap items-end justify-between gap-2 px-0.5">
         <div className="flex items-baseline gap-3">
           <p className="font-display text-xl font-semibold tracking-tight text-[var(--chalk)] tabular-nums">
@@ -216,6 +249,35 @@ export function TelemetryStage({
             {" / "}
             <span className="text-[var(--trace-amber)]">OVL</span>
           </p>
+          {focusLabel && (
+            <span className="inline-flex flex-wrap items-center gap-2 font-mono text-[0.62rem] text-[var(--mist)]">
+              <span className="inline-flex items-center gap-1.5">
+                <span
+                  className="inline-block h-0.5 w-5 rounded-full"
+                  style={{ background: focusAccent ?? "var(--signal)" }}
+                />
+                <span style={{ color: focusAccent ?? "var(--signal)" }}>
+                  {focusLabel}
+                </span>
+              </span>
+              {referenceLabel && compareLapId && (
+                <span className="inline-flex items-center gap-1.5">
+                  <span
+                    className="inline-block h-0.5 w-5 rounded-full"
+                    style={{
+                      background: `repeating-linear-gradient(90deg, ${referenceAccent ?? "#6b7788"} 0 3px, transparent 3px 6px)`,
+                    }}
+                  />
+                  <span style={{ color: referenceAccent ?? "var(--mute)" }}>
+                    {referenceLabel}
+                  </span>
+                </span>
+              )}
+              {speedDelta && (
+                <span className="text-[var(--mute)]">· Δ speed row on</span>
+              )}
+            </span>
+          )}
           {activeCite && (
             <span className="font-mono text-[0.68rem] text-[var(--signal)]">
               {activeCite.label}
@@ -249,7 +311,7 @@ export function TelemetryStage({
 
       <div
         ref={shellRef}
-        className="stage-shell relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
+        className="stage-shell panel-scroll relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"
       >
         <div className="stage-grid pointer-events-none absolute inset-0 opacity-50" />
         <svg
@@ -391,7 +453,10 @@ export function TelemetryStage({
             const y0 = plotTop + idx * rowH;
             const y1 = y0 + rowH;
             if (!sample) return null;
-            const stroke = strokeFor(ch);
+            const baseStroke = strokeFor(ch);
+            const stroke =
+              ch.id === "speed" && focusAccent ? focusAccent : baseStroke;
+            const compareStroke = referenceAccent ?? "var(--mute)";
             const focused = focusChannelId === ch.id;
             const dimmed = Boolean(focusChannelId) && !focused;
             const dash = ch.id === "throttle" || ch.id === "drs" ? "5 4" : undefined;
@@ -461,10 +526,12 @@ export function TelemetryStage({
                   <path
                     d={pathFor(compare.series, y0, y1)}
                     fill="none"
-                    stroke="var(--mute)"
-                    strokeWidth="1"
-                    strokeDasharray="3 3"
-                    opacity="0.55"
+                    stroke={
+                      ch.id === "speed" ? compareStroke : "var(--mute)"
+                    }
+                    strokeWidth="1.5"
+                    strokeDasharray="4 3"
+                    opacity="0.7"
                   />
                 )}
                 <path
@@ -472,7 +539,7 @@ export function TelemetryStage({
                   d={pathFor(sample.series, y0, y1)}
                   fill="none"
                   stroke={stroke}
-                  strokeWidth={focused ? 2.4 : rowH >= 44 ? 1.7 : 1.4}
+                  strokeWidth={focused ? 2.4 : rowH >= 44 ? 2.25 : 1.8}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeDasharray={drawn ? dash : undefined}
@@ -498,6 +565,72 @@ export function TelemetryStage({
               </g>
             );
           })}
+
+          {speedDelta &&
+            (() => {
+              const idx = plots.length;
+              const y0 = plotTop + idx * rowH;
+              const y1 = y0 + rowH;
+              const live = interpolateAt(speedDelta, playheadM);
+              return (
+                <g key="delta-speed">
+                  <rect
+                    x={0}
+                    y={y0}
+                    width={W}
+                    height={rowH}
+                    fill="rgba(198,255,74,0.04)"
+                  />
+                  <line
+                    x1={padL}
+                    x2={W - padR}
+                    y1={y1 - 0.5}
+                    y2={y1 - 0.5}
+                    stroke="var(--hairline)"
+                  />
+                  <text
+                    x={10}
+                    y={y0 + rowH / 2 + 3}
+                    fill="var(--signal)"
+                    fontSize="9"
+                    fontFamily="var(--font-mono)"
+                    fontWeight={600}
+                  >
+                    ΔSpd
+                  </text>
+                  <text
+                    x={padL - 6}
+                    y={y0 + rowH / 2 + 3}
+                    textAnchor="end"
+                    fill="var(--mute)"
+                    fontSize="7"
+                    fontFamily="var(--font-mono)"
+                  >
+                    CMP
+                  </text>
+                  <path
+                    d={pathFor(speedDelta, y0, y1)}
+                    fill="none"
+                    stroke="var(--signal)"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  />
+                  <text
+                    x={W - 10}
+                    y={y0 + rowH / 2 + 3}
+                    textAnchor="end"
+                    fill="var(--signal)"
+                    fontSize="9"
+                    fontFamily="var(--font-mono)"
+                    fontWeight={600}
+                  >
+                    {live != null
+                      ? `${live >= 0 ? "+" : ""}${live.toFixed(1)} km/h`
+                      : "—"}
+                  </text>
+                </g>
+              );
+            })()}
 
           {/* Playhead */}
           <rect

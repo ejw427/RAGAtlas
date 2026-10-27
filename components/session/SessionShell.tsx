@@ -3,22 +3,36 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ContextRail } from "@/components/session/ContextRail";
+import { Plate } from "@/components/identity/Plate";
+import { CompareDuo } from "@/components/session/CompareDuo";
+import { DeltaRibbon } from "@/components/session/DeltaRibbon";
+import { DemoGuide, type DemoStep } from "@/components/session/DemoGuide";
+import { HouseSwitcher } from "@/components/session/HouseSwitcher";
+import { SelectDock } from "@/components/session/SelectDock";
 import { TelemetryStage } from "@/components/session/TelemetryStage";
+import { TrackSchematic } from "@/components/session/TrackSchematic";
 import { RagRail } from "@/components/session/RagRail";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import {
-  allowedLapNumbers,
-  compareTargetLap,
+  accentFor,
+  bestFlyerFor,
+  biggestGainSector,
+  biggestLossSector,
+  fieldBestLap,
+  getLapSafe,
+  otherCompoundLap,
+  resolveDriverParam,
+  resolveHouse,
+  resolveLapNumber,
+  sectorDeltas,
+  teammateId,
+} from "@/lib/identity";
+import {
   defaultDriverId,
   defaultLapNumber,
   defaultPlotIds,
-  formatLapDelta,
   getCite,
   getDriver,
-  getDrivers,
-  getLap,
   getLapById,
   getLapsForDriver,
   getSample,
@@ -26,61 +40,104 @@ import {
   lapDistanceM,
   sectorLabel,
 } from "@/lib/session";
-import { formatLapTime, formatSector, cn, peakInWindow } from "@/lib/utils";
+import { peakInWindow } from "@/lib/utils";
 import { animateValue } from "@/lib/motion";
 import type { CiteTarget } from "@/lib/types";
 import {
+  AUTHOR,
   DEMO_ASK,
+  DEMO_NO_HIT,
   LIVE_URL,
   PORTFOLIO_URL,
   PRODUCT,
   STUDIO,
-  WEDGE,
 } from "@/lib/brand";
 
 function resolveSessionParams(searchParams: URLSearchParams) {
-  const drivers = getDrivers();
-  const driverParam = searchParams.get("driver") ?? "";
-  const byCode = drivers.find(
-    (d) => d.code.toLowerCase() === driverParam.toLowerCase(),
-  );
-  const byId = drivers.find((d) => d.id === driverParam);
-  const driverId = byCode?.id ?? byId?.id ?? defaultDriverId();
+  const demoForced = searchParams.get("demo") === "1";
+  const houseKey = searchParams.get("house");
+  const house = resolveHouse(houseKey);
+  if (house) {
+    return {
+      driverId: house.focusDriverId,
+      initialLap: house.focusLap,
+      referenceDriverId: house.referenceDriverId as string | null,
+      referenceLap: house.referenceLap as number | null,
+      initialCiteId: searchParams.get("citeId") ?? undefined,
+      initialQuery: searchParams.get("q") ?? undefined,
+      initialSector: searchParams.get("sector") ?? "Lap",
+      initialChannels: searchParams.get("ch"),
+      demoForced,
+      houseId: house.toolsDemo
+        ? "tools"
+        : (houseKey?.toLowerCase() ?? null),
+      toolsDemo: Boolean(house.toolsDemo),
+    };
+  }
 
-  const allowed = allowedLapNumbers(driverId);
-  const fallback = defaultLapNumber(driverId);
-  const lap = Number(searchParams.get("lap") ?? String(fallback));
-  const initialLap =
-    Number.isFinite(lap) && allowed.includes(lap) ? lap : fallback;
+  const focusId =
+    resolveDriverParam(searchParams.get("a")) ??
+    resolveDriverParam(searchParams.get("driver")) ??
+    defaultDriverId();
+  const focusLap = resolveLapNumber(
+    focusId,
+    searchParams.get("lapA") ?? searchParams.get("lap"),
+    defaultLapNumber(focusId),
+  );
+  const refId = resolveDriverParam(searchParams.get("b"));
+  const refLap = refId
+    ? resolveLapNumber(
+        refId,
+        searchParams.get("lapB"),
+        defaultLapNumber(refId),
+      )
+    : null;
 
   return {
-    driverId,
-    initialLap,
+    driverId: focusId,
+    initialLap: focusLap,
+    referenceDriverId: refId,
+    referenceLap: refLap,
     initialCiteId: searchParams.get("citeId") ?? undefined,
     initialQuery: searchParams.get("q") ?? undefined,
+    initialSector: searchParams.get("sector") ?? "Lap",
+    initialChannels: searchParams.get("ch"),
+    demoForced,
+    houseId: null as string | null,
+    toolsDemo: false,
   };
 }
 
 export function SessionShell() {
   const pack = getSessionPack();
-  const drivers = getDrivers();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const boot = useMemo(
     () => resolveSessionParams(searchParams),
-    // Boot once from the landing URL; later updates go through pushUrl.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
-  const initialCiteId = boot.initialCiteId;
-  const initialQuery = boot.initialQuery;
-
   const [driverId, setDriverId] = useState(boot.driverId);
   const [lapNumber, setLapNumber] = useState(boot.initialLap);
-  const [compare, setCompare] = useState(false);
-  const [plotChannelIds, setPlotChannelIds] = useState(defaultPlotIds);
+  const [referenceDriverId, setReferenceDriverId] = useState<string | null>(
+    boot.referenceDriverId,
+  );
+  const [referenceLapNumber, setReferenceLapNumber] = useState<number | null>(
+    boot.referenceLap,
+  );
+  const [activeHouse, setActiveHouse] = useState<string | null>(
+    boot.houseId ?? (boot.toolsDemo ? "tools" : null),
+  );
+  const [plotChannelIds, setPlotChannelIds] = useState(() => {
+    if (boot.initialChannels) {
+      const ids = boot.initialChannels.split(",").filter(Boolean);
+      if (ids.length) return ids;
+    }
+    if (boot.referenceDriverId) return ["speed", "throttle", "brake"];
+    return defaultPlotIds().slice(0, 6);
+  });
   const [playheadM, setPlayheadM] = useState(1800);
   const [evidence, setEvidence] = useState<{
     startM: number;
@@ -88,25 +145,39 @@ export function SessionShell() {
   } | null>(null);
   const [selectedCite, setSelectedCite] = useState<CiteTarget | null>(null);
   const [pulsingCiteId, setPulsingCiteId] = useState<string | null>(null);
-  const [activeSector, setActiveSector] = useState<string | null>("Lap");
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [coachOpen, setCoachOpen] = useState(true);
+  const [activeSector, setActiveSector] = useState<string | null>(
+    boot.initialSector,
+  );
+  const [askOpen, setAskOpen] = useState(false);
+  const [demoOpen, setDemoOpen] = useState(true);
+  const [demoStep, setDemoStep] = useState<DemoStep>(0);
+  const [askTrigger, setAskTrigger] = useState<{
+    query: string;
+    nonce: number;
+  } | null>(null);
+  const [emphasizeCites, setEmphasizeCites] = useState(false);
   const lengthM = lapDistanceM();
 
   useEffect(() => {
+    if (boot.demoForced) {
+      setDemoOpen(true);
+      return;
+    }
     try {
-      if (window.localStorage.getItem("citetrace-coach-dismissed") === "1") {
-        setCoachOpen(false);
+      if (window.localStorage.getItem("citetrace-demo-dismissed") === "1") {
+        setDemoOpen(false);
       }
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [boot.demoForced]);
 
-  const dismissCoach = () => {
-    setCoachOpen(false);
+  const dismissDemo = () => {
+    setDemoOpen(false);
+    setEmphasizeCites(false);
+    if (boot.demoForced) return;
     try {
-      window.localStorage.setItem("citetrace-coach-dismissed", "1");
+      window.localStorage.setItem("citetrace-demo-dismissed", "1");
     } catch {
       /* ignore */
     }
@@ -114,28 +185,63 @@ export function SessionShell() {
 
   const driver = getDriver(driverId);
   const driverLaps = getLapsForDriver(driverId);
-  const lap =
-    getLap(lapNumber, driverId) ?? driverLaps[0] ?? pack.laps[0];
+  const lap = getLapSafe(driverId, lapNumber);
   const lapId = lap.id;
-  const compareLap = compare ? compareTargetLap(driverId) : undefined;
+  const referenceDriver = referenceDriverId
+    ? getDriver(referenceDriverId)
+    : null;
+  const referenceLaps = referenceDriverId
+    ? getLapsForDriver(referenceDriverId)
+    : [];
+  const referenceLap =
+    referenceDriverId && referenceLapNumber != null
+      ? getLapSafe(referenceDriverId, referenceLapNumber)
+      : null;
   const compareLapId =
-    compare && compareLap && compareLap.id !== lapId ? compareLap.id : null;
-
-  const compoundTag =
-    lap.tags?.find((t) =>
-      ["soft", "hard", "medium", "intermediate", "wet"].includes(t),
-    ) ?? pack.session.compound.toLowerCase();
+    referenceLap && referenceLap.id !== lapId ? referenceLap.id : null;
+  const focusAccent = accentFor(driver);
+  const referenceAccent = accentFor(referenceDriver ?? undefined);
+  const deltas = sectorDeltas(lap, referenceLap);
+  const gain = biggestGainSector(deltas);
+  const loss = biggestLossSector(deltas);
 
   const pushUrl = useCallback(
-    (next: { driverId: string; lap: number; citeId?: string | null }) => {
+    (next: {
+      driverId: string;
+      lap: number;
+      referenceDriverId?: string | null;
+      referenceLap?: number | null;
+      citeId?: string | null;
+      sector?: string | null;
+      channels?: string[];
+      house?: string | null;
+      demo?: boolean;
+    }) => {
       const params = new URLSearchParams({
-        driver: getDriver(next.driverId).code,
-        lap: String(next.lap),
+        a: getDriver(next.driverId).code,
+        lapA: String(next.lap),
       });
+      params.set("driver", getDriver(next.driverId).code);
+      params.set("lap", String(next.lap));
+      if (next.referenceDriverId) {
+        params.set("b", getDriver(next.referenceDriverId).code);
+        if (next.referenceLap != null) {
+          params.set("lapB", String(next.referenceLap));
+        }
+      }
       if (next.citeId) params.set("citeId", next.citeId);
+      if (next.sector && next.sector !== "Lap") {
+        params.set("sector", next.sector);
+      }
+      if (next.channels?.length) {
+        params.set("ch", next.channels.join(","));
+      }
+      const house = next.house ?? activeHouse;
+      if (house) params.set("house", house);
+      if (next.demo ?? (boot.demoForced || demoOpen)) params.set("demo", "1");
       router.replace(`/session?${params.toString()}`, { scroll: false });
     },
-    [router],
+    [router, activeHouse, boot.demoForced, demoOpen],
   );
 
   const sectorForDistance = useCallback(
@@ -158,6 +264,8 @@ export function SessionShell() {
       setSelectedCite(cite);
       setEvidence(cite.window);
       setPulsingCiteId(cite.id);
+      setEmphasizeCites(false);
+      if (demoOpen) setDemoStep(3);
       if (cite.channelId) {
         setPlotChannelIds((prev) =>
           prev.includes(cite.channelId!)
@@ -201,49 +309,111 @@ export function SessionShell() {
         pushUrl({
           driverId: targetLap?.driverId ?? driverId,
           lap: targetLap?.number ?? lapNumber,
+          referenceDriverId,
+          referenceLap: referenceLapNumber,
           citeId: cite.id,
+          sector: sec ?? activeSector,
+          channels: plotChannelIds,
         });
       }
 
-      setSheetOpen(false);
+      setAskOpen(false);
     },
-    [driverId, lapNumber, playheadM, pushUrl, sectorForDistance],
+    [
+      driverId,
+      lapNumber,
+      playheadM,
+      pushUrl,
+      sectorForDistance,
+      referenceDriverId,
+      referenceLapNumber,
+      activeSector,
+      plotChannelIds,
+      demoOpen,
+    ],
   );
 
   useEffect(() => {
-    if (!initialCiteId) return;
-    const cite = getCite(initialCiteId);
+    if (!boot.initialCiteId) return;
+    const cite = getCite(boot.initialCiteId);
     if (cite) {
       const t = window.setTimeout(() => lockCite(cite, false), 120);
       return () => window.clearTimeout(t);
     }
-  }, [initialCiteId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [boot.initialCiteId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPlayhead = (m: number) => {
     setPlayheadM(m);
     setActiveSector(sectorForDistance(m));
   };
 
-  const deltaBest = useMemo(() => {
-    const fieldBest = Math.min(...pack.laps.map((l) => l.timeMs));
-    const d = lap.timeMs - fieldBest;
-    return d === 0
-      ? "Δ field −0.000"
-      : `Δ field ${d >= 0 ? "+" : ""}${(d / 1000).toFixed(3)}`;
-  }, [lap.timeMs, pack.laps]);
-
-  const explainSpike = () => {
-    const cite = getCite("cite_brake_spike");
-    if (cite) lockCite(cite);
-  };
+  const selectSector = useCallback(
+    (label: string) => {
+      setActiveSector(label);
+      setSelectedCite(null);
+      if (label === "Lap") {
+        setEvidence({ startM: 0, endM: lengthM });
+        setPlayheadM(lengthM / 2);
+      } else {
+        const s = pack.sectors.find((sec) => sec.label === label);
+        if (s) {
+          setEvidence({ startM: s.startM, endM: s.endM });
+          setPlayheadM((s.startM + s.endM) / 2);
+        }
+      }
+      if (demoOpen && label !== "Lap") setDemoStep(1);
+      pushUrl({
+        driverId,
+        lap: lapNumber,
+        referenceDriverId,
+        referenceLap: referenceLapNumber,
+        sector: label,
+        channels: plotChannelIds,
+      });
+    },
+    [
+      lengthM,
+      pack.sectors,
+      demoOpen,
+      pushUrl,
+      driverId,
+      lapNumber,
+      referenceDriverId,
+      referenceLapNumber,
+      plotChannelIds,
+    ],
+  );
 
   const togglePlot = (channelId: string) => {
     setPlotChannelIds((prev) => {
+      let next: string[];
       if (prev.includes(channelId)) {
         if (prev.length <= 1) return prev;
-        return prev.filter((id) => id !== channelId);
+        next = prev.filter((id) => id !== channelId);
+      } else {
+        next = [...prev, channelId];
       }
-      return [...prev, channelId];
+      pushUrl({
+        driverId,
+        lap: lapNumber,
+        referenceDriverId,
+        referenceLap: referenceLapNumber,
+        sector: activeSector,
+        channels: next,
+      });
+      return next;
+    });
+  };
+
+  const setPlots = (ids: string[]) => {
+    setPlotChannelIds(ids);
+    pushUrl({
+      driverId,
+      lap: lapNumber,
+      referenceDriverId,
+      referenceLap: referenceLapNumber,
+      sector: activeSector,
+      channels: ids,
     });
   };
 
@@ -253,8 +423,15 @@ export function SessionShell() {
     setLapNumber(nextLap);
     setEvidence(null);
     setSelectedCite(null);
-    setCompare(false);
-    pushUrl({ driverId: nextId, lap: nextLap });
+    setActiveHouse(null);
+    pushUrl({
+      driverId: nextId,
+      lap: nextLap,
+      referenceDriverId,
+      referenceLap: referenceLapNumber,
+      channels: plotChannelIds,
+      house: null,
+    });
   };
 
   const selectLap = (n: number) => {
@@ -262,224 +439,399 @@ export function SessionShell() {
     setActiveSector("Lap");
     setEvidence({ startM: 0, endM: lengthM });
     setSelectedCite(null);
-    pushUrl({ driverId, lap: n });
+    pushUrl({
+      driverId,
+      lap: n,
+      referenceDriverId,
+      referenceLap: referenceLapNumber,
+      channels: plotChannelIds,
+    });
   };
 
+  const selectReferenceDriver = (nextId: string) => {
+    const nextLap = defaultLapNumber(nextId);
+    setReferenceDriverId(nextId);
+    setReferenceLapNumber(nextLap);
+    setActiveHouse(null);
+    pushUrl({
+      driverId,
+      lap: lapNumber,
+      referenceDriverId: nextId,
+      referenceLap: nextLap,
+      channels: plotChannelIds,
+      house: null,
+    });
+  };
+
+  const selectReferenceLap = (n: number) => {
+    setReferenceLapNumber(n);
+    pushUrl({
+      driverId,
+      lap: lapNumber,
+      referenceDriverId,
+      referenceLap: n,
+      channels: plotChannelIds,
+    });
+  };
+
+  const fillTeammate = () => {
+    const mate = teammateId(driverId);
+    if (!mate) return;
+    const flyer = bestFlyerFor(mate);
+    if (!flyer) return;
+    setReferenceDriverId(mate);
+    setReferenceLapNumber(flyer.number);
+    pushUrl({
+      driverId,
+      lap: lapNumber,
+      referenceDriverId: mate,
+      referenceLap: flyer.number,
+      channels: plotChannelIds,
+    });
+  };
+
+  const fillFieldBest = () => {
+    const best = fieldBestLap(lapId);
+    if (!best?.driverId) return;
+    setReferenceDriverId(best.driverId);
+    setReferenceLapNumber(best.number);
+    pushUrl({
+      driverId,
+      lap: lapNumber,
+      referenceDriverId: best.driverId,
+      referenceLap: best.number,
+      channels: plotChannelIds,
+    });
+  };
+
+  const fillOtherCompound = () => {
+    const other = otherCompoundLap(driverId, lap);
+    if (!other) return;
+    setReferenceDriverId(driverId);
+    setReferenceLapNumber(other.number);
+    pushUrl({
+      driverId,
+      lap: lapNumber,
+      referenceDriverId: driverId,
+      referenceLap: other.number,
+      channels: plotChannelIds,
+    });
+  };
+
+  const swapCars = () => {
+    if (!referenceDriverId || referenceLapNumber == null) return;
+    const prevFocus = { driverId, lap: lapNumber };
+    setDriverId(referenceDriverId);
+    setLapNumber(referenceLapNumber);
+    setReferenceDriverId(prevFocus.driverId);
+    setReferenceLapNumber(prevFocus.lap);
+    pushUrl({
+      driverId: referenceDriverId,
+      lap: referenceLapNumber,
+      referenceDriverId: prevFocus.driverId,
+      referenceLap: prevFocus.lap,
+      channels: plotChannelIds,
+    });
+  };
+
+  const clearReference = () => {
+    setReferenceDriverId(null);
+    setReferenceLapNumber(null);
+    setActiveHouse(null);
+    pushUrl({
+      driverId,
+      lap: lapNumber,
+      referenceDriverId: null,
+      referenceLap: null,
+      channels: plotChannelIds,
+      house: null,
+    });
+  };
+
+  const applyHouse = (houseId: string) => {
+    const resolved = resolveHouse(houseId);
+    if (!resolved) return;
+    setActiveHouse(houseId);
+    setDriverId(resolved.focusDriverId);
+    setLapNumber(resolved.focusLap);
+    setReferenceDriverId(resolved.referenceDriverId);
+    setReferenceLapNumber(resolved.referenceLap);
+    setPlotChannelIds(["speed", "throttle", "brake"]);
+    setEvidence(null);
+    setSelectedCite(null);
+    setActiveSector("Lap");
+    setDemoStep(0);
+    pushUrl({
+      driverId: resolved.focusDriverId,
+      lap: resolved.focusLap,
+      referenceDriverId: resolved.referenceDriverId,
+      referenceLap: resolved.referenceLap,
+      channels: ["speed", "throttle", "brake"],
+      house: houseId,
+      sector: "Lap",
+    });
+    if (resolved.toolsDemo || houseId === "tools") {
+      setDemoOpen(true);
+      openAskPanel();
+    }
+  };
+
+  const openAskPanel = () => {
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(min-width: 1280px)").matches
+    ) {
+      return;
+    }
+    setAskOpen(true);
+  };
+
+  const runDemoStep = (step: DemoStep) => {
+    setDemoStep(step);
+    setDemoOpen(true);
+    if (step === 0) {
+      setEmphasizeCites(false);
+      return;
+    }
+    if (step === 1) {
+      const label = gain?.label ?? "S2";
+      selectSector(label);
+      return;
+    }
+    if (step === 2) {
+      openAskPanel();
+      setAskTrigger((prev) => ({
+        query: DEMO_ASK,
+        nonce: (prev?.nonce ?? 0) + 1,
+      }));
+      setEmphasizeCites(false);
+      setPlotChannelIds((prev) =>
+        prev.includes("brake_temp") ? prev : [...prev, "brake_temp"],
+      );
+      return;
+    }
+    if (step === 3) {
+      openAskPanel();
+      setAskTrigger((prev) => ({
+        query: DEMO_ASK,
+        nonce: (prev?.nonce ?? 0) + 1,
+      }));
+      setEmphasizeCites(true);
+      return;
+    }
+    if (step === 4) {
+      openAskPanel();
+      setAskTrigger((prev) => ({
+        query: DEMO_NO_HIT,
+        nonce: (prev?.nonce ?? 0) + 1,
+      }));
+      setEmphasizeCites(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!boot.demoForced) return;
+    const t = window.setTimeout(() => setDemoStep(0), 80);
+    return () => window.clearTimeout(t);
+  }, [boot.demoForced]);
+
   const weather = pack.session.weather;
-  const compareLabel = compareLap
-    ? compareLap.driverId === driverId
-      ? `Compare L${compareLap.number}`
-      : `Compare ${getDriver(compareLap.driverId).code}`
-    : "Compare";
+  const traps = (() => {
+    const open = lap.openf1;
+    if (!open) return [];
+    const s1 = pack.sectors.find((s) => s.label === "S1");
+    const s2 = pack.sectors.find((s) => s.label === "S2");
+    const out: { id: string; m: number; label: string; speed?: number }[] = [];
+    if (open.i1_speed != null && s1) {
+      out.push({
+        id: "i1",
+        m: Math.max(0, s1.endM - 40),
+        label: "I1",
+        speed: open.i1_speed,
+      });
+    }
+    if (open.i2_speed != null && s2) {
+      out.push({
+        id: "i2",
+        m: Math.max(0, s2.endM - 40),
+        label: "I2",
+        speed: open.i2_speed,
+      });
+    }
+    if (open.st_speed != null) {
+      out.push({
+        id: "st",
+        m: Math.round(lengthM * 0.59),
+        label: "ST",
+        speed: open.st_speed,
+      });
+    }
+    return out;
+  })();
+
+  const rag = (
+    <RagRail
+      selectedCiteId={selectedCite?.id ?? null}
+      pulsingCiteId={pulsingCiteId}
+      onCite={(c) => lockCite(c)}
+      initialQuery={boot.initialQuery}
+      autoAsk={Boolean(boot.initialQuery)}
+      askTrigger={askTrigger}
+      emphasizeCites={emphasizeCites}
+      compact
+    />
+  );
 
   return (
     <div className="flex h-dvh max-h-dvh flex-col overflow-hidden bg-[var(--void)]">
-      <header className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-[var(--hairline)] bg-[var(--panel)] px-3 py-1.5 font-mono text-[0.7rem]">
+      <header className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b border-[var(--hairline)] bg-[var(--panel)] px-3 py-1.5 font-mono text-[0.7rem]">
         <Link
           href="/"
-          className="font-display text-[0.95rem] font-semibold tracking-tight text-[var(--chalk)] hover:text-[var(--signal)]"
+          className="shrink-0 font-display text-[0.95rem] font-semibold tracking-tight text-[var(--chalk)] hover:text-[var(--signal)]"
         >
           Cite<span className="text-[var(--signal)]">Trace</span>
         </Link>
-        <span className="hidden text-[var(--mute)] sm:inline">{STUDIO}</span>
-        <span className="text-[var(--mute)]">/</span>
-        <span className="text-[var(--chalk)]">
-          {pack.meeting.venue.split(" ").slice(0, 3).join(" ")}{" "}
+        <span className="hidden shrink-0 text-[var(--mute)] lg:inline">
+          {STUDIO}
+        </span>
+        <span className="hidden text-[var(--mute)] sm:inline">/</span>
+        <span className="min-w-0 text-[var(--chalk)]">
+          <span className="hidden sm:inline">{pack.meeting.venue}</span>
+          <span className="sm:hidden">COTA</span>
+          {" · "}
           {pack.session.label}
+          {pack.meeting.locality ? (
+            <span className="hidden text-[var(--mute)] xl:inline">
+              {" "}
+              · {pack.meeting.locality}
+            </span>
+          ) : null}
         </span>
-        <label className="flex items-center gap-1.5 text-[var(--mist)]">
-          <span className="text-[var(--mute)]">Driver</span>
-          <select
-            value={driverId}
-            onChange={(e) => selectDriver(e.target.value)}
-            className="min-h-7 border border-[var(--hairline)] bg-[var(--asphalt)] px-2 text-[var(--chalk)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
-            aria-label="Select driver"
-          >
-            {drivers.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.code}
-                {d.number != null ? ` #${d.number}` : ""}
-                {d.team ? ` · ${d.team}` : ""}
-              </option>
-            ))}
-          </select>
-        </label>
-        <span className="uppercase tracking-wide text-[var(--mist)]">
-          {compoundTag}
-        </span>
+        <HouseSwitcher activeHouse={activeHouse} onSelect={applyHouse} />
         {weather && (
-          <span className="hidden text-[var(--mute)] xl:inline">
+          <span className="ml-auto hidden shrink-0 text-[var(--mute)] lg:inline">
             air {weather.airTemperatureC.toFixed(1)}°C · track{" "}
             {weather.trackTemperatureC.toFixed(1)}°C · RH {weather.humidityPct}%
           </span>
         )}
-        <span className="text-[var(--signal)] md:ml-auto">
-          {formatLapDelta(lap.deltaToBaselineMs) != null
-            ? `Δ L7 ${formatLapDelta(lap.deltaToBaselineMs)}`
-            : deltaBest}
-        </span>
-        <span className="rounded-sm bg-[var(--signal-dim)] px-1.5 py-0.5 text-[0.55rem] uppercase tracking-wider text-[var(--signal)]">
-          {pack.meta.driverCount ?? drivers.length} cars · OpenF1
+        <span className="shrink-0 rounded-sm bg-[var(--signal-dim)] px-1.5 py-0.5 text-[0.55rem] uppercase tracking-wider text-[var(--signal)]">
+          {pack.meta.driverCount ?? 22} cars · OpenF1
         </span>
       </header>
 
-      <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-[var(--hairline)] bg-[var(--asphalt)] px-3 py-1.5">
-        <span className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-[var(--mute)]">
-          Lap
-        </span>
-        {driverLaps.map((l) => (
-          <button
-            key={l.id}
-            type="button"
-            onClick={() => selectLap(l.number)}
-            className={cn(
-              "min-h-7 border border-[var(--hairline)] px-2 font-mono text-[0.68rem] text-[var(--mist)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
-              l.number === lapNumber &&
-                "border-[var(--signal)]/40 bg-[var(--signal-dim)] text-[var(--signal)] shadow-[inset_0_-2px_0_var(--signal)]",
-            )}
-            title={l.tags?.join(" · ")}
-          >
-            {l.number}
-          </button>
-        ))}
-        <span className="ml-2 font-mono text-[0.6rem] uppercase tracking-[0.12em] text-[var(--mute)]">
-          Focus
-        </span>
-        <button
-          type="button"
-          onClick={() => {
-            setActiveSector("Lap");
-            setEvidence({ startM: 0, endM: lengthM });
-            setPlayheadM(lengthM / 2);
-            setSelectedCite(null);
-          }}
-          className={cn(
-            "min-h-7 border border-[var(--hairline)] px-2 font-mono text-[0.68rem] text-[var(--mist)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
-            activeSector === "Lap" &&
-              "border-[var(--signal)]/40 bg-[var(--signal-dim)] text-[var(--signal)] shadow-[inset_0_-2px_0_var(--signal)]",
-          )}
-          title="Whole lap — full distance window"
-        >
-          Lap
-        </button>
-        {pack.sectors.map((s) => (
-          <button
-            key={s.id}
-            type="button"
-            onClick={() => {
-              setActiveSector(s.label);
-              setEvidence({ startM: s.startM, endM: s.endM });
-              setPlayheadM((s.startM + s.endM) / 2);
-              setSelectedCite(null);
-            }}
-            className={cn(
-              "min-h-7 border border-[var(--hairline)] px-2 font-mono text-[0.68rem] text-[var(--mist)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
-              activeSector === s.label &&
-                "border-[var(--signal)]/40 bg-[var(--signal-dim)] text-[var(--signal)] shadow-[inset_0_-2px_0_var(--signal)]",
-            )}
-          >
-            {s.label}
-          </button>
-        ))}
-        <label className="ml-2 flex min-h-7 cursor-pointer items-center gap-2 font-mono text-[0.65rem] text-[var(--mist)]">
-          <input
-            type="checkbox"
-            checked={compare}
-            onChange={(e) => setCompare(e.target.checked)}
-            className="accent-[var(--signal)]"
-          />
-          {compareLabel}
-        </label>
-        <Button
-          type="button"
-          variant="rail"
-          size="sm"
-          className="ml-auto h-7"
-          onClick={explainSpike}
-        >
-          Explain spike
-        </Button>
-        <span className="hidden font-mono text-[0.62rem] text-[var(--mute)] lg:inline">
-          {formatLapTime(lap.timeMs)} · S1 {formatSector(lap.sectorsMs[0])} · S2{" "}
-          {formatSector(lap.sectorsMs[1])} · S3 {formatSector(lap.sectorsMs[2])}
-        </span>
-      </div>
+      <CompareDuo
+        focusDriver={driver}
+        focusLap={lap}
+        focusLaps={driverLaps}
+        referenceDriver={referenceDriver}
+        referenceLap={referenceLap}
+        referenceLaps={referenceLaps}
+        onFocusDriver={selectDriver}
+        onFocusLap={selectLap}
+        onReferenceDriver={selectReferenceDriver}
+        onReferenceLap={selectReferenceLap}
+        onSwap={swapCars}
+        onClear={clearReference}
+        onTeammate={fillTeammate}
+        onFieldBest={fillFieldBest}
+        onOtherCompound={fillOtherCompound}
+        canOtherCompound={Boolean(otherCompoundLap(driverId, lap))}
+      />
 
-      {coachOpen && (
-        <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b border-[var(--signal)]/25 bg-[var(--signal-dim)] px-3 py-1.5 font-mono text-[0.62rem] text-[var(--chalk)]">
-          <span className="text-[var(--signal)]">90s proof</span>
-          <span className="text-[var(--mist)]">
-            Ask → click Evidence → playhead locks.{" "}
-            <span className="text-[var(--trace-amber)]">OVL</span> = synthetic
-            overlay · <span className="text-[var(--mute)]">OF1</span> = OpenF1.
-          </span>
-          <span className="hidden text-[var(--mute)] lg:inline">{WEDGE}</span>
-          <button
-            type="button"
-            onClick={() => {
-              dismissCoach();
-              explainSpike();
-            }}
-            className="min-h-6 border border-[var(--signal)]/40 bg-[var(--asphalt)] px-2 text-[var(--signal)] hover:bg-[var(--panel)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
-          >
-            Run money shot
-          </button>
-          <button
-            type="button"
-            onClick={dismissCoach}
-            className="ml-auto text-[var(--mute)] hover:text-[var(--mist)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
-            aria-label="Dismiss coach"
-          >
-            Dismiss
-          </button>
-          <span className="sr-only">{DEMO_ASK}</span>
-        </div>
+      {deltas && (
+        <DeltaRibbon
+          lapMs={deltas.lapMs}
+          sectorsMs={deltas.sectorsMs}
+          activeSector={activeSector}
+          onSelect={selectSector}
+        />
       )}
 
-      <div className="hidden min-h-0 flex-1 overflow-hidden md:grid md:grid-cols-[200px_minmax(0,1fr)_228px] xl:grid-cols-[212px_minmax(0,1fr)_248px]">
-        <ContextRail
-          lapId={lapId}
-          playheadM={playheadM}
-          activeSector={activeSector}
-          evidence={evidence}
-          activeCiteId={selectedCite?.id ?? null}
-          onTimelineCite={(id) => {
-            const c = getCite(id);
-            if (c) lockCite(c);
-          }}
-          plotChannelIds={plotChannelIds}
-          onTogglePlot={togglePlot}
-          emphasizeBrake={driverId === pack.primaryDriverId}
-          driverNumber={driver.number}
+      {demoOpen && (
+        <DemoGuide
+          step={demoStep}
+          gainLabel={gain?.label ?? "S2"}
+          onStep={runDemoStep}
+          onDismiss={dismissDemo}
         />
-        <main className="flex min-h-0 flex-col overflow-hidden bg-[var(--asphalt)] p-2.5 xl:p-3">
-          <TelemetryStage
-            lapId={lapId}
-            compareLapId={compareLapId}
-            playheadM={playheadM}
-            onPlayhead={onPlayhead}
-            evidence={evidence}
-            activeCite={selectedCite}
-            drawKey={`${lapId}-${compare}-${plotChannelIds.join(",")}`}
-            plotChannelIds={plotChannelIds}
-          />
-        </main>
-        <RagRail
-          selectedCiteId={selectedCite?.id ?? null}
-          pulsingCiteId={pulsingCiteId}
-          onCite={(c) => lockCite(c)}
-          initialQuery={initialQuery}
-          autoAsk={Boolean(initialQuery)}
-        />
-      </div>
+      )}
 
-      <div className="flex flex-1 flex-col md:hidden">
-        <div className="border-b border-[var(--hairline)] bg-[var(--rail)] p-2">
-          <ContextRail
+      {/* Single tree: stacks on mobile, 3-col md, 4-col xl with Ask */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain md:grid md:grid-cols-[252px_minmax(0,1fr)_260px] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden xl:grid-cols-[240px_minmax(0,1fr)_220px_300px]">
+        <div className="min-h-0 md:overflow-hidden">
+          <div className="md:hidden">
+            <Plate
+              driver={driver}
+              lap={lap}
+              activeSector={activeSector}
+              sectorDeltasMs={deltas?.sectorsMs ?? null}
+              onSelectSector={selectSector}
+              compact
+            />
+          </div>
+          <div className="hidden h-full md:block">
+            <Plate
+              driver={driver}
+              lap={lap}
+              activeSector={activeSector}
+              sectorDeltasMs={deltas?.sectorsMs ?? null}
+              onSelectSector={selectSector}
+            />
+          </div>
+        </div>
+
+        <main className="flex min-h-[70vh] flex-col gap-2 bg-[var(--asphalt)] p-2 md:min-h-0 md:overflow-hidden md:p-2.5 xl:p-3">
+          <div className="h-[240px] shrink-0 overflow-hidden md:h-[min(30vh,280px)] md:min-h-[180px]">
+            <TrackSchematic
+              stage
+              activeSector={activeSector}
+              playheadM={playheadM}
+              evidence={evidence}
+              onPlayhead={onPlayhead}
+              onSector={selectSector}
+              focusAccent={focusAccent.accent}
+              referenceAccent={
+                compareLapId ? referenceAccent.accent : undefined
+              }
+              focusNumber={driver.number}
+              referenceNumber={referenceDriver?.number}
+              comparing={Boolean(compareLapId)}
+              traps={traps}
+              sectorDeltaMs={deltas?.sectorsMs ?? null}
+              gainSectorIndex={gain?.index ?? null}
+              lossSectorIndex={
+                loss && loss.ms > 0 ? loss.index : null
+              }
+            />
+          </div>
+          <div className="flex min-h-[320px] flex-1 flex-col overflow-hidden md:min-h-0">
+            <TelemetryStage
+              lapId={lapId}
+              compareLapId={compareLapId}
+              playheadM={playheadM}
+              onPlayhead={onPlayhead}
+              evidence={evidence}
+              activeCite={selectedCite}
+              drawKey={`${lapId}-${compareLapId ?? "solo"}-${plotChannelIds.join(",")}`}
+              plotChannelIds={plotChannelIds}
+              focusAccent={focusAccent.accent}
+              referenceAccent={
+                compareLapId ? referenceAccent.accent : undefined
+              }
+              focusLabel={`${driver.code} ${driver.number ?? ""}`.trim()}
+              referenceLabel={
+                referenceDriver
+                  ? `${referenceDriver.code} ${referenceDriver.number ?? ""}`.trim()
+                  : undefined
+              }
+            />
+          </div>
+        </main>
+
+        <div className="min-h-[360px] border-t border-[var(--hairline)] md:min-h-0 md:overflow-hidden md:border-t-0">
+          <SelectDock
             lapId={lapId}
             playheadM={playheadM}
-            activeSector={activeSector}
-            evidence={evidence}
             activeCiteId={selectedCite?.id ?? null}
             onTimelineCite={(id) => {
               const c = getCite(id);
@@ -487,51 +839,42 @@ export function SessionShell() {
             }}
             plotChannelIds={plotChannelIds}
             onTogglePlot={togglePlot}
-            driverNumber={driver.number}
+            onSetPlots={setPlots}
+            emphasizeBrake={driverId === pack.primaryDriverId}
+            driverLaps={driverLaps}
+            lapNumber={lapNumber}
+            onSelectLap={selectLap}
+            onAsk={openAskPanel}
           />
         </div>
-        <main className="min-h-[45vh] flex-1 bg-[var(--asphalt)] p-2">
-          <TelemetryStage
-            lapId={lapId}
-            compareLapId={compareLapId}
-            playheadM={playheadM}
-            onPlayhead={onPlayhead}
-            evidence={evidence}
-            activeCite={selectedCite}
-            drawKey={`${lapId}-m-${compare}-${plotChannelIds.join(",")}`}
-            plotChannelIds={plotChannelIds}
-          />
-        </main>
-        <div className="sticky bottom-0 border-t border-[var(--hairline)] bg-[var(--rail)] p-2">
-          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-            <SheetTrigger asChild>
-              <Button className="w-full" variant="signal">
-                Ask the session
-              </Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetTitle>Ask the session</SheetTitle>
-              <div className="mt-3 max-h-[60vh] overflow-auto">
-                <RagRail
-                  selectedCiteId={selectedCite?.id ?? null}
-                  pulsingCiteId={pulsingCiteId}
-                  onCite={(c) => lockCite(c)}
-                  initialQuery={initialQuery}
-                  autoAsk={Boolean(initialQuery)}
-                />
-              </div>
-            </SheetContent>
-          </Sheet>
+
+        <div className="hidden min-h-0 overflow-hidden border-l border-[var(--hairline)] xl:block">
+          {rag}
         </div>
       </div>
 
+      <Sheet open={askOpen} onOpenChange={setAskOpen}>
+        <SheetContent className="md:inset-x-auto md:right-0 md:bottom-0 md:top-0 md:max-h-none md:w-[min(100vw,380px)] md:rounded-none md:border-l xl:hidden">
+          <SheetTitle>Ask the session</SheetTitle>
+          <div className="mt-3 max-h-[70vh] overflow-auto md:max-h-[calc(100dvh-4rem)]">
+            {/* Sheet instance for < xl; xl uses the rail column */}
+            <RagRail
+              selectedCiteId={selectedCite?.id ?? null}
+              pulsingCiteId={pulsingCiteId}
+              onCite={(c) => lockCite(c)}
+              initialQuery={boot.initialQuery}
+              autoAsk={Boolean(boot.initialQuery)}
+              askTrigger={askTrigger}
+              emphasizeCites={emphasizeCites}
+              compact
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+
       <footer className="shrink-0 border-t border-[var(--hairline)] px-3 py-1 text-[0.58rem] text-[var(--mute)]">
-        {STUDIO} · {PRODUCT} · {pack.meta.driverCount ?? 22} drivers · OpenF1
-        subset + overlays · No SECU
-        {pack.meta.ratesHz
-          ? ` · ${pack.meta.ratesHz.high ?? "—"}/${pack.meta.ratesHz.mid ?? "—"}/${pack.meta.ratesHz.low ?? "—"} Hz pack`
-          : ""}{" "}
-        ·{" "}
+        {STUDIO} · {PRODUCT} · {AUTHOR} · {pack.meta.driverCount ?? 22} drivers
+        · OpenF1 subset + overlays · No SECU ·{" "}
         <Link href="/about" className="text-[var(--trace-cyan)]">
           Method
         </Link>

@@ -89,6 +89,29 @@ body {
   animation: hero-dash-crawl 18s linear infinite;
 }
 
+@keyframes hero-kenburns {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.12) translate3d(-1.2%, -0.8%, 0);
+  }
+}
+
+.hero-kenburns {
+  animation: hero-kenburns 22s var(--ease) forwards;
+  will-change: transform;
+}
+
+.cota-kerb {
+  background: repeating-linear-gradient(
+    90deg,
+    #e8eef5 0 14px,
+    #ff4d5e 14px 28px
+  );
+  opacity: 0.85;
+}
+
 .cite-pulse {
   animation: cite-pulse 0.55s var(--ease) 1;
 }
@@ -126,6 +149,72 @@ body {
   transition: opacity 120ms var(--ease);
 }
 
+.panel-scroll {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(198, 255, 74, 0.45) rgba(24, 32, 48, 0.9);
+}
+
+.panel-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.panel-scroll::-webkit-scrollbar-track {
+  background: rgba(24, 32, 48, 0.95);
+  border-left: 1px solid rgba(232, 238, 245, 0.08);
+}
+
+.panel-scroll::-webkit-scrollbar-thumb {
+  background: rgba(198, 255, 74, 0.45);
+  border-radius: 999px;
+  border: 2px solid rgba(24, 32, 48, 0.95);
+}
+
+.panel-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(198, 255, 74, 0.7);
+}
+
+.circuit-stage {
+  background: #070a0f;
+}
+
+.circuit-stage-bg {
+  background:
+    radial-gradient(
+      80% 70% at 30% 20%,
+      rgba(58, 215, 255, 0.08),
+      transparent 55%
+    ),
+    radial-gradient(
+      70% 60% at 75% 80%,
+      rgba(198, 255, 74, 0.06),
+      transparent 50%
+    ),
+    linear-gradient(180deg, #121820 0%, #070a0f 100%);
+}
+
+@keyframes circuit-dash-crawl {
+  to {
+    stroke-dashoffset: -80;
+  }
+}
+
+.circuit-dash {
+  animation: circuit-dash-crawl 22s linear infinite;
+}
+
+.compare-vs-btn:hover {
+  filter: brightness(1.08);
+  transform: scale(1.04);
+}
+
+.compare-vs-btn {
+  transition:
+    transform 160ms var(--ease),
+    filter 160ms var(--ease);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cite-pulse {
     animation: none;
@@ -136,11 +225,18 @@ body {
     animation: none !important;
   }
   .hero-track-draw,
-  .hero-dash {
+  .hero-dash,
+  .hero-kenburns {
     animation: none !important;
     stroke-dashoffset: 0 !important;
   }
   .playhead-ease {
     transition: none !important;
+  }
+  .circuit-dash,
+  .compare-vs-btn {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 }

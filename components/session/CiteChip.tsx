@@ -7,11 +7,13 @@ export function CiteChip({
   cite,
   selected,
   pulsing,
+  emphasize,
   onSelect,
 }: {
   cite: CiteTarget;
   selected?: boolean;
   pulsing?: boolean;
+  emphasize?: boolean;
   onSelect: (cite: CiteTarget) => void;
 }) {
   return (
@@ -25,6 +27,9 @@ export function CiteChip({
         selected &&
           "border-[var(--signal)] bg-[var(--signal-dim)] text-[var(--signal)]",
         pulsing && "cite-pulse",
+        emphasize &&
+          !selected &&
+          "border-[var(--signal)]/60 shadow-[0_0_0_1px_rgba(198,255,74,0.35)] animate-pulse",
       )}
     >
       <span className="block">{cite.label}</span>

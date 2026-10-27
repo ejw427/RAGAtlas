@@ -1,9 +1,14 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DisclaimerFooter } from "@/components/DisclaimerFooter";
 import {
+  AUTHOR,
+  CANDIDATE_LINE,
   DEMO_ASK,
   DEMO_STEPS,
+  EMAIL_BLURB,
+  LIVE_DEMO_URL,
   LIVE_URL,
   METHOD_HEADLINE,
   PORTFOLIO_URL,
@@ -12,6 +17,7 @@ import {
   TAGLINE,
   WEDGE,
 } from "@/lib/brand";
+import { HOUSE_PRESETS } from "@/lib/identity";
 import { corpusSummary } from "@/lib/rag";
 import { getChannels, getSessionPack } from "@/lib/session";
 import { cn } from "@/lib/utils";
@@ -122,10 +128,33 @@ export default function AboutPage() {
             </Link>
           </div>
           <Button asChild size="sm">
-            <Link href="/session?driver=LEC&lap=10">Open session</Link>
+            <Link href="/session?demo=1&house=ferrari">90s demo</Link>
           </Button>
         </div>
       </header>
+
+      <div className="relative isolate h-40 overflow-hidden border-b border-[var(--hairline)] sm:h-52">
+        <Image
+          src="/cota-tower-dusk.jpg"
+          alt="Circuit of the Americas observation tower at dusk"
+          fill
+          className="object-cover object-[center_40%]"
+          sizes="100vw"
+          priority
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(5,7,10,0.35) 0%, rgba(5,7,10,0.88) 100%)",
+          }}
+        />
+        <div className="relative z-[1] mx-auto flex h-full max-w-[800px] items-end px-6 pb-5">
+          <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[var(--signal)]">
+            Austin · Circuit of the Americas · 2026 FP2
+          </p>
+        </div>
+      </div>
 
       <article className="mx-auto max-w-[800px] px-6 py-12">
         <p className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-[var(--signal)]">
@@ -163,10 +192,10 @@ export default function AboutPage() {
         {/* 90-second demo */}
         <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
           <h2 className="font-display text-xl font-semibold">
-            90-second demo
+            What this proves in 90 seconds
           </h2>
           <p className="text-[var(--mist)] leading-relaxed">
-            Hiring-manager skim path. Money-shot ask:{" "}
+            {CANDIDATE_LINE}. Money-shot ask:{" "}
             <span className="font-mono text-[var(--chalk)]">{DEMO_ASK}</span>
           </p>
           <ol className="list-decimal space-y-2 pl-5 text-[var(--mist)]">
@@ -174,9 +203,57 @@ export default function AboutPage() {
               <li key={step}>{step}</li>
             ))}
           </ol>
+          <div className="rounded-sm border border-[var(--hairline)] bg-[var(--panel)] px-3 py-2.5">
+            <p className="font-mono text-[0.55rem] uppercase tracking-[0.12em] text-[var(--mute)]">
+              Email / LinkedIn blurb · {AUTHOR}
+            </p>
+            <p className="mt-1.5 text-[0.78rem] leading-relaxed text-[var(--chalk)]">
+              {EMAIL_BLURB}
+            </p>
+            <p className="mt-2 font-mono text-[0.62rem] text-[var(--signal)]">
+              {LIVE_DEMO_URL.replace(/^https:\/\//, "")}
+            </p>
+          </div>
           <Button asChild size="sm" className="mt-2">
-            <Link href="/session?driver=LEC&lap=10">Open COTA session</Link>
+            <Link href="/session?demo=1&house=ferrari">Run the 90s demo</Link>
           </Button>
+        </section>
+
+        <section className="mt-10 space-y-3 border-t border-[var(--hairline)] pt-8">
+          <h2 className="font-display text-xl font-semibold">
+            House walk-ins
+          </h2>
+          <p className="text-[var(--mist)] leading-relaxed">
+            Same pit wall, re-aimed. Use the House switcher in-session or deep-link.
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {HOUSE_PRESETS.map((h) => (
+              <Link
+                key={h.id}
+                href={`/session?demo=1&house=${h.id}`}
+                className="border border-[var(--hairline)] bg-[var(--panel)] px-3 py-2.5 transition hover:border-[var(--hairline-strong)] hover:bg-[var(--signal-dim)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+              >
+                <span className="font-mono text-[0.72rem] text-[var(--signal)]">
+                  {h.label}
+                </span>
+                <span className="mt-0.5 block text-[0.72rem] text-[var(--mist)]">
+                  {h.focusCode} L{h.focusLap} vs {h.referenceCode} L
+                  {h.referenceLap}
+                </span>
+              </Link>
+            ))}
+            <Link
+              href="/session?demo=1&house=tools"
+              className="border border-[var(--hairline)] bg-[var(--panel)] px-3 py-2.5 transition hover:border-[var(--hairline-strong)] hover:bg-[var(--signal-dim)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+            >
+              <span className="font-mono text-[0.72rem] text-[var(--signal)]">
+                Tools vendor
+              </span>
+              <span className="mt-0.5 block text-[0.72rem] text-[var(--mist)]">
+                Cite lock · OF1 vs OVL · fail closed
+              </span>
+            </Link>
+          </div>
         </section>
 
         {/* Corpus strip */}
@@ -281,7 +358,7 @@ export default function AboutPage() {
             />
           </div>
           <Button asChild>
-            <Link href="/session?driver=LEC&lap=10">Open COTA session</Link>
+            <Link href="/session?demo=1&house=ferrari">Run 90s demo</Link>
           </Button>
         </section>
 
@@ -439,7 +516,7 @@ export default function AboutPage() {
 
         <div className="mt-12 flex flex-wrap gap-4 border-t border-[var(--hairline)] pt-8">
           <Button asChild>
-            <Link href="/session?driver=LEC&lap=10">Open the COTA session</Link>
+            <Link href="/session?demo=1&house=ferrari">Run 90s demo</Link>
           </Button>
           <Button asChild variant="rail">
             <Link href="/session?driver=LEC&lap=10&citeId=cite_brake_spike">

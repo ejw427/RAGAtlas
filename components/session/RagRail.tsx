@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CiteChip } from "@/components/session/CiteChip";
 import { answerQuery, seedQueries } from "@/lib/rag";
+import { DEMO_ASK, DEMO_NO_HIT } from "@/lib/brand";
 import type { CiteTarget, RagAnswer } from "@/lib/types";
 import { prefersReducedMotion } from "@/lib/motion";
 
@@ -21,19 +22,25 @@ export function RagRail({
   onCite,
   initialQuery,
   autoAsk = false,
+  askTrigger,
+  emphasizeCites = false,
+  compact = false,
 }: {
   selectedCiteId: string | null;
   pulsingCiteId: string | null;
   onCite: (cite: CiteTarget) => void;
   initialQuery?: string;
   autoAsk?: boolean;
+  /** Increment to force a new ask (demo step). */
+  askTrigger?: { query: string; nonce: number } | null;
+  emphasizeCites?: boolean;
+  compact?: boolean;
 }) {
-  const [query, setQuery] = useState(
-    initialQuery ?? "Why did brake temp spike in S3 on lap 10?",
-  );
+  const [query, setQuery] = useState(initialQuery ?? DEMO_ASK);
   const [answer, setAnswer] = useState<RagAnswer>(EMPTY);
   const seeds = seedQueries();
   const autoAsked = useRef(false);
+  const lastTrigger = useRef(0);
 
   const submit = async (q: string) => {
     const trimmed = q.trim();
@@ -59,8 +66,21 @@ export function RagRail({
     return () => window.clearTimeout(t);
   }, [autoAsk, initialQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (!askTrigger?.query || askTrigger.nonce === lastTrigger.current) return;
+    lastTrigger.current = askTrigger.nonce;
+    setQuery(askTrigger.query);
+    void submit(askTrigger.query);
+  }, [askTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
-    <aside className="flex h-full min-h-0 flex-col gap-3 overflow-auto bg-[var(--rail)] p-3 md:border-l md:border-[var(--hairline)]">
+    <aside
+      className={
+        compact
+          ? "flex h-full min-h-0 flex-col gap-2.5 overflow-auto bg-[var(--rail)] p-2.5"
+          : "flex h-full min-h-0 flex-col gap-3 overflow-auto bg-[var(--rail)] p-3 md:border-l md:border-[var(--hairline)]"
+      }
+    >
       <div>
         <p className="font-mono text-[0.62rem] uppercase tracking-[0.14em] text-[var(--mute)]">
           Ask the session
@@ -80,7 +100,7 @@ export function RagRail({
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Why did brake temp spike in S3 on lap 10?"
+          placeholder={DEMO_ASK}
           aria-label="Session query"
           className="min-w-0 flex-1 text-[0.8rem]"
         />
@@ -89,8 +109,8 @@ export function RagRail({
         </Button>
       </form>
 
-      <div className="flex max-h-36 flex-wrap gap-1.5 overflow-auto">
-        {seeds.map((s) => (
+      <div className="flex max-h-28 flex-wrap gap-1.5 overflow-auto">
+        {seeds.slice(0, compact ? 4 : seeds.length).map((s) => (
           <button
             key={s}
             type="button"
@@ -101,15 +121,14 @@ export function RagRail({
             title={s}
             className="border border-[var(--hairline)] px-2 py-1 text-left font-mono text-[0.58rem] text-[var(--mute)] hover:border-[var(--hairline-strong)] hover:text-[var(--mist)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
           >
-            {s.length > 56 ? `${s.slice(0, 54)}…` : s}
+            {s.length > 48 ? `${s.slice(0, 46)}…` : s}
           </button>
         ))}
         <button
           type="button"
           onClick={() => {
-            const q = "Who is the championship leader?";
-            setQuery(q);
-            void submit(q);
+            setQuery(DEMO_NO_HIT);
+            void submit(DEMO_NO_HIT);
           }}
           className="border border-[var(--warn)]/35 px-2 py-1 font-mono text-[0.58rem] text-[var(--warn)] hover:bg-[var(--warn)]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
         >
@@ -117,7 +136,7 @@ export function RagRail({
         </button>
       </div>
 
-      <div className="min-h-[8rem] border-t border-[var(--hairline)] pt-3">
+      <div className="min-h-[6rem] border-t border-[var(--hairline)] pt-3">
         {answer.status === "empty" && (
           <div className="space-y-2">
             <p className="text-[0.78rem] leading-snug text-[var(--mist)]">
@@ -155,12 +174,13 @@ export function RagRail({
               <p className="font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--mute)]">
                 Evidence · click to lock playhead
               </p>
-              {answer.cites.map((cite) => (
+              {answer.cites.map((cite, i) => (
                 <CiteChip
                   key={cite.id}
                   cite={cite}
                   selected={selectedCiteId === cite.id}
                   pulsing={pulsingCiteId === cite.id}
+                  emphasize={emphasizeCites && i === 0}
                   onSelect={onCite}
                 />
               ))}

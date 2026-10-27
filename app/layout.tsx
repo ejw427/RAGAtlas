@@ -62,7 +62,7 @@ export const metadata: Metadata = {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "CiteTrace — Circuit of the Americas night session",
+        alt: "CiteTrace — Circuit of the Americas Turn 1 climb, Austin",
       },
     ],
   },

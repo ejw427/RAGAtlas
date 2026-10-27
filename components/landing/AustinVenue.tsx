@@ -107,7 +107,7 @@ export function AustinVenue() {
             </p>
             <div className="mt-5">
               <Button asChild>
-                <Link href="/session?driver=LEC&lap=10">Open COTA session</Link>
+                <Link href="/session?house=ferrari">Compare two cars</Link>
               </Button>
             </div>
           </div>

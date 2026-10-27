@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,44 +16,47 @@ const STEPS = [
   {
     n: "01",
     title: "Ask the lap",
-    body: "Query the session pack — notes, channel docs, and distance windows — not the open web.",
+    body: "Query the COTA session pack — notes, channel docs, and distance windows on the US GP circuit — not the open web.",
+    mark: "T1 · Esses · Stadium",
   },
   {
     n: "02",
     title: "Get a cite",
-    body: "Every claim binds to evidence chips. No match → fail closed. Deterministic QaMap, not an LLM.",
+    body: "Every claim binds to evidence chips. No match → fail closed. Deterministic QaMap, not an LLM inventing physics.",
+    mark: "S3 brake · Soft flyer",
   },
   {
     n: "03",
     title: "Lock the trace",
-    body: "Click a cite → playhead and evidence band lock on the waveforms. Trust what you can see.",
+    body: "Click a cite → playhead and evidence band lock on the waveforms. Walk a race team through what you can see.",
+    mark: "Playhead + band",
   },
 ] as const;
 
 const CHIPS = [
   {
     href: "/session?driver=LEC&lap=10&citeId=cite_brake_spike",
-    label: "Cite lock · brake spike",
+    label: "Cite lock · stadium brake",
     hint: "942°C peak · S3 heavy",
   },
   {
     href: "/session?driver=LEC&lap=10&citeId=cite_front_brake&q=Why%20is%20the%20front%20brake%20cooler%20than%20the%20rear%20on%20lap%2010%3F",
-    label: "Front vs rear",
+    label: "Front vs rear · COTA ducts",
     hint: "Duct story · OVL",
   },
   {
     href: "/session?driver=LEC&lap=10&citeId=cite_pressure&q=Was%20the%20S3%20stop%20a%20late%20stab%20or%20a%20trail%3F",
-    label: "Trail, not a stab",
+    label: "Trail into stadium",
     hint: "Brake pressure shape",
   },
   {
     href: "/session?driver=LEC&lap=10&citeId=cite_tyre&q=How%20hot%20was%20the%20Soft%20tyre%20through%20S2%3F",
-    label: "Soft tyre heat",
+    label: "Soft heat · esses / S2",
     hint: "OVL surface temp",
   },
   {
     href: "/session?driver=LEC&lap=10&citeId=cite_trap_st&q=What%20was%20the%20Soft%20speed%20trap%20vs%20Hard%3F",
-    label: "Speed trap +5",
+    label: "Speed trap +5 · Austin",
     hint: "OpenF1 ST",
   },
   {
@@ -74,20 +78,44 @@ export function HowItWorks() {
       id="how-it-works"
       className="scroll-mt-8 border-t border-[var(--hairline)] bg-[var(--asphalt)]"
     >
-      <div className="mx-auto max-w-[1120px] px-6 py-14 sm:py-16">
-        <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[var(--signal)]">
-          How grounding works
-        </p>
-        <h2 className="mt-2 max-w-2xl font-display text-2xl font-semibold tracking-tight text-[var(--chalk)] sm:text-3xl">
-          {METHOD_HEADLINE}
-        </h2>
-        <p className="mt-2 max-w-xl text-[0.95rem] leading-relaxed text-[var(--mist)]">
-          {WEDGE} {TAGLINE}
-        </p>
+      <div className="relative isolate overflow-hidden border-b border-[var(--hairline)]">
+        <div className="absolute inset-0">
+          <Image
+            src="/cota-pitwall.jpg"
+            alt="Race engineers at a pit-wall telemetry booth overlooking a floodlit Circuit of the Americas session"
+            fill
+            className="object-cover object-[center_30%] opacity-45"
+            sizes="100vw"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(11,15,20,0.55) 0%, rgba(11,15,20,0.92) 100%), linear-gradient(90deg, rgba(5,7,10,0.85) 0%, rgba(5,7,10,0.35) 60%, rgba(5,7,10,0.75) 100%)",
+            }}
+          />
+        </div>
+        <div className="relative z-[1] mx-auto max-w-[1120px] px-6 py-12 sm:py-14">
+          <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[var(--signal)]">
+            How grounding works · pit wall
+          </p>
+          <h2 className="mt-2 max-w-2xl font-display text-2xl font-semibold tracking-tight text-[var(--chalk)] sm:text-3xl">
+            {METHOD_HEADLINE}
+          </h2>
+          <p className="mt-2 max-w-xl text-[0.95rem] leading-relaxed text-[var(--mist)]">
+            {WEDGE} {TAGLINE} Demo it like a race team debrief — COTA asphalt,
+            locked cites, honest provenance.
+          </p>
+        </div>
+      </div>
 
-        <ol className="mt-10 grid gap-6 sm:grid-cols-3">
+      <div className="mx-auto max-w-[1120px] px-6 py-14 sm:py-16">
+        <ol className="grid gap-6 sm:grid-cols-3">
           {STEPS.map((step) => (
-            <li key={step.n} className="border-t border-[var(--hairline-strong)] pt-4">
+            <li
+              key={step.n}
+              className="border-t border-[var(--hairline-strong)] pt-4"
+            >
               <p className="font-mono text-[0.6rem] tracking-[0.14em] text-[var(--mute)]">
                 {step.n}
               </p>
@@ -97,6 +125,9 @@ export function HowItWorks() {
               <p className="mt-2 text-[0.85rem] leading-relaxed text-[var(--mist)]">
                 {step.body}
               </p>
+              <p className="mt-3 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--signal)]">
+                {step.mark}
+              </p>
             </li>
           ))}
         </ol>
@@ -104,7 +135,7 @@ export function HowItWorks() {
         <div className="mt-10 flex flex-wrap items-end justify-between gap-4 border-t border-[var(--hairline)] pt-8">
           <div>
             <p className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-[var(--mute)]">
-              Live corpus · {corpus.yearHint} {corpus.sessionLabel}
+              Live corpus · {corpus.yearHint} {corpus.sessionLabel} · Austin
             </p>
             <p className="mt-1 font-mono text-[0.7rem] text-[var(--mist)]">
               {corpus.drivers} drivers · {corpus.channelParams} channels (
@@ -114,7 +145,7 @@ export function HowItWorks() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button asChild size="sm">
-              <Link href="/session?driver=LEC&lap=10">Open session</Link>
+              <Link href="/session?demo=1&house=ferrari">Run 90s demo</Link>
             </Button>
             <Button asChild size="sm" variant="ghost">
               <Link href="/about">Full method</Link>
