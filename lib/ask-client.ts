@@ -1,4 +1,5 @@
 import { retrieveEvidence, resolveCites } from "@/lib/rag";
+import { trackEvent } from "@/lib/track";
 import type { RagAnswer } from "@/lib/types";
 
 type AskApiHit = {
@@ -50,6 +51,7 @@ export async function askSession(query: string): Promise<RagAnswer> {
 
   const bundle = retrieveEvidence(trimmed);
   if (bundle.status !== "hit") {
+    trackEvent("ask_miss", { query: trimmed.slice(0, 80) });
     return {
       status: bundle.status,
       query: bundle.query,
@@ -58,6 +60,8 @@ export async function askSession(query: string): Promise<RagAnswer> {
       source: "qamap",
     };
   }
+
+  trackEvent("ask_hit", { query: trimmed.slice(0, 80) });
 
   try {
     const res = await fetch("/api/ask", {

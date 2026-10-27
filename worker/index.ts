@@ -13,9 +13,19 @@ type AiRun = (
   },
 ) => Promise<{ response?: string } | string>;
 
+type AnalyticsEngineDataset = {
+  writeDataPoint: (point: {
+    blobs?: (string | null)[];
+    doubles?: number[];
+    indexes?: (string | null)[];
+  }) => void;
+};
+
 export interface Env {
   AI: { run: AiRun };
   ASSETS?: { fetch: (request: Request) => Promise<Response> };
+  /** Hiring-funnel events — query in CF Workers Analytics Engine */
+  TRACK?: AnalyticsEngineDataset;
 }
 
 type EvidenceSnippet = {
@@ -215,11 +225,67 @@ async function handleAsk(req: Request, env: Env): Promise<Response> {
   }
 }
 
+async function handleTrack(req: Request, env: Env): Promise<Response> {
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "access-control-allow-methods": "POST, OPTIONS",
+        "access-control-allow-headers": "content-type",
+        "access-control-max-age": "86400",
+      },
+    });
+  }
+  if (req.method !== "POST") {
+    return json({ ok: false }, 405);
+  }
+  try {
+    const body = (await req.json()) as Record<string, unknown>;
+    const event =
+      typeof body.event === "string" ? body.event.slice(0, 64) : "page_view";
+    const source =
+      typeof body.utm_source === "string"
+        ? body.utm_source.slice(0, 64)
+        : typeof body.house === "string"
+          ? body.house.slice(0, 64)
+          : "unknown";
+    const campaign =
+      typeof body.utm_campaign === "string"
+        ? body.utm_campaign.slice(0, 64)
+        : "";
+    const content =
+      typeof body.utm_content === "string"
+        ? body.utm_content.slice(0, 64)
+        : "";
+    const path =
+      typeof body.path === "string"
+        ? body.path.slice(0, 256)
+        : typeof body.href === "string"
+          ? body.href.slice(0, 256)
+          : "";
+    const referrer =
+      typeof body.referrer === "string" ? body.referrer.slice(0, 256) : "";
+
+    env.TRACK?.writeDataPoint({
+      // blob1=event blob2=source blob3=campaign blob4=content blob5=path blob6=referrer
+      blobs: [event, source, campaign, content, path, referrer],
+      doubles: [1],
+      indexes: [source],
+    });
+  } catch {
+    /* never fail the client over analytics */
+  }
+  return json({ ok: true });
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname === "/api/ask" || url.pathname === "/api/ask/") {
       return handleAsk(request, env);
+    }
+    if (url.pathname === "/api/track" || url.pathname === "/api/track/") {
+      return handleTrack(request, env);
     }
     // Asset-first for everything else when run_worker_first only matches /api/*
     if (env.ASSETS) {

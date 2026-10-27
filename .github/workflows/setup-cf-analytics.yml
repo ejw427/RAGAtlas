@@ -1,0 +1,71 @@
+﻿# One-shot: create Cloudflare Web Analytics for citetrace.welchsoftware.net
+# and print the site token so you can set GitHub secret CF_WEB_ANALYTICS_TOKEN.
+name: Setup CF Web Analytics
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    name: Create / fetch Web Analytics token
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Ensure Web Analytics site
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          HOST="citetrace.welchsoftware.net"
+          LIST=$(curl -sS -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/rum/site_info/list")
+          echo "$LIST" | jq '{success, errors, count: (.result|length)}'
+
+          TOKEN=$(echo "$LIST" | jq -r --arg h "$HOST" '
+            .result[]?
+            | select(
+                ((.rules // []) | map(.host // "") | join(" "))
+                + " " + (.hostname // "")
+                + " " + (.site_name // "")
+                | contains($h)
+              )
+            | .site_tag
+          ' | head -n1)
+
+          if [ -z "${TOKEN}" ] || [ "${TOKEN}" = "null" ]; then
+            CREATE=$(curl -sS -X POST \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              -H "Content-Type: application/json" \
+              "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/rum/site_info" \
+              --data "{\"auto_install\":false,\"host\":\"${HOST}\"}")
+            echo "$CREATE" | jq '{success, errors, result: (.result | {site_tag, site_name, sn})}'
+            TOKEN=$(echo "$CREATE" | jq -r '.result.site_tag // empty')
+          else
+            echo "Found existing Web Analytics site for ${HOST}"
+          fi
+
+          if [ -z "${TOKEN}" ]; then
+            echo "::error::Could not create/find Web Analytics token for ${HOST}"
+            echo "$LIST" | jq .
+            exit 1
+          fi
+
+          echo "::add-mask::${TOKEN}"
+          {
+            echo "## Cloudflare Web Analytics"
+            echo ""
+            echo "Site: \`${HOST}\`"
+            echo ""
+            echo "Set GitHub secret **CF_WEB_ANALYTICS_TOKEN** to:"
+            echo ""
+            echo '```'
+            echo "${TOKEN}"
+            echo '```'
+            echo ""
+            echo "Then re-run the **Deploy** workflow so the beacon is baked into the static export."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Token ready (length ${#TOKEN}). See job summary."

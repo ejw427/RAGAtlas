@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Oxanium, Sora } from "next/font/google";
+import { CampaignBeacon } from "@/components/CampaignBeacon";
 import { CfAnalytics } from "@/components/CfAnalytics";
 import {
   LIVE_URL,
@@ -89,6 +90,7 @@ export default function RootLayout({
         className={`${oxanium.variable} ${sora.variable} ${plexMono.variable} min-h-dvh bg-[var(--void)] font-ui text-[var(--chalk)] antialiased`}
       >
         {children}
+        <CampaignBeacon />
         <CfAnalytics />
       </body>
     </html>

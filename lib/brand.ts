@@ -25,6 +25,12 @@ export const LIVE_COMPARE_URL = `${LIVE_URL}${SESSION_FIELD_PATH}`;
 export const LIVE_DEMO_URL = `${LIVE_URL}${SESSION_FIELD_DEMO_PATH}`;
 export const LIVE_AUDI_URL = `${LIVE_URL}/session?demo=1&house=audi`;
 export const PORTFOLIO_URL = "https://www.welchsoftware.net/projects/citetrace";
+
+/** Prefer these in new outreach — UTMs show up in Cloudflare as path/query */
+export {
+  TRACKED as LIVE_TRACKED,
+  withCampaign,
+} from "@/lib/campaign";
 /** Money-shot ask — cite locks playhead on the stadium brake */
 export const DEMO_ASK = "Why did brake temp spike in S3 on lap 10?";
 export const DEMO_NO_HIT = "Who is the championship leader?";
