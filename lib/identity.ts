@@ -217,11 +217,12 @@ export function fieldTopTwoCompare(): {
   const pack = getSessionPack();
   const sorted = pack.laps.slice().sort((a, b) => a.timeMs - b.timeMs);
   const seen = new Set<string>();
-  const best: Lap[] = [];
+  const best: { driverId: string; lap: number }[] = [];
   for (const lap of sorted) {
-    if (seen.has(lap.driverId)) continue;
-    seen.add(lap.driverId);
-    best.push(lap);
+    const driverId = lap.driverId;
+    if (!driverId || seen.has(driverId)) continue;
+    seen.add(driverId);
+    best.push({ driverId, lap: lap.number });
     if (best.length >= 2) break;
   }
   const p1 = best[0];
@@ -229,9 +230,9 @@ export function fieldTopTwoCompare(): {
   if (!p1 || !p2) return null;
   return {
     focusDriverId: p1.driverId,
-    focusLap: p1.number,
+    focusLap: p1.lap,
     referenceDriverId: p2.driverId,
-    referenceLap: p2.number,
+    referenceLap: p2.lap,
   };
 }
 
