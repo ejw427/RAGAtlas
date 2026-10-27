@@ -224,12 +224,14 @@ export function fieldTopTwoCompare(): {
     best.push(lap);
     if (best.length >= 2) break;
   }
-  if (best.length < 2) return null;
+  const p1 = best[0];
+  const p2 = best[1];
+  if (!p1 || !p2) return null;
   return {
-    focusDriverId: best[0].driverId,
-    focusLap: best[0].number,
-    referenceDriverId: best[1].driverId,
-    referenceLap: best[1].number,
+    focusDriverId: p1.driverId,
+    focusLap: p1.number,
+    referenceDriverId: p2.driverId,
+    referenceLap: p2.number,
   };
 }
 
