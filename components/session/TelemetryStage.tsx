@@ -51,6 +51,7 @@ export function TelemetryStage({
   referenceLabel,
   onOpenCompare,
   viewWindow = null,
+  sectorDeltaMs = null,
 }: {
   lapId: string;
   compareLapId: string | null;
@@ -67,6 +68,8 @@ export function TelemetryStage({
   onOpenCompare?: () => void;
   /** Stretch x-domain to match map zoom / sector. */
   viewWindow?: { startM: number; endM: number } | null;
+  /** Focus − Reference sector gaps (ms). Colors the stage green/amber. */
+  sectorDeltaMs?: [number, number, number] | null;
 }) {
   const channels = stageChannels(plotChannelIds);
   const uid = useId();
@@ -259,6 +262,34 @@ export function TelemetryStage({
     };
   };
 
+  /** Area fill for Δ series above/below zero. */
+  const deltaAreaPaths = (
+    series: { d: number[]; v: number[] },
+    y0: number,
+    y1: number,
+  ) => {
+    const vmin = Math.min(...series.v, 0);
+    const vmax = Math.max(...series.v, 0);
+    const span = vmax - vmin || 1;
+    const padY = 5;
+    const yAt = (v: number) =>
+      y1 - padY - ((v - vmin) / span) * (y1 - y0 - padY * 2);
+    const zeroY = yAt(0);
+    const pos: string[] = [];
+    const neg: string[] = [];
+    const clipped = clipSeries(series);
+    for (let i = 0; i < clipped.d.length - 1; i++) {
+      const m0 = clipped.d[i];
+      const m1 = clipped.d[i + 1];
+      const v0 = clipped.v[i];
+      const v1 = clipped.v[i + 1];
+      const poly = `M${xOf(m0).toFixed(1)},${zeroY.toFixed(1)} L${xOf(m0).toFixed(1)},${yAt(v0).toFixed(1)} L${xOf(m1).toFixed(1)},${yAt(v1).toFixed(1)} L${xOf(m1).toFixed(1)},${zeroY.toFixed(1)} Z`;
+      if ((v0 + v1) / 2 >= 0) pos.push(poly);
+      else neg.push(poly);
+    }
+    return { pos, neg, zeroY, range: { vmin, vmax } };
+  };
+
   const onPointer = (clientX: number) => {
     const svg = svgRef.current;
     if (!svg) return;
@@ -417,13 +448,20 @@ export function TelemetryStage({
         >
           <defs>
             <linearGradient id={`${uid}-band`} x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="rgba(58,215,255,0.18)" />
-              <stop offset="100%" stopColor="rgba(58,215,255,0.05)" />
+              <stop offset="0%" stopColor="rgba(58,215,255,0.28)" />
+              <stop offset="100%" stopColor="rgba(58,215,255,0.06)" />
             </linearGradient>
             <linearGradient id={`${uid}-play`} x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="rgba(198,255,74,0.55)" />
-              <stop offset="100%" stopColor="rgba(198,255,74,0.05)" />
+              <stop offset="0%" stopColor="rgba(58,215,255,0.7)" />
+              <stop offset="100%" stopColor="rgba(198,255,74,0.08)" />
             </linearGradient>
+            <filter id={`${uid}-glow`} x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="2.2" result="b" />
+              <feMerge>
+                <feMergeNode in="b" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
           </defs>
 
           {/* Axis */}
@@ -432,34 +470,56 @@ export function TelemetryStage({
             y={0}
             width={W}
             height={axisH}
-            fill="rgba(11,15,20,0.85)"
+            fill="rgba(11,15,20,0.9)"
           />
-          {sectors.map((s, i) => (
-            <g key={s.id}>
-              <rect
-                x={xOf(s.startM)}
-                y={plotTop}
-                width={Math.max(1, xOf(s.endM) - xOf(s.startM))}
-                height={H - plotTop}
-                fill={
-                  i % 2 === 0
-                    ? "rgba(198,255,74,0.03)"
-                    : "rgba(58,215,255,0.025)"
-                }
-              />
-              <text
-                x={(xOf(s.startM) + xOf(s.endM)) / 2}
-                y={18}
-                textAnchor="middle"
-                fill="var(--mute)"
-                fontSize="10"
-                fontFamily="var(--font-mono)"
-                letterSpacing="0.08em"
-              >
-                {s.label}
-              </text>
-            </g>
-          ))}
+          {sectors.map((s, i) => {
+            const delta = sectorDeltaMs?.[i];
+            const ahead = delta != null && delta <= 0;
+            const behind = delta != null && delta > 0;
+            const fill = compareLapId
+              ? ahead
+                ? "rgba(198,255,74,0.12)"
+                : behind
+                  ? "rgba(255,77,94,0.1)"
+                  : i % 2 === 0
+                    ? "rgba(58,215,255,0.05)"
+                    : "rgba(58,215,255,0.03)"
+              : i % 2 === 0
+                ? "rgba(198,255,74,0.03)"
+                : "rgba(58,215,255,0.025)";
+            return (
+              <g key={s.id}>
+                <rect
+                  x={xOf(s.startM)}
+                  y={plotTop}
+                  width={Math.max(1, xOf(s.endM) - xOf(s.startM))}
+                  height={H - plotTop}
+                  fill={fill}
+                />
+                <text
+                  x={(xOf(s.startM) + xOf(s.endM)) / 2}
+                  y={18}
+                  textAnchor="middle"
+                  fill={
+                    ahead
+                      ? "var(--signal)"
+                      : behind
+                        ? "var(--fault)"
+                        : "var(--mute)"
+                  }
+                  fontSize="10"
+                  fontFamily="var(--font-mono)"
+                  fontWeight={delta != null ? 700 : 400}
+                  letterSpacing="0.08em"
+                >
+                  {s.label}
+                  {delta != null
+                    ? ` ${delta > 0 ? "+" : "−"}${Math.abs(delta / 1000).toFixed(3)}`
+                    : ""}
+                </text>
+              </g>
+            );
+          })}
           {tickMs.map((m) => (
             <g key={m}>
               <line
@@ -538,17 +598,18 @@ export function TelemetryStage({
             const dash = ch.id === "throttle" || ch.id === "drs" ? "5 4" : undefined;
             const liveRef =
               compare != null ? interpolateAt(compare.series, playheadM) : null;
-            const isSpeedCompare =
-              ch.id === "speed" && compare && speedBand != null;
-            const fillBundle = isSpeedCompare
-              ? compareFillPaths(
-                  clipSeries(speedBand.focus),
-                  clipSeries(speedBand.reference),
-                  y0,
-                  y1,
-                )
-              : null;
+            const fillBundle =
+              compare != null
+                ? compareFillPaths(
+                    clipSeries(sample.series),
+                    clipSeries(compare.series),
+                    y0,
+                    y1,
+                  )
+                : null;
             const sharedRange = fillBundle?.range;
+            const liveDelta =
+              live != null && liveRef != null ? live - liveRef : null;
             return (
               <g
                 key={ch.id}
@@ -616,7 +677,7 @@ export function TelemetryStage({
                     <path
                       key={`g-${gi}`}
                       d={p}
-                      fill="rgba(198,255,74,0.22)"
+                      fill="rgba(198,255,74,0.38)"
                       stroke="none"
                     />
                   ))}
@@ -625,7 +686,7 @@ export function TelemetryStage({
                     <path
                       key={`l-${li}`}
                       d={p}
-                      fill="rgba(255,176,32,0.2)"
+                      fill="rgba(255,77,94,0.32)"
                       stroke="none"
                     />
                   ))}
@@ -633,12 +694,13 @@ export function TelemetryStage({
                   <path
                     d={pathFor(clipSeries(compare.series), y0, y1, sharedRange)}
                     fill="none"
-                    stroke={
-                      ch.id === "speed" ? compareStroke : "var(--mute)"
+                    stroke={compareStroke}
+                    strokeWidth="2.4"
+                    strokeDasharray="6 3.5"
+                    opacity="0.95"
+                    filter={
+                      ch.id === "speed" ? `url(#${uid}-glow)` : undefined
                     }
-                    strokeWidth="2"
-                    strokeDasharray="5 3.5"
-                    opacity="0.85"
                   />
                 )}
                 <path
@@ -646,11 +708,12 @@ export function TelemetryStage({
                   d={pathFor(clipSeries(sample.series), y0, y1, sharedRange)}
                   fill="none"
                   stroke={stroke}
-                  strokeWidth={focused ? 2.6 : rowH >= 44 ? 2.4 : 2}
+                  strokeWidth={focused || compare ? 2.8 : rowH >= 44 ? 2.4 : 2}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeDasharray={drawn ? dash : undefined}
                   opacity={dimmed ? 0.9 : 1}
+                  filter={compare ? `url(#${uid}-glow)` : undefined}
                   className={!drawn ? "trace-draw" : undefined}
                   style={
                     !drawn
@@ -662,7 +725,7 @@ export function TelemetryStage({
                   <g>
                     <text
                       x={W - 10}
-                      y={y0 + rowH / 2 - 5}
+                      y={y0 + rowH / 2 - 8}
                       textAnchor="end"
                       fill={stroke}
                       fontSize="9"
@@ -673,7 +736,7 @@ export function TelemetryStage({
                     </text>
                     <text
                       x={W - 10}
-                      y={y0 + rowH / 2 + 8}
+                      y={y0 + rowH / 2 + 3}
                       textAnchor="end"
                       fill={compareStroke}
                       fontSize="8"
@@ -682,6 +745,24 @@ export function TelemetryStage({
                     >
                       {formatChannelValue(ch, liveRef)}
                     </text>
+                    {liveDelta != null && (
+                      <text
+                        x={W - 10}
+                        y={y0 + rowH / 2 + 14}
+                        textAnchor="end"
+                        fill={
+                          liveDelta >= 0 ? "var(--signal)" : "var(--fault)"
+                        }
+                        fontSize="8"
+                        fontFamily="var(--font-mono)"
+                        fontWeight={700}
+                      >
+                        Δ{liveDelta >= 0 ? "+" : ""}
+                        {Math.abs(liveDelta) >= 10
+                          ? liveDelta.toFixed(0)
+                          : liveDelta.toFixed(1)}
+                      </text>
+                    )}
                   </g>
                 ) : (
                   <text
@@ -706,13 +787,7 @@ export function TelemetryStage({
               const y0 = plotTop + idx * rowH;
               const y1 = y0 + rowH;
               const live = interpolateAt(speedDelta, playheadM);
-              const zeroY = (() => {
-                const vmin = Math.min(...speedDelta.v);
-                const vmax = Math.max(...speedDelta.v);
-                const span = vmax - vmin || 1;
-                const padY = 5;
-                return y1 - padY - ((0 - vmin) / span) * (y1 - y0 - padY * 2);
-              })();
+              const areas = deltaAreaPaths(speedDelta, y0, y1);
               return (
                 <g key="delta-speed">
                   <rect
@@ -720,7 +795,7 @@ export function TelemetryStage({
                     y={y0}
                     width={W}
                     height={rowH}
-                    fill="rgba(198,255,74,0.06)"
+                    fill="rgba(58,215,255,0.08)"
                   />
                   <line
                     x1={padL}
@@ -729,18 +804,34 @@ export function TelemetryStage({
                     y2={y1 - 0.5}
                     stroke="var(--hairline)"
                   />
+                  {areas.pos.map((p, i) => (
+                    <path
+                      key={`dp-${i}`}
+                      d={p}
+                      fill="rgba(198,255,74,0.45)"
+                      stroke="none"
+                    />
+                  ))}
+                  {areas.neg.map((p, i) => (
+                    <path
+                      key={`dn-${i}`}
+                      d={p}
+                      fill="rgba(255,77,94,0.4)"
+                      stroke="none"
+                    />
+                  ))}
                   <line
                     x1={padL}
                     x2={W - padR}
-                    y1={zeroY}
-                    y2={zeroY}
-                    stroke="rgba(232,238,245,0.2)"
-                    strokeDasharray="3 3"
+                    y1={areas.zeroY}
+                    y2={areas.zeroY}
+                    stroke="rgba(232,238,245,0.35)"
+                    strokeWidth="1.25"
                   />
                   <text
                     x={10}
                     y={y0 + rowH / 2 + 3}
-                    fill="var(--signal)"
+                    fill="var(--trace-cyan)"
                     fontSize="9"
                     fontFamily="var(--font-mono)"
                     fontWeight={700}
@@ -758,11 +849,12 @@ export function TelemetryStage({
                     CMP
                   </text>
                   <path
-                    d={pathFor(clipSeries(speedDelta), y0, y1)}
+                    d={pathFor(clipSeries(speedDelta), y0, y1, areas.range)}
                     fill="none"
-                    stroke="var(--signal)"
-                    strokeWidth="2.2"
+                    stroke="var(--chalk)"
+                    strokeWidth="2.4"
                     strokeLinecap="round"
+                    filter={`url(#${uid}-glow)`}
                   />
                   <text
                     x={W - 10}
@@ -770,12 +862,12 @@ export function TelemetryStage({
                     textAnchor="end"
                     fill={
                       live != null && live < 0
-                        ? "var(--trace-amber)"
+                        ? "var(--fault)"
                         : "var(--signal)"
                     }
-                    fontSize="10"
+                    fontSize="11"
                     fontFamily="var(--font-mono)"
-                    fontWeight={700}
+                    fontWeight={800}
                   >
                     {live != null
                       ? `${live >= 0 ? "+" : ""}${live.toFixed(1)} km/h`
@@ -787,11 +879,12 @@ export function TelemetryStage({
 
           {/* Playhead */}
           <rect
-            x={xOf(playheadM) - 0.75}
+            x={xOf(playheadM) - (compareLapId ? 4 : 0.75)}
             y={plotTop}
-            width={1.5}
+            width={compareLapId ? 8 : 1.5}
             height={H - plotTop}
             fill={`url(#${uid}-play)`}
+            opacity={compareLapId ? 0.55 : 1}
             className="playhead-ease"
           />
           <line
@@ -800,12 +893,13 @@ export function TelemetryStage({
             y1={plotTop}
             y2={H}
             className="playhead-ease"
-            stroke="var(--signal)"
-            strokeWidth={1.25}
+            stroke={compareLapId ? "var(--trace-cyan)" : "var(--signal)"}
+            strokeWidth={compareLapId ? 2.25 : 1.25}
+            filter={compareLapId ? `url(#${uid}-glow)` : undefined}
           />
           <polygon
-            points={`${xOf(playheadM)},${plotTop - 1} ${xOf(playheadM) - 5},${plotTop - 8} ${xOf(playheadM) + 5},${plotTop - 8}`}
-            fill="var(--signal)"
+            points={`${xOf(playheadM)},${plotTop - 1} ${xOf(playheadM) - 6},${plotTop - 9} ${xOf(playheadM) + 6},${plotTop - 9}`}
+            fill={compareLapId ? "var(--trace-cyan)" : "var(--signal)"}
             className="playhead-ease"
           />
         </svg>

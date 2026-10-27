@@ -388,17 +388,12 @@ export function TrackSchematic({
 
   const sectorColor = (index: number, active: boolean) => {
     if (comparing && sectorDeltaMs) {
-      if (activeSector === "Lap") {
-        if (gainSectorIndex === index) return "var(--signal)";
-        if (lossSectorIndex === index) return "var(--trace-amber)";
-        return focusAccent;
-      }
-      if (active && activeSector != null) {
-        const delta = sectorDeltaMs[index];
-        if (delta < 0) return "var(--signal)";
-        if (delta > 0) return "var(--trace-amber)";
-        return "var(--mist)";
-      }
+      const delta = sectorDeltaMs[index];
+      // Always paint gain/loss — Lap view and sector focus both read green/red.
+      if (delta < -5) return "var(--signal)";
+      if (delta > 5) return "var(--fault)";
+      if (active || activeSector === "Lap") return "var(--trace-cyan)";
+      return "rgba(154,167,184,0.55)";
     }
     if (active || activeSector === "Lap") return focusAccent;
     return "rgba(154,167,184,0.55)";
@@ -596,11 +591,12 @@ export function TrackSchematic({
               key={`Δ-${i}`}
               d={seg.path}
               fill="none"
-              stroke={seg.gain ? "var(--signal)" : "var(--trace-amber)"}
-              strokeWidth={u * 0.95}
+              stroke={seg.gain ? "var(--signal)" : "var(--fault)"}
+              strokeWidth={u * 1.35}
               strokeLinejoin="round"
               strokeLinecap="round"
-              opacity={0.8}
+              opacity={0.92}
+              filter={`url(#${uid}-bloom)`}
             />
           ))}
 
@@ -617,16 +613,39 @@ export function TrackSchematic({
           {sectorPaths.map((sec, index) => {
             const wholeLap = activeSector === "Lap" || !activeSector;
             const active = wholeLap || activeSector === sec.label;
+            const comparingPaint = comparing && sectorDeltaMs;
             return (
               <path
                 key={sec.id}
                 d={sec.path}
                 fill="none"
-                strokeWidth={active && !wholeLap ? u * 0.72 : u * 0.38}
+                strokeWidth={
+                  comparingPaint
+                    ? active && !wholeLap
+                      ? u * 0.95
+                      : u * 0.7
+                    : active && !wholeLap
+                      ? u * 0.72
+                      : u * 0.38
+                }
                 strokeLinejoin="round"
                 stroke={sectorColor(index, active)}
-                opacity={wholeLap ? 0.9 : active ? 1 : 0.28}
-                filter={active && !wholeLap ? `url(#${uid}-bloom)` : undefined}
+                opacity={
+                  comparingPaint
+                    ? active || wholeLap
+                      ? 1
+                      : 0.55
+                    : wholeLap
+                      ? 0.9
+                      : active
+                        ? 1
+                        : 0.28
+                }
+                filter={
+                  comparingPaint || (active && !wholeLap)
+                    ? `url(#${uid}-bloom)`
+                    : undefined
+                }
                 className="cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();

@@ -24,9 +24,9 @@ export function DeltaRibbon({
   ];
 
   return (
-    <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-[var(--hairline)] bg-[rgba(5,7,10,0.65)] px-3 py-1">
-      <p className="mr-1 font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--mute)]">
-        Gap
+    <div className="compare-gap-bar flex shrink-0 flex-wrap items-center gap-1.5 border-b border-[var(--hairline)] px-3 py-1.5">
+      <p className="mr-1 font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--trace-cyan)]">
+        Gap · green = Focus faster
       </p>
       {cells.map((c) => {
         const ahead = c.ms <= 0;
@@ -37,20 +37,20 @@ export function DeltaRibbon({
             type="button"
             onClick={() => onSelect(c.id)}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-sm border px-2 py-1 font-mono transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
+              "inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1 font-mono transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
               ahead
-                ? "border-[var(--signal)]/40 bg-[var(--signal-dim)]/45"
-                : "border-[var(--trace-amber)]/40 bg-[var(--trace-amber)]/10",
-              active && "ring-1 ring-[var(--signal)]",
+                ? "border-[var(--signal)] bg-[var(--signal-dim)] shadow-[0_0_16px_rgba(198,255,74,0.35)]"
+                : "border-[var(--fault)]/60 bg-[rgba(255,77,94,0.16)] shadow-[0_0_16px_rgba(255,77,94,0.28)]",
+              active && "ring-2 ring-[var(--trace-cyan)]",
             )}
           >
-            <span className="text-[0.5rem] uppercase tracking-[0.12em] text-[var(--mute)]">
+            <span className="text-[0.5rem] uppercase tracking-[0.12em] text-[var(--mist)]">
               {c.label}
             </span>
             <span
               className={cn(
-                "text-[0.78rem] font-bold tabular-nums leading-none",
-                ahead ? "text-[var(--signal)]" : "text-[var(--trace-amber)]",
+                "text-[0.85rem] font-black tabular-nums leading-none",
+                ahead ? "text-[var(--signal)]" : "text-[var(--fault)]",
               )}
             >
               {formatDeltaSec(c.ms)}
@@ -59,13 +59,13 @@ export function DeltaRibbon({
         );
       })}
       <p className="hidden font-mono text-[0.48rem] text-[var(--mute)] sm:inline">
-        − = Focus faster · click to stretch map + traces
+        click sector → stretch map + traces
       </p>
       {onOpenCompare && (
         <button
           type="button"
           onClick={onOpenCompare}
-          className="ml-auto font-mono text-[0.55rem] uppercase tracking-[0.1em] text-[var(--signal)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+          className="ml-auto rounded-sm border border-[var(--trace-cyan)]/50 bg-[rgba(58,215,255,0.12)] px-2 py-1 font-mono text-[0.55rem] uppercase tracking-[0.1em] text-[var(--trace-cyan)] hover:bg-[rgba(58,215,255,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
         >
           Full compare ▸
         </button>

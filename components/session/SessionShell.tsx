@@ -804,7 +804,11 @@ export function SessionShell() {
           </div>
         </div>
 
-        <main className="flex min-h-[85vh] flex-col gap-2 bg-[var(--asphalt)] p-2 md:min-h-0 md:overflow-y-auto md:overscroll-contain md:p-2.5 xl:p-3">
+        <main
+          className={`flex min-h-[85vh] flex-col gap-2 bg-[var(--asphalt)] p-2 md:min-h-0 md:overflow-y-auto md:overscroll-contain md:p-2.5 xl:p-3 ${
+            compareLapId ? "compare-stage-glow" : ""
+          }`}
+        >
           <div className="h-[min(58vw,440px)] shrink-0 overflow-hidden md:h-[min(46vh,460px)] md:min-h-[320px]">
             <TrackSchematic
               stage
@@ -860,6 +864,7 @@ export function SessionShell() {
               }
               onOpenCompare={compareLapId ? openCompare : undefined}
               viewWindow={mapWindow}
+              sectorDeltaMs={deltas?.sectorsMs ?? null}
             />
           </div>
         </main>
