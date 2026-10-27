@@ -8,11 +8,13 @@ export function DeltaRibbon({
   sectorsMs,
   activeSector,
   onSelect,
+  onOpenCompare,
 }: {
   lapMs: number;
   sectorsMs: [number, number, number];
   activeSector: string | null;
   onSelect: (sector: string) => void;
+  onOpenCompare?: () => void;
 }) {
   const cells: { id: string; label: string; ms: number }[] = [
     { id: "Lap", label: "Lap", ms: lapMs },
@@ -27,9 +29,20 @@ export function DeltaRibbon({
         <p className="font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--mute)]">
           Gap story · Focus − Reference
         </p>
-        <p className="font-mono text-[0.55rem] text-[var(--mute)]">
-          Negative = Focus faster · click a sector
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="font-mono text-[0.55rem] text-[var(--mute)]">
+            Negative = Focus faster · click a sector
+          </p>
+          {onOpenCompare && (
+            <button
+              type="button"
+              onClick={onOpenCompare}
+              className="font-mono text-[0.55rem] uppercase tracking-[0.1em] text-[var(--signal)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+            >
+              Full compare ▸
+            </button>
+          )}
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
         {cells.map((c) => {

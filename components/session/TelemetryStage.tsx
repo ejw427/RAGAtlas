@@ -12,6 +12,7 @@ import {
   sourceBadge,
   stageChannels,
 } from "@/lib/session";
+import { speedDeltaSeries } from "@/lib/compare-series";
 import { interpolateAt, peakInWindow, cn } from "@/lib/utils";
 import { prefersReducedMotion } from "@/lib/motion";
 import type { Channel, CiteTarget } from "@/lib/types";
@@ -48,6 +49,7 @@ export function TelemetryStage({
   referenceAccent,
   focusLabel,
   referenceLabel,
+  onOpenCompare,
 }: {
   lapId: string;
   compareLapId: string | null;
@@ -61,6 +63,7 @@ export function TelemetryStage({
   referenceAccent?: string;
   focusLabel?: string;
   referenceLabel?: string;
+  onOpenCompare?: () => void;
 }) {
   const channels = stageChannels(plotChannelIds);
   const uid = useId();
@@ -143,26 +146,21 @@ export function TelemetryStage({
     });
   }, [channels, lapId, compareLapId, playheadM]);
 
-  const speedDelta = useMemo(() => {
+  const speedDelta = useMemo(
+    () =>
+      compareLapId
+        ? speedDeltaSeries(lapId, compareLapId, lengthM, 240)
+        : null,
+    [compareLapId, lapId, lengthM],
+  );
+
+  const speedBand = useMemo(() => {
     if (!compareLapId) return null;
     const a = getSample("speed", lapId);
     const b = getSample("speed", compareLapId);
     if (!a || !b) return null;
-    const n = Math.min(a.series.d.length, b.series.d.length, 240);
-    const d: number[] = [];
-    const v: number[] = [];
-    for (let i = 0; i < n; i++) {
-      const t = i / Math.max(n - 1, 1);
-      const m = t * lengthM;
-      const va = interpolateAt(a.series, m);
-      const vb = interpolateAt(b.series, m);
-      if (va == null || vb == null) continue;
-      d.push(m);
-      v.push(va - vb);
-    }
-    if (d.length < 2) return null;
-    return { d, v };
-  }, [compareLapId, lapId, lengthM]);
+    return { focus: a.series, reference: b.series };
+  }, [compareLapId, lapId]);
 
   const showDelta = Boolean(speedDelta);
   const n = Math.max(plots.length + (showDelta ? 1 : 0), 1);
@@ -187,9 +185,10 @@ export function TelemetryStage({
     series: { d: number[]; v: number[] },
     y0: number,
     y1: number,
+    range?: { vmin: number; vmax: number },
   ) => {
-    const vmin = Math.min(...series.v);
-    const vmax = Math.max(...series.v);
+    const vmin = range?.vmin ?? Math.min(...series.v);
+    const vmax = range?.vmax ?? Math.max(...series.v);
     const span = vmax - vmin || 1;
     const padY = 5;
     return series.d
@@ -200,6 +199,44 @@ export function TelemetryStage({
         return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
       })
       .join(" ");
+  };
+
+  /** Gain/loss fill between Focus and Reference on a shared scale. */
+  const compareFillPaths = (
+    focus: { d: number[]; v: number[] },
+    reference: { d: number[]; v: number[] },
+    y0: number,
+    y1: number,
+  ) => {
+    const vmin = Math.min(...focus.v, ...reference.v);
+    const vmax = Math.max(...focus.v, ...reference.v);
+    const span = vmax - vmin || 1;
+    const padY = 5;
+    const yAt = (v: number) =>
+      y1 - padY - ((v - vmin) / span) * (y1 - y0 - padY * 2);
+    const n = Math.min(120, focus.d.length, reference.d.length);
+    const gain: string[] = [];
+    const loss: string[] = [];
+    for (let i = 0; i < n - 1; i++) {
+      const t0 = i / Math.max(n - 1, 1);
+      const t1 = (i + 1) / Math.max(n - 1, 1);
+      const m0 = t0 * lengthM;
+      const m1 = t1 * lengthM;
+      const fa = interpolateAt(focus, m0);
+      const fb = interpolateAt(focus, m1);
+      const ra = interpolateAt(reference, m0);
+      const rb = interpolateAt(reference, m1);
+      if (fa == null || fb == null || ra == null || rb == null) continue;
+      const poly = `M${xOf(m0).toFixed(1)},${yAt(fa).toFixed(1)} L${xOf(m1).toFixed(1)},${yAt(fb).toFixed(1)} L${xOf(m1).toFixed(1)},${yAt(rb).toFixed(1)} L${xOf(m0).toFixed(1)},${yAt(ra).toFixed(1)} Z`;
+      const avg = (fa + fb) / 2 - (ra + rb) / 2;
+      if (avg >= 0) gain.push(poly);
+      else loss.push(poly);
+    }
+    return {
+      gain,
+      loss,
+      range: { vmin, vmax },
+    };
   };
 
   const onPointer = (clientX: number) => {
@@ -243,7 +280,7 @@ export function TelemetryStage({
           </p>
           <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-[var(--mute)]">
             {channels.length} channels · distance
-            {compareLapId ? " · compare" : ""}
+            {compareLapId ? " · dual-car compare" : ""}
             {" · "}
             <span className="text-[var(--mute)]">OF1</span>
             {" / "}
@@ -259,6 +296,7 @@ export function TelemetryStage({
                 <span style={{ color: focusAccent ?? "var(--signal)" }}>
                   {focusLabel}
                 </span>
+                <span className="text-[var(--mute)]">solid</span>
               </span>
               {referenceLabel && compareLapId && (
                 <span className="inline-flex items-center gap-1.5">
@@ -271,10 +309,11 @@ export function TelemetryStage({
                   <span style={{ color: referenceAccent ?? "var(--mute)" }}>
                     {referenceLabel}
                   </span>
+                  <span className="text-[var(--mute)]">dashed</span>
                 </span>
               )}
               {speedDelta && (
-                <span className="text-[var(--mute)]">· Δ speed row on</span>
+                <span className="text-[var(--signal)]">· Δ fill on</span>
               )}
             </span>
           )}
@@ -282,6 +321,15 @@ export function TelemetryStage({
             <span className="font-mono text-[0.68rem] text-[var(--signal)]">
               {activeCite.label}
             </span>
+          )}
+          {compareLapId && onOpenCompare && (
+            <button
+              type="button"
+              onClick={onOpenCompare}
+              className="rounded-sm border border-[var(--signal)]/45 bg-[var(--signal-dim)] px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-[var(--signal)] transition hover:bg-[var(--signal)] hover:text-[var(--void)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+            >
+              Open compare
+            </button>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[0.6rem] text-[var(--mist)]">
@@ -460,6 +508,14 @@ export function TelemetryStage({
             const focused = focusChannelId === ch.id;
             const dimmed = Boolean(focusChannelId) && !focused;
             const dash = ch.id === "throttle" || ch.id === "drs" ? "5 4" : undefined;
+            const liveRef =
+              compare != null ? interpolateAt(compare.series, playheadM) : null;
+            const isSpeedCompare =
+              ch.id === "speed" && compare && speedBand != null;
+            const fillBundle = isSpeedCompare
+              ? compareFillPaths(speedBand.focus, speedBand.reference, y0, y1)
+              : null;
+            const sharedRange = fillBundle?.range;
             return (
               <g
                 key={ch.id}
@@ -501,7 +557,7 @@ export function TelemetryStage({
                 />
                 <text
                   x={10}
-                  y={y0 + rowH / 2 + 3}
+                  y={y0 + (compare ? rowH / 2 - 4 : rowH / 2 + 3)}
                   fill={focused ? "var(--chalk)" : "var(--mist)"}
                   fontSize="9"
                   fontFamily="var(--font-mono)"
@@ -522,24 +578,42 @@ export function TelemetryStage({
                 >
                   {sourceBadge(ch)}
                 </text>
+                {fillBundle &&
+                  fillBundle.gain.map((p, gi) => (
+                    <path
+                      key={`g-${gi}`}
+                      d={p}
+                      fill="rgba(198,255,74,0.22)"
+                      stroke="none"
+                    />
+                  ))}
+                {fillBundle &&
+                  fillBundle.loss.map((p, li) => (
+                    <path
+                      key={`l-${li}`}
+                      d={p}
+                      fill="rgba(255,176,32,0.2)"
+                      stroke="none"
+                    />
+                  ))}
                 {compare && (
                   <path
-                    d={pathFor(compare.series, y0, y1)}
+                    d={pathFor(compare.series, y0, y1, sharedRange)}
                     fill="none"
                     stroke={
                       ch.id === "speed" ? compareStroke : "var(--mute)"
                     }
-                    strokeWidth="1.5"
-                    strokeDasharray="4 3"
-                    opacity="0.7"
+                    strokeWidth="2"
+                    strokeDasharray="5 3.5"
+                    opacity="0.85"
                   />
                 )}
                 <path
                   key={`${uid}-${drawKey}-${ch.id}`}
-                  d={pathFor(sample.series, y0, y1)}
+                  d={pathFor(sample.series, y0, y1, sharedRange)}
                   fill="none"
                   stroke={stroke}
-                  strokeWidth={focused ? 2.4 : rowH >= 44 ? 2.25 : 1.8}
+                  strokeWidth={focused ? 2.6 : rowH >= 44 ? 2.4 : 2}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeDasharray={drawn ? dash : undefined}
@@ -551,17 +625,44 @@ export function TelemetryStage({
                       : undefined
                   }
                 />
-                <text
-                  x={W - 10}
-                  y={y0 + rowH / 2 + 3}
-                  textAnchor="end"
-                  fill={focused ? stroke : "var(--chalk)"}
-                  fontSize={rowH >= 44 ? 10 : 9}
-                  fontFamily="var(--font-mono)"
-                  fontWeight={600}
-                >
-                  {live != null ? formatChannelValue(ch, live) : "—"}
-                </text>
+                {compare && liveRef != null ? (
+                  <g>
+                    <text
+                      x={W - 10}
+                      y={y0 + rowH / 2 - 5}
+                      textAnchor="end"
+                      fill={stroke}
+                      fontSize="9"
+                      fontFamily="var(--font-mono)"
+                      fontWeight={700}
+                    >
+                      {live != null ? formatChannelValue(ch, live) : "—"}
+                    </text>
+                    <text
+                      x={W - 10}
+                      y={y0 + rowH / 2 + 8}
+                      textAnchor="end"
+                      fill={compareStroke}
+                      fontSize="8"
+                      fontFamily="var(--font-mono)"
+                      fontWeight={600}
+                    >
+                      {formatChannelValue(ch, liveRef)}
+                    </text>
+                  </g>
+                ) : (
+                  <text
+                    x={W - 10}
+                    y={y0 + rowH / 2 + 3}
+                    textAnchor="end"
+                    fill={focused ? stroke : "var(--chalk)"}
+                    fontSize={rowH >= 44 ? 10 : 9}
+                    fontFamily="var(--font-mono)"
+                    fontWeight={600}
+                  >
+                    {live != null ? formatChannelValue(ch, live) : "—"}
+                  </text>
+                )}
               </g>
             );
           })}
@@ -572,6 +673,13 @@ export function TelemetryStage({
               const y0 = plotTop + idx * rowH;
               const y1 = y0 + rowH;
               const live = interpolateAt(speedDelta, playheadM);
+              const zeroY = (() => {
+                const vmin = Math.min(...speedDelta.v);
+                const vmax = Math.max(...speedDelta.v);
+                const span = vmax - vmin || 1;
+                const padY = 5;
+                return y1 - padY - ((0 - vmin) / span) * (y1 - y0 - padY * 2);
+              })();
               return (
                 <g key="delta-speed">
                   <rect
@@ -579,7 +687,7 @@ export function TelemetryStage({
                     y={y0}
                     width={W}
                     height={rowH}
-                    fill="rgba(198,255,74,0.04)"
+                    fill="rgba(198,255,74,0.06)"
                   />
                   <line
                     x1={padL}
@@ -588,13 +696,21 @@ export function TelemetryStage({
                     y2={y1 - 0.5}
                     stroke="var(--hairline)"
                   />
+                  <line
+                    x1={padL}
+                    x2={W - padR}
+                    y1={zeroY}
+                    y2={zeroY}
+                    stroke="rgba(232,238,245,0.2)"
+                    strokeDasharray="3 3"
+                  />
                   <text
                     x={10}
                     y={y0 + rowH / 2 + 3}
                     fill="var(--signal)"
                     fontSize="9"
                     fontFamily="var(--font-mono)"
-                    fontWeight={600}
+                    fontWeight={700}
                   >
                     ΔSpd
                   </text>
@@ -612,17 +728,21 @@ export function TelemetryStage({
                     d={pathFor(speedDelta, y0, y1)}
                     fill="none"
                     stroke="var(--signal)"
-                    strokeWidth="1.8"
+                    strokeWidth="2.2"
                     strokeLinecap="round"
                   />
                   <text
                     x={W - 10}
                     y={y0 + rowH / 2 + 3}
                     textAnchor="end"
-                    fill="var(--signal)"
-                    fontSize="9"
+                    fill={
+                      live != null && live < 0
+                        ? "var(--trace-amber)"
+                        : "var(--signal)"
+                    }
+                    fontSize="10"
                     fontFamily="var(--font-mono)"
-                    fontWeight={600}
+                    fontWeight={700}
                   >
                     {live != null
                       ? `${live >= 0 ? "+" : ""}${live.toFixed(1)} km/h`

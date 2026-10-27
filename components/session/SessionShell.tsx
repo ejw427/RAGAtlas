@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plate } from "@/components/identity/Plate";
+import { CompareDetailSheet } from "@/components/session/CompareDetailSheet";
 import { CompareDuo } from "@/components/session/CompareDuo";
 import { DeltaRibbon } from "@/components/session/DeltaRibbon";
 import { DemoGuide, type DemoStep } from "@/components/session/DemoGuide";
@@ -13,6 +14,7 @@ import { TelemetryStage } from "@/components/session/TelemetryStage";
 import { TrackSchematic } from "@/components/session/TrackSchematic";
 import { RagRail } from "@/components/session/RagRail";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { speedDeltaSeries } from "@/lib/compare-series";
 import {
   accentFor,
   bestFlyerFor,
@@ -149,6 +151,7 @@ export function SessionShell() {
     boot.initialSector,
   );
   const [askOpen, setAskOpen] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(true);
   const [demoStep, setDemoStep] = useState<DemoStep>(0);
   const [askTrigger, setAskTrigger] = useState<{
@@ -204,6 +207,16 @@ export function SessionShell() {
   const deltas = sectorDeltas(lap, referenceLap);
   const gain = biggestGainSector(deltas);
   const loss = biggestLossSector(deltas);
+  const speedDelta = useMemo(
+    () =>
+      compareLapId
+        ? speedDeltaSeries(lapId, compareLapId, lengthM, 200)
+        : null,
+    [compareLapId, lapId, lengthM],
+  );
+  const openCompare = useCallback(() => {
+    if (compareLapId) setCompareOpen(true);
+  }, [compareLapId]);
 
   const pushUrl = useCallback(
     (next: {
@@ -736,6 +749,7 @@ export function SessionShell() {
         onFieldBest={fillFieldBest}
         onOtherCompound={fillOtherCompound}
         canOtherCompound={Boolean(otherCompoundLap(driverId, lap))}
+        onOpenCompare={compareLapId ? openCompare : undefined}
       />
 
       {deltas && (
@@ -744,6 +758,7 @@ export function SessionShell() {
           sectorsMs={deltas.sectorsMs}
           activeSector={activeSector}
           onSelect={selectSector}
+          onOpenCompare={openCompare}
         />
       )}
 
@@ -781,7 +796,7 @@ export function SessionShell() {
         </div>
 
         <main className="flex min-h-[70vh] flex-col gap-2 bg-[var(--asphalt)] p-2 md:min-h-0 md:overflow-hidden md:p-2.5 xl:p-3">
-          <div className="h-[240px] shrink-0 overflow-hidden md:h-[min(30vh,280px)] md:min-h-[180px]">
+          <div className="h-[min(52vw,360px)] shrink-0 overflow-hidden md:h-[min(38vh,380px)] md:min-h-[260px]">
             <TrackSchematic
               stage
               activeSector={activeSector}
@@ -802,9 +817,11 @@ export function SessionShell() {
               lossSectorIndex={
                 loss && loss.ms > 0 ? loss.index : null
               }
+              speedDelta={speedDelta}
+              onOpenCompare={compareLapId ? openCompare : undefined}
             />
           </div>
-          <div className="flex min-h-[320px] flex-1 flex-col overflow-hidden md:min-h-0">
+          <div className="flex min-h-[360px] flex-1 flex-col overflow-hidden md:min-h-0">
             <TelemetryStage
               lapId={lapId}
               compareLapId={compareLapId}
@@ -824,6 +841,7 @@ export function SessionShell() {
                   ? `${referenceDriver.code} ${referenceDriver.number ?? ""}`.trim()
                   : undefined
               }
+              onOpenCompare={compareLapId ? openCompare : undefined}
             />
           </div>
         </main>
@@ -871,6 +889,23 @@ export function SessionShell() {
           </div>
         </SheetContent>
       </Sheet>
+
+      {referenceDriver && referenceLap && deltas && (
+        <CompareDetailSheet
+          open={compareOpen}
+          onOpenChange={setCompareOpen}
+          focusDriver={driver}
+          focusLap={lap}
+          referenceDriver={referenceDriver}
+          referenceLap={referenceLap}
+          deltas={deltas}
+          gainLabel={gain?.label ?? null}
+          lossLabel={loss && loss.ms > 0 ? loss.label : null}
+          playheadM={playheadM}
+          onJumpSector={selectSector}
+          onPlayhead={onPlayhead}
+        />
+      )}
 
       <footer className="shrink-0 border-t border-[var(--hairline)] px-3 py-1 text-[0.58rem] text-[var(--mute)]">
         {STUDIO} · {PRODUCT} · {AUTHOR} · {pack.meta.driverCount ?? 22} drivers

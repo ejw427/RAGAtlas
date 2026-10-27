@@ -28,6 +28,7 @@ export function CompareDuo({
   onFieldBest,
   onOtherCompound,
   canOtherCompound,
+  onOpenCompare,
 }: {
   focusDriver: Driver;
   focusLap: Lap;
@@ -45,6 +46,7 @@ export function CompareDuo({
   onFieldBest: () => void;
   onOtherCompound: () => void;
   canOtherCompound: boolean;
+  onOpenCompare?: () => void;
 }) {
   const focusAccent = accentFor(focusDriver);
   const refAccent = accentFor(referenceDriver ?? undefined);
@@ -143,7 +145,12 @@ export function CompareDuo({
                 >
                   VS
                 </button>
-                <div className="text-center">
+                <button
+                  type="button"
+                  onClick={onOpenCompare}
+                  className="text-center transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+                  title="Open compare detail"
+                >
                   <p
                     className={cn(
                       "font-display text-xl font-bold tabular-nums leading-none",
@@ -157,7 +164,10 @@ export function CompareDuo({
                   <p className="mt-0.5 font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--mute)]">
                     {deltas.lapMs <= 0 ? "Focus ahead" : "Reference ahead"}
                   </p>
-                </div>
+                  <p className="mt-0.5 font-mono text-[0.48rem] uppercase tracking-[0.12em] text-[var(--signal)]">
+                    Detail ▸
+                  </p>
+                </button>
                 <button
                   type="button"
                   onClick={onClear}

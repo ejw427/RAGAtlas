@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useMemo, useRef } from "react";
+import { ElevationStrip } from "@/components/session/ElevationStrip";
 import { getSessionPack } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -8,6 +9,9 @@ const LANDMARKS = [
   { id: "sf", label: "S/F", m: 0 },
   { id: "t1", label: "T1", m: 420 },
   { id: "esses", label: "Esses", m: 980 },
+  { id: "s1", label: "S1", m: 1483 },
+  { id: "t11", label: "T11", m: 2600 },
+  { id: "s2", label: "S2", m: 3672 },
   { id: "stadium", label: "Stadium", m: 4100 },
   { id: "t19", label: "T19", m: 5100 },
 ] as const;
@@ -105,6 +109,8 @@ export function TrackSchematic({
   gainSectorIndex = null,
   lossSectorIndex = null,
   stage = false,
+  speedDelta = null,
+  onOpenCompare,
 }: {
   activeSector: string | null;
   playheadM: number;
@@ -123,6 +129,9 @@ export function TrackSchematic({
   /** Index 0–2 of biggest Focus loss (painted amber on Lap view). */
   lossSectorIndex?: number | null;
   stage?: boolean;
+  /** Focus − Reference speed along distance — paints the ribbon green/amber. */
+  speedDelta?: { d: number[]; v: number[] } | null;
+  onOpenCompare?: () => void;
 }) {
   const pack = getSessionPack();
   const { x, y, d } = pack.trackXY.series;
@@ -186,11 +195,37 @@ export function TrackSchematic({
 
   const tower = useMemo(() => pointAt(d, x, y, 180), [d, x, y]);
 
+  const deltaRibbon = useMemo(() => {
+    if (!comparing || !speedDelta || speedDelta.d.length < 2) return [];
+    const segs: { path: string; gain: boolean }[] = [];
+    const step = Math.max(1, Math.floor(speedDelta.d.length / 90));
+    for (let i = 0; i < speedDelta.d.length - step; i += step) {
+      const m0 = speedDelta.d[i];
+      const m1 = speedDelta.d[Math.min(i + step, speedDelta.d.length - 1)];
+      const vAvg =
+        (speedDelta.v[i] +
+          speedDelta.v[Math.min(i + step, speedDelta.v.length - 1)]) /
+        2;
+      const pts: string[] = [];
+      for (let j = 0; j < d.length; j++) {
+        if (d[j] >= m0 && d[j] <= m1) {
+          pts.push(
+            `${pts.length === 0 ? "M" : "L"} ${x[j].toFixed(1)} ${y[j].toFixed(1)}`,
+          );
+        }
+      }
+      if (pts.length >= 2) {
+        segs.push({ path: pts.join(" "), gain: vAvg >= 0 });
+      }
+    }
+    return segs;
+  }, [comparing, speedDelta, d, x, y]);
+
   const minX = Math.min(...x);
   const maxX = Math.max(...x);
   const minY = Math.min(...y);
   const maxY = Math.max(...y);
-  const pad = stage ? 80 : 55;
+  const pad = stage ? 100 : 55;
 
   const scrubTo = (clientX: number, clientY: number) => {
     if (!onPlayhead || !svgRef.current || !d.length) return;
@@ -241,15 +276,38 @@ export function TrackSchematic({
       )}
     >
       <div className="circuit-stage-bg pointer-events-none absolute inset-0" />
-      <div className="relative z-[1] mb-1 flex shrink-0 items-baseline justify-between gap-2 px-2.5 pt-2">
-        <p className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[var(--mist)]">
-          Circuit of the Americas
-        </p>
-        <p className="font-mono text-[0.55rem] text-[var(--mute)]">
-          {comparing
-            ? "Distance domain · same metre"
-            : "5.513 km · 20 turns"}
-        </p>
+      {stage && (
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.18]"
+          style={{
+            backgroundImage: "url(/cota-tower-dusk.jpg)",
+            backgroundSize: "cover",
+            backgroundPosition: "center 30%",
+            maskImage:
+              "radial-gradient(70% 80% at 70% 40%, black 0%, transparent 72%)",
+          }}
+        />
+      )}
+      <div className="relative z-[1] mb-0.5 flex shrink-0 items-center justify-between gap-2 px-2.5 pt-2">
+        <div>
+          <p className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[var(--mist)]">
+            Circuit of the Americas · Austin
+          </p>
+          <p className="font-mono text-[0.52rem] text-[var(--mute)]">
+            {comparing
+              ? "Δ speed ribbon · same metre · scrub the lap"
+              : "5.513 km · 20 turns · T1 +41 m"}
+          </p>
+        </div>
+        {comparing && onOpenCompare && (
+          <button
+            type="button"
+            onClick={onOpenCompare}
+            className="shrink-0 rounded-sm border border-[var(--signal)]/50 bg-[var(--signal-dim)] px-2 py-1 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-[var(--signal)] transition hover:bg-[var(--signal)] hover:text-[var(--void)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+          >
+            Compare detail
+          </button>
+        )}
       </div>
       <svg
         ref={svgRef}
@@ -292,52 +350,65 @@ export function TrackSchematic({
         <path
           d={pathD}
           fill="none"
-          stroke="rgba(8,12,18,0.9)"
-          strokeWidth={stage ? 58 : 38}
+          stroke="rgba(8,12,18,0.95)"
+          strokeWidth={stage ? 72 : 38}
           strokeLinejoin="round"
         />
-        {/* kerb suggestion */}
+        {/* red / white kerbs */}
         <path
           d={pathD}
           fill="none"
-          stroke="rgba(255,77,94,0.45)"
-          strokeWidth={stage ? 42 : 28}
+          stroke="rgba(255,77,94,0.55)"
+          strokeWidth={stage ? 52 : 28}
           strokeLinejoin="round"
-          strokeDasharray="12 16"
-        />
-        <path
-          d={pathD}
-          fill="none"
-          stroke="rgba(232,238,245,0.4)"
-          strokeWidth={stage ? 42 : 28}
-          strokeLinejoin="round"
-          strokeDasharray="12 16"
-          strokeDashoffset="14"
-        />
-        {/* asphalt ribbon — light enough to read as a road */}
-        <path
-          d={pathD}
-          fill="none"
-          stroke="#2a3444"
-          strokeWidth={stage ? 30 : 20}
-          strokeLinejoin="round"
+          strokeDasharray="14 18"
         />
         <path
           d={pathD}
           fill="none"
-          stroke="#3d4a5c"
-          strokeWidth={stage ? 22 : 14}
+          stroke="rgba(232,238,245,0.5)"
+          strokeWidth={stage ? 52 : 28}
+          strokeLinejoin="round"
+          strokeDasharray="14 18"
+          strokeDashoffset="16"
+        />
+        {/* asphalt ribbon */}
+        <path
+          d={pathD}
+          fill="none"
+          stroke="#1e2734"
+          strokeWidth={stage ? 38 : 20}
           strokeLinejoin="round"
         />
+        <path
+          d={pathD}
+          fill="none"
+          stroke="#3a4658"
+          strokeWidth={stage ? 26 : 14}
+          strokeLinejoin="round"
+        />
+        {/* Δ speed ribbon when comparing */}
+        {deltaRibbon.map((seg, i) => (
+          <path
+            key={`Δ-${i}`}
+            d={seg.path}
+            fill="none"
+            stroke={seg.gain ? "var(--signal)" : "var(--trace-amber)"}
+            strokeWidth={stage ? 18 : 12}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            opacity={0.72}
+          />
+        ))}
         {/* center line glow */}
         <path
           d={pathD}
           fill="none"
-          stroke="rgba(232,238,245,0.75)"
+          stroke="rgba(232,238,245,0.8)"
           strokeWidth={stage ? 2.5 : 2}
           strokeLinejoin="round"
           strokeDasharray="16 20"
-          opacity="0.7"
+          opacity="0.65"
           className="circuit-dash"
         />
 
@@ -480,7 +551,13 @@ export function TrackSchematic({
         />
       </svg>
 
-      <div className="relative z-[1] mt-auto flex shrink-0 flex-wrap items-center gap-2 border-t border-[var(--hairline)] bg-[rgba(5,7,10,0.45)] px-2.5 py-1.5 font-mono text-[0.62rem]">
+      {stage && (
+        <div className="relative z-[1] shrink-0">
+          <ElevationStrip playheadM={playheadM} />
+        </div>
+      )}
+
+      <div className="relative z-[1] mt-auto flex shrink-0 flex-wrap items-center gap-2 border-t border-[var(--hairline)] bg-[rgba(5,7,10,0.55)] px-2.5 py-1.5 font-mono text-[0.62rem]">
         <button
           type="button"
           onClick={() => onSector?.("Lap")}
@@ -521,6 +598,18 @@ export function TrackSchematic({
             )}
           </button>
         ))}
+        {comparing && deltaRibbon.length > 0 && (
+          <span className="hidden items-center gap-2 sm:inline-flex">
+            <span className="inline-flex items-center gap-1 text-[var(--signal)]">
+              <span className="inline-block h-1.5 w-3 rounded-sm bg-[var(--signal)]" />
+              faster
+            </span>
+            <span className="inline-flex items-center gap-1 text-[var(--trace-amber)]">
+              <span className="inline-block h-1.5 w-3 rounded-sm bg-[var(--trace-amber)]" />
+              slower
+            </span>
+          </span>
+        )}
         <span className="ml-auto tabular-nums text-[var(--mist)]">
           {Math.round(playheadM)} m
         </span>
