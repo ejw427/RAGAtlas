@@ -168,9 +168,10 @@ export function CompareDuo({
                 <button
                   type="button"
                   onClick={onClear}
-                  className="font-mono text-[0.55rem] text-[var(--mute)] hover:text-[var(--mist)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+                  className="font-mono text-[0.55rem] uppercase tracking-[0.1em] text-[var(--trace-cyan)] hover:text-[var(--signal)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+                  title="Drop Reference and load the full solo channel pack"
                 >
-                  Clear
+                  Solo · 1 car
                 </button>
               </>
             ) : (

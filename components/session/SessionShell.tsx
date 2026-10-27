@@ -23,12 +23,14 @@ import {
   fieldBestLap,
   getLapSafe,
   otherCompoundLap,
+  RACE_PLOT_IDS,
   resolveDriverParam,
   resolveHouse,
   resolveLapNumber,
   sectorDeltas,
   teammateId,
 } from "@/lib/identity";
+import { StageAcqBar } from "@/components/session/StageAcqBar";
 import {
   defaultDriverId,
   defaultLapNumber,
@@ -137,8 +139,8 @@ export function SessionShell() {
       const ids = boot.initialChannels.split(",").filter(Boolean);
       if (ids.length) return ids;
     }
-    if (boot.referenceDriverId) return ["speed", "throttle", "brake"];
-    return defaultPlotIds().slice(0, 6);
+    // Race pack for both solo and compare — never starve the stage to 3 rows.
+    return [...RACE_PLOT_IDS];
   });
   const [playheadM, setPlayheadM] = useState(1800);
   const [evidence, setEvidence] = useState<{
@@ -555,12 +557,14 @@ export function SessionShell() {
     setReferenceDriverId(null);
     setReferenceLapNumber(null);
     setActiveHouse(null);
+    const soloPlots = defaultPlotIds();
+    setPlotChannelIds(soloPlots);
     pushUrl({
       driverId,
       lap: lapNumber,
       referenceDriverId: null,
       referenceLap: null,
-      channels: plotChannelIds,
+      channels: soloPlots,
       house: null,
     });
   };
@@ -568,12 +572,13 @@ export function SessionShell() {
   const applyHouse = (houseId: string) => {
     const resolved = resolveHouse(houseId);
     if (!resolved) return;
+    const racePlots = [...RACE_PLOT_IDS];
     setActiveHouse(houseId);
     setDriverId(resolved.focusDriverId);
     setLapNumber(resolved.focusLap);
     setReferenceDriverId(resolved.referenceDriverId);
     setReferenceLapNumber(resolved.referenceLap);
-    setPlotChannelIds(["speed", "throttle", "brake"]);
+    setPlotChannelIds(racePlots);
     setEvidence(null);
     setSelectedCite(null);
     setActiveSector("Lap");
@@ -583,7 +588,7 @@ export function SessionShell() {
       lap: resolved.focusLap,
       referenceDriverId: resolved.referenceDriverId,
       referenceLap: resolved.referenceLap,
-      channels: ["speed", "throttle", "brake"],
+      channels: racePlots,
       house: houseId,
       sector: "Lap",
     });
@@ -826,7 +831,14 @@ export function SessionShell() {
               onViewWindow={setMapWindow}
             />
           </div>
-          <div className="flex min-h-[380px] flex-1 flex-col md:min-h-[320px]">
+          <div className="flex min-h-[380px] flex-1 flex-col gap-1.5 md:min-h-[320px]">
+            <StageAcqBar
+              plotChannelIds={plotChannelIds}
+              comparing={Boolean(compareLapId)}
+              onSetPlots={setPlots}
+              onSolo={compareLapId ? clearReference : undefined}
+              totalChannels={defaultPlotIds().length}
+            />
             <TelemetryStage
               lapId={lapId}
               compareLapId={compareLapId}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  defaultPlotIds,
   formatChannelValue,
   getChannelsByApp,
   getEvents,
@@ -12,12 +13,22 @@ import {
   isOverlayChannel,
   sourceBadge,
 } from "@/lib/session";
-import { channelPresets } from "@/lib/identity";
+import { resolvePreset } from "@/lib/identity";
 import { interpolateAt, formatLapTime, cn } from "@/lib/utils";
 import { Timeline } from "@/components/session/Timeline";
 import { ProvenanceStrip } from "@/components/session/ProvenanceStrip";
 import { Button } from "@/components/ui/button";
 import type { Channel, Lap } from "@/lib/types";
+
+const PRESET_ORDER = [
+  "Race",
+  "All",
+  "Lap",
+  "Pedals",
+  "Brakes",
+  "Thermal",
+  "Power",
+] as const;
 
 const COLOR: Record<string, string> = {
   "trace-brake": "var(--trace-brake)",
@@ -70,13 +81,20 @@ export function SelectDock({
   const events = getEvents().filter((e) => !e.lapId || e.lapId === lapId);
   const failure = getFailureModes()[0];
   const pack = getSessionPack();
-  const presets = channelPresets();
+  const allIds = defaultPlotIds();
+  const totalChannels = Object.values(byApp).flat().length;
 
   const liveValue = (ch: Channel) => {
     const sample = getSample(ch.id, lapId);
     if (!sample) return null;
     return interpolateAt(sample.series, playheadM);
   };
+
+  const activePreset = PRESET_ORDER.find((name) => {
+    const ids = resolvePreset(name, allIds);
+    if (ids.length !== plotChannelIds.length) return false;
+    return ids.every((id, i) => id === plotChannelIds[i]);
+  });
 
   return (
     <aside className="flex h-full min-h-0 flex-col border-[var(--hairline)] bg-[var(--rail)] md:border-l">
@@ -100,21 +118,32 @@ export function SelectDock({
       <div className="panel-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain p-2.5">
         {tab === "channels" && (
           <div className="space-y-2.5">
+            <p className="font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--mute)]">
+              Acquisition packs · put on stage
+            </p>
             <div className="flex flex-wrap gap-1">
-              {Object.entries(presets).map(([name, ids]) => (
-                <button
-                  key={name}
-                  type="button"
-                  onClick={() => onSetPlots(ids)}
-                  className="min-h-6 border border-[var(--hairline)] px-1.5 font-mono text-[0.55rem] text-[var(--mist)] hover:border-[var(--signal)]/40 hover:text-[var(--signal)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
-                >
-                  {name}
-                </button>
-              ))}
+              {PRESET_ORDER.map((name) => {
+                const hot = activePreset === name;
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => onSetPlots(resolvePreset(name, allIds))}
+                    className={cn(
+                      "min-h-6 border px-1.5 font-mono text-[0.55rem] uppercase tracking-[0.06em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
+                      hot
+                        ? "border-[var(--signal)] bg-[var(--signal-dim)] text-[var(--signal)]"
+                        : "border-[var(--hairline)] text-[var(--mist)] hover:border-[var(--signal)]/40 hover:text-[var(--signal)]",
+                    )}
+                  >
+                    {name}
+                  </button>
+                );
+              })}
             </div>
             <p className="font-mono text-[0.55rem] text-[var(--mute)]">
-              {plotChannelIds.length}/
-              {Object.values(byApp).flat().length} on stage
+              {plotChannelIds.length}/{totalChannels} on stage · toggle below ·
+              scroll traces for the full pack
             </p>
             {apps.map((app) => (
               <div key={app}>

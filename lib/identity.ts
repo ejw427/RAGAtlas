@@ -311,13 +311,44 @@ export function biggestLossSector(
   };
 }
 
+/** Default dual-car / house walk-in — enough to argue the lap, not a starved trio. */
+export const RACE_PLOT_IDS = [
+  "speed",
+  "throttle",
+  "brake",
+  "brake_pressure",
+  "n_gear",
+  "steering",
+  "rpm",
+] as const;
+
 export function channelPresets(): Record<string, string[]> {
   return {
+    Race: [...RACE_PLOT_IDS],
     Lap: ["speed", "throttle", "brake"],
     Pedals: ["throttle", "brake", "brake_pressure", "steering"],
     Brakes: ["brake", "brake_pressure", "brake_temp", "brake_temp_fl"],
+    Thermal: [
+      "brake_temp",
+      "brake_temp_fl",
+      "tyre_surf_fl",
+      "coolant_temp",
+      "oil_pressure",
+    ],
     Power: ["rpm", "n_gear", "fuel_flow", "oil_pressure", "coolant_temp"],
+    /** Filled by caller with defaultPlotIds() when needed — placeholder key order. */
+    All: [],
   };
+}
+
+export function resolvePreset(
+  name: string,
+  allIds: string[],
+): string[] {
+  if (name === "All") return allIds;
+  const presets = channelPresets();
+  const ids = presets[name];
+  return ids?.length ? ids : [...RACE_PLOT_IDS];
 }
 
 export function resolveLapNumber(
