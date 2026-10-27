@@ -32,12 +32,12 @@ npm run build && npx wrangler dev
 
 | Route | Purpose |
 |-------|---------|
-| `/` | Landing — COTA night hero + real track path |
+| `/` | Landing — COTA daytime hero + real track path |
 | `/session?house=ferrari` | Pit wall — map + Focus/Reference compare (any house) |
 | `/session?driver=LEC&lap=10` | Workspace deep link (legacy params still work) |
 | `/about` | Method, disclaimer, credits |
 
-## 90-second demo
+## Walk-through
 
 1. Land → **Open COTA session**
 2. Use **Lap** for the whole lap, or S1–S3 for sector focus

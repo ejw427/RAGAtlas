@@ -614,7 +614,7 @@ export function TrackSchematic({
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.22]"
           style={{
-            backgroundImage: "url(/cota-tower-dusk.jpg)",
+            backgroundImage: "url(/cota-tower-day.jpg)",
             backgroundSize: "cover",
             backgroundPosition: "center 28%",
             maskImage:

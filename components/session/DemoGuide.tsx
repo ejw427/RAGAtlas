@@ -48,7 +48,7 @@ export function DemoGuide({
     <div className="shrink-0 border-b border-[var(--signal)]/30 bg-[var(--signal-dim)] px-3 py-2">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <span className="font-mono text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-[var(--signal)]">
-          90s interview
+          Walk-through
         </span>
         <span className="hidden font-mono text-[0.58rem] text-[var(--mute)] lg:inline">
           {WEDGE}

@@ -87,17 +87,17 @@ export function HowItWorks() {
       <div className="relative isolate overflow-hidden border-b border-[var(--hairline)]">
         <div className="absolute inset-0">
           <Image
-            src="/cota-pitwall.jpg"
-            alt="Race engineers at a pit-wall telemetry booth overlooking a floodlit Circuit of the Americas session"
+            src="/cota-main-straight-day.jpg"
+            alt="Circuit of the Americas main straight and grandstand in daylight"
             fill
-            className="object-cover object-[center_30%] opacity-45"
+            className="object-cover object-[center_40%] opacity-50"
             sizes="100vw"
           />
           <div
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(180deg, rgba(11,15,20,0.55) 0%, rgba(11,15,20,0.92) 100%), linear-gradient(90deg, rgba(5,7,10,0.85) 0%, rgba(5,7,10,0.35) 60%, rgba(5,7,10,0.75) 100%)",
+                "linear-gradient(180deg, rgba(11,15,20,0.5) 0%, rgba(11,15,20,0.9) 100%), linear-gradient(90deg, rgba(5,7,10,0.82) 0%, rgba(5,7,10,0.32) 60%, rgba(5,7,10,0.7) 100%)",
             }}
           />
         </div>
@@ -165,7 +165,7 @@ export function HowItWorks() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button asChild size="sm">
-              <Link href="/session?demo=1&house=ferrari">Run 90s demo</Link>
+              <Link href="/session?demo=1&house=ferrari">Open pit wall</Link>
             </Button>
             <Button asChild size="sm" variant="ghost">
               <Link href="/about">Full method</Link>
@@ -175,7 +175,7 @@ export function HowItWorks() {
 
         <div className="mt-8">
           <p className="mb-3 font-mono text-[0.6rem] uppercase tracking-[0.12em] text-[var(--mute)]">
-            90-second demos · money shot: {DEMO_ASK}
+            Money-shot asks · {DEMO_ASK}
           </p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {CHIPS.map((chip) => (

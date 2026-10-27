@@ -194,7 +194,7 @@ Three tabs, Channels selected by default. The dock is how “everything else” 
 
 **Notes.** Events, debrief notes, and the timeline cites already rendered in `ContextRail` and `Timeline`. Clicking a cite still calls `lockCite`.
 
-**Ask** is the last control in the dock, a button that opens the existing `RagRail` as a drawer over the dock (desktop) or the existing bottom sheet (narrow). The cite lock behaviour does not change: click a cite, the playhead eases to the evidence, the band paints on the traces and on the circuit, the channel joins the plot if it was off. The 90-second demo still ends on the brake spike.
+**Ask** is the last control in the dock, a button that opens the existing `RagRail` as a drawer over the dock (desktop) or the existing bottom sheet (narrow). The cite lock behaviour does not change: click a cite, the playhead eases to the evidence, the band paints on the traces and on the circuit, the channel joins the plot if it was off. The walk-through still ends on the brake spike.
 
 The failure-mode teaching card and the provenance strip move into Notes and into the footer line. They are true, and they should not sit above the circuit.
 
@@ -451,7 +451,7 @@ One paragraph, for the project page and the top of a résumé note:
 
 > CiteTrace is a pit wall for a race session. The circuit is on screen, large enough to scrub. Any car can be set against any other car, with the sector delta, the compound, and both traces on the same metre. Selecting a driver brings up an original plate: number, team, helmet mark, and car. Under that, the traces and a cite that locks the playhead. Built by Eric at Welch Software. Live at citetrace.welchsoftware.net.
 
-The landing page CTA becomes **Open the pit wall**, aimed at `?house=ferrari`, with **Ask the lap** as the second action. That sells the workspace — circuit, duo, cite, playhead — not a single compare feature. The night photograph and the track stroke on the hero stay. They already promise a circuit; the session should keep that promise.
+The landing page CTA becomes **Open the pit wall**, aimed at `?house=ferrari`, with **Ask the lap** as the second action. That sells the workspace — circuit, duo, cite, playhead — not a single compare feature. The daytime COTA photograph and the track stroke on the hero stay. They already promise a circuit; the session should keep that promise.
 
 ---
 
