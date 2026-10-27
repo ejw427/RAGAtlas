@@ -50,6 +50,7 @@ export function TelemetryStage({
   focusLabel,
   referenceLabel,
   onOpenCompare,
+  viewWindow = null,
 }: {
   lapId: string;
   compareLapId: string | null;
@@ -64,6 +65,8 @@ export function TelemetryStage({
   focusLabel?: string;
   referenceLabel?: string;
   onOpenCompare?: () => void;
+  /** Stretch x-domain to match map zoom / sector. */
+  viewWindow?: { startM: number; endM: number } | null;
 }) {
   const channels = stageChannels(plotChannelIds);
   const uid = useId();
@@ -76,6 +79,9 @@ export function TelemetryStage({
   const pack = getSessionPack();
   const lap = getLapById(lapId);
   const sectors = pack.sectors;
+  const domainStart = viewWindow?.startM ?? 0;
+  const domainEnd = viewWindow?.endM ?? lengthM;
+  const domainSpan = Math.max(domainEnd - domainStart, 1);
 
   useEffect(() => {
     const el = shellRef.current;
@@ -179,7 +185,21 @@ export function TelemetryStage({
   // Only stretch-to-fill when everything fits with roomy rows; else scroll.
   const fillsShell = shellH > 0 && H <= shellH + 1 && rowH >= minRow;
 
-  const xOf = (m: number) => padL + (m / lengthM) * plotW;
+  const xOf = (m: number) =>
+    padL + ((m - domainStart) / domainSpan) * plotW;
+
+  const clipSeries = (series: { d: number[]; v: number[] }) => {
+    if (!viewWindow) return series;
+    const dOut: number[] = [];
+    const vOut: number[] = [];
+    for (let i = 0; i < series.d.length; i++) {
+      if (series.d[i] < domainStart - 1 || series.d[i] > domainEnd + 1) continue;
+      dOut.push(series.d[i]);
+      vOut.push(series.v[i]);
+    }
+    if (dOut.length < 2) return series;
+    return { d: dOut, v: vOut };
+  };
 
   const pathFor = (
     series: { d: number[]; v: number[] },
@@ -220,8 +240,8 @@ export function TelemetryStage({
     for (let i = 0; i < n - 1; i++) {
       const t0 = i / Math.max(n - 1, 1);
       const t1 = (i + 1) / Math.max(n - 1, 1);
-      const m0 = t0 * lengthM;
-      const m1 = t1 * lengthM;
+      const m0 = domainStart + t0 * domainSpan;
+      const m1 = domainStart + t1 * domainSpan;
       const fa = interpolateAt(focus, m0);
       const fb = interpolateAt(focus, m1);
       const ra = interpolateAt(reference, m0);
@@ -245,8 +265,11 @@ export function TelemetryStage({
     const rect = svg.getBoundingClientRect();
     const px = ((clientX - rect.left) / rect.width) * W;
     const m = Math.max(
-      0,
-      Math.min(lengthM, ((px - padL) / plotW) * lengthM),
+      domainStart,
+      Math.min(
+        domainEnd,
+        domainStart + ((px - padL) / plotW) * domainSpan,
+      ),
     );
     onPlayhead(m);
   };
@@ -266,7 +289,9 @@ export function TelemetryStage({
       : null;
   const peakCh = getChannel(peakChannelId);
 
-  const tickMs = [0, 0.25, 0.5, 0.75, 1].map((t) => Math.round(t * lengthM));
+  const tickMs = [0, 0.25, 0.5, 0.75, 1].map((t) =>
+    Math.round(domainStart + t * domainSpan),
+  );
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-1.5 overflow-hidden">
@@ -281,6 +306,9 @@ export function TelemetryStage({
           <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-[var(--mute)]">
             {channels.length} channels · distance
             {compareLapId ? " · dual-car compare" : ""}
+            {viewWindow
+              ? ` · stretch ${Math.round(domainStart)}–${Math.round(domainEnd)} m`
+              : ""}
             {" · "}
             <span className="text-[var(--mute)]">OF1</span>
             {" / "}
@@ -513,7 +541,12 @@ export function TelemetryStage({
             const isSpeedCompare =
               ch.id === "speed" && compare && speedBand != null;
             const fillBundle = isSpeedCompare
-              ? compareFillPaths(speedBand.focus, speedBand.reference, y0, y1)
+              ? compareFillPaths(
+                  clipSeries(speedBand.focus),
+                  clipSeries(speedBand.reference),
+                  y0,
+                  y1,
+                )
               : null;
             const sharedRange = fillBundle?.range;
             return (
@@ -598,7 +631,7 @@ export function TelemetryStage({
                   ))}
                 {compare && (
                   <path
-                    d={pathFor(compare.series, y0, y1, sharedRange)}
+                    d={pathFor(clipSeries(compare.series), y0, y1, sharedRange)}
                     fill="none"
                     stroke={
                       ch.id === "speed" ? compareStroke : "var(--mute)"
@@ -609,8 +642,8 @@ export function TelemetryStage({
                   />
                 )}
                 <path
-                  key={`${uid}-${drawKey}-${ch.id}`}
-                  d={pathFor(sample.series, y0, y1, sharedRange)}
+                  key={`${uid}-${drawKey}-${ch.id}-${domainStart}-${domainEnd}`}
+                  d={pathFor(clipSeries(sample.series), y0, y1, sharedRange)}
                   fill="none"
                   stroke={stroke}
                   strokeWidth={focused ? 2.6 : rowH >= 44 ? 2.4 : 2}
@@ -725,7 +758,7 @@ export function TelemetryStage({
                     CMP
                   </text>
                   <path
-                    d={pathFor(speedDelta, y0, y1)}
+                    d={pathFor(clipSeries(speedDelta), y0, y1)}
                     fill="none"
                     stroke="var(--signal)"
                     strokeWidth="2.2"

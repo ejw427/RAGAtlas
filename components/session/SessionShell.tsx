@@ -152,6 +152,10 @@ export function SessionShell() {
   );
   const [askOpen, setAskOpen] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
+  const [mapWindow, setMapWindow] = useState<{
+    startM: number;
+    endM: number;
+  } | null>(null);
   const [demoOpen, setDemoOpen] = useState(true);
   const [demoStep, setDemoStep] = useState<DemoStep>(0);
   const [askTrigger, setAskTrigger] = useState<{
@@ -771,9 +775,9 @@ export function SessionShell() {
         />
       )}
 
-      {/* Single tree: stacks on mobile, 3-col md, 4-col xl with Ask */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain md:grid md:grid-cols-[252px_minmax(0,1fr)_260px] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden xl:grid-cols-[240px_minmax(0,1fr)_220px_300px]">
-        <div className="min-h-0 md:overflow-hidden">
+      {/* Workspace scrolls as one pit wall when chrome is tall; columns scroll inside on wide desks. */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain md:grid md:grid-cols-[220px_minmax(0,1fr)_240px] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden xl:grid-cols-[210px_minmax(0,1fr)_210px_280px]">
+        <div className="min-h-0 md:overflow-y-auto md:overscroll-contain">
           <div className="md:hidden">
             <Plate
               driver={driver}
@@ -784,7 +788,7 @@ export function SessionShell() {
               compact
             />
           </div>
-          <div className="hidden h-full md:block">
+          <div className="hidden md:block">
             <Plate
               driver={driver}
               lap={lap}
@@ -795,8 +799,8 @@ export function SessionShell() {
           </div>
         </div>
 
-        <main className="flex min-h-[70vh] flex-col gap-2 bg-[var(--asphalt)] p-2 md:min-h-0 md:overflow-hidden md:p-2.5 xl:p-3">
-          <div className="h-[min(52vw,360px)] shrink-0 overflow-hidden md:h-[min(38vh,380px)] md:min-h-[260px]">
+        <main className="flex min-h-[85vh] flex-col gap-2 bg-[var(--asphalt)] p-2 md:min-h-0 md:overflow-y-auto md:overscroll-contain md:p-2.5 xl:p-3">
+          <div className="h-[min(58vw,440px)] shrink-0 overflow-hidden md:h-[min(46vh,460px)] md:min-h-[320px]">
             <TrackSchematic
               stage
               activeSector={activeSector}
@@ -819,9 +823,10 @@ export function SessionShell() {
               }
               speedDelta={speedDelta}
               onOpenCompare={compareLapId ? openCompare : undefined}
+              onViewWindow={setMapWindow}
             />
           </div>
-          <div className="flex min-h-[360px] flex-1 flex-col overflow-hidden md:min-h-0">
+          <div className="flex min-h-[380px] flex-1 flex-col md:min-h-[320px]">
             <TelemetryStage
               lapId={lapId}
               compareLapId={compareLapId}
@@ -829,7 +834,7 @@ export function SessionShell() {
               onPlayhead={onPlayhead}
               evidence={evidence}
               activeCite={selectedCite}
-              drawKey={`${lapId}-${compareLapId ?? "solo"}-${plotChannelIds.join(",")}`}
+              drawKey={`${lapId}-${compareLapId ?? "solo"}-${plotChannelIds.join(",")}-${mapWindow?.startM ?? 0}-${mapWindow?.endM ?? 0}`}
               plotChannelIds={plotChannelIds}
               focusAccent={focusAccent.accent}
               referenceAccent={
@@ -842,11 +847,12 @@ export function SessionShell() {
                   : undefined
               }
               onOpenCompare={compareLapId ? openCompare : undefined}
+              viewWindow={mapWindow}
             />
           </div>
         </main>
 
-        <div className="min-h-[360px] border-t border-[var(--hairline)] md:min-h-0 md:overflow-hidden md:border-t-0">
+        <div className="min-h-[360px] border-t border-[var(--hairline)] md:min-h-0 md:overflow-y-auto md:overscroll-contain md:border-t-0">
           <SelectDock
             lapId={lapId}
             playheadM={playheadM}
@@ -866,7 +872,7 @@ export function SessionShell() {
           />
         </div>
 
-        <div className="hidden min-h-0 overflow-hidden border-l border-[var(--hairline)] xl:block">
+        <div className="hidden min-h-0 overflow-y-auto overscroll-contain border-l border-[var(--hairline)] xl:block">
           {rag}
         </div>
       </div>

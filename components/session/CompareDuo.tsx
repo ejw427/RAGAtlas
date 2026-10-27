@@ -66,25 +66,25 @@ export function CompareDuo({
             : `linear-gradient(90deg, ${focusAccent.accent}18 0%, var(--asphalt) 55%)`,
         }}
       >
-        <div className="flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-stretch sm:gap-3">
+        <div className="flex flex-col gap-1.5 px-2.5 py-1.5 sm:flex-row sm:items-stretch sm:gap-2">
           {/* FOCUS */}
           <div
-            className="relative flex min-w-0 flex-1 items-center gap-3 rounded-md border px-3 py-2.5"
+            className="relative flex min-w-0 flex-1 items-center gap-2.5 rounded-md border px-2.5 py-1.5"
             style={{
               borderColor: `${focusAccent.accent}66`,
-              boxShadow: `inset 0 0 0 1px ${focusAccent.accent}22, 0 0 28px ${focusAccent.accent}18`,
+              boxShadow: `inset 0 0 0 1px ${focusAccent.accent}22, 0 0 20px ${focusAccent.accent}14`,
               background: "rgba(5,7,10,0.55)",
             }}
           >
             <span
-              className="absolute left-0 top-0 rounded-br-md px-2 py-0.5 font-mono text-[0.55rem] font-bold uppercase tracking-[0.16em] text-[var(--void)]"
+              className="absolute left-0 top-0 rounded-br-md px-1.5 py-0.5 font-mono text-[0.5rem] font-bold uppercase tracking-[0.14em] text-[var(--void)]"
               style={{ background: focusAccent.accent }}
             >
               Focus
             </span>
-            <DriverPortrait driver={focusDriver} size={72} className="mt-2" />
-            <div className="min-w-0 flex-1 pt-3">
-              <p className="truncate font-display text-lg font-bold leading-tight text-[var(--chalk)]">
+            <DriverPortrait driver={focusDriver} size={52} className="mt-1.5" />
+            <div className="min-w-0 flex-1 pt-2">
+              <p className="truncate font-display text-base font-bold leading-tight text-[var(--chalk)]">
                 {focusDriver.name}
               </p>
               <p className="font-mono text-[0.68rem] text-[var(--mist)]">
@@ -123,19 +123,19 @@ export function CompareDuo({
                 </span>
               </div>
             </div>
-            <p className="shrink-0 self-end pb-0.5 font-display text-2xl font-bold tabular-nums tracking-tight text-[var(--chalk)] sm:self-center sm:pb-0">
-              {formatLapTime(focusLap.timeMs)}
-            </p>
-          </div>
+              <p className="shrink-0 self-end pb-0.5 font-display text-xl font-bold tabular-nums tracking-tight text-[var(--chalk)] sm:self-center sm:pb-0">
+                {formatLapTime(focusLap.timeMs)}
+              </p>
+            </div>
 
           {/* VS hub */}
-          <div className="flex shrink-0 flex-row items-center justify-center gap-2 sm:w-[7.5rem] sm:flex-col sm:gap-1">
+          <div className="flex shrink-0 flex-row items-center justify-center gap-1.5 sm:w-[6.5rem] sm:flex-col sm:gap-0.5">
             {comparing && deltas ? (
               <>
                 <button
                   type="button"
                   onClick={onSwap}
-                  className="compare-vs-btn relative flex h-12 w-12 items-center justify-center rounded-full font-display text-sm font-black uppercase tracking-wide text-[var(--void)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+                  className="compare-vs-btn relative flex h-10 w-10 items-center justify-center rounded-full font-display text-xs font-black uppercase tracking-wide text-[var(--void)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
                   style={{
                     background:
                       "linear-gradient(135deg, var(--signal), #9be03a)",
@@ -153,7 +153,7 @@ export function CompareDuo({
                 >
                   <p
                     className={cn(
-                      "font-display text-xl font-bold tabular-nums leading-none",
+                      "font-display text-lg font-bold tabular-nums leading-none",
                       deltas.lapMs > 0
                         ? "text-[var(--trace-amber)]"
                         : "text-[var(--signal)]",
@@ -161,10 +161,7 @@ export function CompareDuo({
                   >
                     Δ {formatDeltaSec(deltas.lapMs)}
                   </p>
-                  <p className="mt-0.5 font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--mute)]">
-                    {deltas.lapMs <= 0 ? "Focus ahead" : "Reference ahead"}
-                  </p>
-                  <p className="mt-0.5 font-mono text-[0.48rem] uppercase tracking-[0.12em] text-[var(--signal)]">
+                  <p className="mt-0.5 font-mono text-[0.45rem] uppercase tracking-[0.12em] text-[var(--signal)]">
                     Detail ▸
                   </p>
                 </button>
@@ -195,26 +192,26 @@ export function CompareDuo({
           {/* REFERENCE */}
           {referenceDriver && referenceLap ? (
             <div
-              className="relative flex min-w-0 flex-1 items-center gap-3 rounded-md border px-3 py-2.5"
+              className="relative flex min-w-0 flex-1 items-center gap-2.5 rounded-md border px-2.5 py-1.5"
               style={{
                 borderColor: `${refAccent.accent}66`,
-                boxShadow: `inset 0 0 0 1px ${refAccent.accent}22, 0 0 28px ${refAccent.accent}18`,
+                boxShadow: `inset 0 0 0 1px ${refAccent.accent}22, 0 0 20px ${refAccent.accent}14`,
                 background: "rgba(5,7,10,0.55)",
               }}
             >
               <span
-                className="absolute left-0 top-0 rounded-br-md px-2 py-0.5 font-mono text-[0.55rem] font-bold uppercase tracking-[0.16em] text-[var(--void)]"
+                className="absolute left-0 top-0 rounded-br-md px-1.5 py-0.5 font-mono text-[0.5rem] font-bold uppercase tracking-[0.14em] text-[var(--void)]"
                 style={{ background: refAccent.accent }}
               >
                 Reference
               </span>
               <DriverPortrait
                 driver={referenceDriver}
-                size={72}
-                className="mt-2"
+                size={52}
+                className="mt-1.5"
               />
-              <div className="min-w-0 flex-1 pt-3">
-                <p className="truncate font-display text-lg font-bold leading-tight text-[var(--chalk)]">
+              <div className="min-w-0 flex-1 pt-2">
+                <p className="truncate font-display text-base font-bold leading-tight text-[var(--chalk)]">
                   {referenceDriver.name}
                 </p>
                 <p className="font-mono text-[0.68rem] text-[var(--mist)]">
@@ -255,7 +252,7 @@ export function CompareDuo({
                   </span>
                 </div>
               </div>
-              <p className="shrink-0 self-end pb-0.5 font-display text-2xl font-bold tabular-nums tracking-tight text-[var(--chalk)] sm:self-center sm:pb-0">
+              <p className="shrink-0 self-end pb-0.5 font-display text-xl font-bold tabular-nums tracking-tight text-[var(--chalk)] sm:self-center sm:pb-0">
                 {formatLapTime(referenceLap.timeMs)}
               </p>
             </div>
@@ -263,7 +260,7 @@ export function CompareDuo({
             <button
               type="button"
               onClick={onTeammate}
-              className="flex min-h-[5.5rem] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-[var(--signal)]/40 bg-[var(--signal-dim)]/20 px-3 py-2 text-center transition hover:bg-[var(--signal-dim)]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+              className="flex min-h-[4.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-md border border-dashed border-[var(--signal)]/40 bg-[var(--signal-dim)]/20 px-3 py-1.5 text-center transition hover:bg-[var(--signal-dim)]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
             >
               <span className="font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--signal)]">
                 Reference
@@ -278,9 +275,9 @@ export function CompareDuo({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5 border-t border-[var(--hairline)] bg-[rgba(5,7,10,0.35)] px-3 py-1.5">
-          <span className="font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--mute)]">
-            Compare presets
+        <div className="flex flex-wrap items-center gap-1 border-t border-[var(--hairline)] bg-[rgba(5,7,10,0.35)] px-2.5 py-1">
+          <span className="font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--mute)]">
+            Presets
           </span>
           <PresetChip label="Teammate" onClick={onTeammate} hot />
           <PresetChip label="Field best" onClick={onFieldBest} />

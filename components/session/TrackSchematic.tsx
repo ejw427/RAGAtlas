@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useRef } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ElevationStrip } from "@/components/session/ElevationStrip";
 import { getSessionPack } from "@/lib/session";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,9 @@ const LANDMARKS = [
   { id: "stadium", label: "Stadium", m: 4100 },
   { id: "t19", label: "T19", m: 5100 },
 ] as const;
+
+type ViewBox = { x: number; y: number; w: number; h: number };
+type DistWindow = { startM: number; endM: number };
 
 function pointAt(
   d: number[],
@@ -37,6 +40,40 @@ function pointAt(
   return { cx, cy, angle };
 }
 
+function boundsForMetres(
+  d: number[],
+  x: number[],
+  y: number[],
+  startM: number,
+  endM: number,
+  padRatio = 0.12,
+): ViewBox | null {
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  let hit = 0;
+  for (let i = 0; i < d.length; i++) {
+    if (d[i] < startM || d[i] > endM) continue;
+    hit += 1;
+    minX = Math.min(minX, x[i]);
+    maxX = Math.max(maxX, x[i]);
+    minY = Math.min(minY, y[i]);
+    maxY = Math.max(maxY, y[i]);
+  }
+  if (hit < 2) return null;
+  const w = Math.max(maxX - minX, 400);
+  const h = Math.max(maxY - minY, 400);
+  const padX = w * padRatio + 180;
+  const padY = h * padRatio + 180;
+  return {
+    x: minX - padX,
+    y: minY - padY,
+    w: w + padX * 2,
+    h: h + padY * 2,
+  };
+}
+
 function CarWedge({
   cx,
   cy,
@@ -44,6 +81,7 @@ function CarWedge({
   fill,
   number,
   offset = 0,
+  scale = 1,
   glow,
 }: {
   cx: number;
@@ -52,39 +90,48 @@ function CarWedge({
   fill: string;
   number?: number;
   offset?: number;
+  scale?: number;
   glow?: boolean;
 }) {
   const rad = ((angle + 90) * Math.PI) / 180;
-  const ox = Math.cos(rad) * offset;
-  const oy = Math.sin(rad) * offset;
+  const ox = Math.cos(rad) * offset * scale;
+  const oy = Math.sin(rad) * offset * scale;
+  const s = scale;
   return (
     <g transform={`translate(${cx + ox}, ${cy + oy}) rotate(${angle})`}>
       {glow && (
         <polygon
-          points="18,0 -12,-10 -12,10"
+          points={`${18 * s},0 ${-12 * s},${-10 * s} ${-12 * s},${10 * s}`}
           fill={fill}
           opacity="0.35"
-          filter="blur(4px)"
+          filter="blur(6px)"
         />
       )}
       <polygon
-        points="16,0 -11,-9 -11,9"
+        points={`${16 * s},0 ${-11 * s},${-9 * s} ${-11 * s},${9 * s}`}
         fill={fill}
         stroke="rgba(5,7,10,0.85)"
-        strokeWidth="2.5"
+        strokeWidth={2.5 * s}
       />
-      <polygon points="8,0 -4,-3.5 -4,3.5" fill="rgba(255,255,255,0.35)" />
+      <polygon
+        points={`${8 * s},0 ${-4 * s},${-3.5 * s} ${-4 * s},${3.5 * s}`}
+        fill="rgba(255,255,255,0.35)"
+      />
       {number != null && (
         <text
           x="0"
-          y="-18"
+          y={-18 * s}
           textAnchor="middle"
           fill={fill}
-          fontSize="15"
+          fontSize={16 * s}
           fontFamily="var(--font-mono), monospace"
           fontWeight="800"
           transform={`rotate(${-angle})`}
-          style={{ paintOrder: "stroke", stroke: "rgba(5,7,10,0.75)", strokeWidth: 3 }}
+          style={{
+            paintOrder: "stroke",
+            stroke: "rgba(5,7,10,0.8)",
+            strokeWidth: 4 * s,
+          }}
         >
           {number}
         </text>
@@ -111,6 +158,7 @@ export function TrackSchematic({
   stage = false,
   speedDelta = null,
   onOpenCompare,
+  onViewWindow,
 }: {
   activeSector: string | null;
   playheadM: number;
@@ -124,19 +172,71 @@ export function TrackSchematic({
   comparing?: boolean;
   traps?: { id: string; m: number; label: string; speed?: number }[];
   sectorDeltaMs?: [number, number, number] | null;
-  /** Index 0–2 of biggest Focus gain (painted signal on Lap view). */
   gainSectorIndex?: number | null;
-  /** Index 0–2 of biggest Focus loss (painted amber on Lap view). */
   lossSectorIndex?: number | null;
   stage?: boolean;
-  /** Focus − Reference speed along distance — paints the ribbon green/amber. */
   speedDelta?: { d: number[]; v: number[] } | null;
   onOpenCompare?: () => void;
+  /** Fired when map zoom window changes — stretch traces to match. */
+  onViewWindow?: (window: DistWindow | null) => void;
 }) {
   const pack = getSessionPack();
   const { x, y, d } = pack.trackXY.series;
   const svgRef = useRef<SVGSVGElement>(null);
   const uid = useId();
+  const [stretchMode, setStretchMode] = useState(false);
+  const [dragBox, setDragBox] = useState<{
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
+  } | null>(null);
+  const [manualView, setManualView] = useState<ViewBox | null>(null);
+  const dragOrigin = useRef<{ x: number; y: number } | null>(null);
+
+  const fullView = useMemo((): ViewBox => {
+    const minX = Math.min(...x);
+    const maxX = Math.max(...x);
+    const minY = Math.min(...y);
+    const maxY = Math.max(...y);
+    const pad = stage ? 420 : 160;
+    return {
+      x: minX - pad,
+      y: minY - pad,
+      w: maxX - minX + pad * 2,
+      h: maxY - minY + pad * 2,
+    };
+  }, [x, y, stage]);
+
+  const sectorWindow = useMemo((): DistWindow | null => {
+    if (!activeSector || activeSector === "Lap") return null;
+    const sec = pack.sectors.find((s) => s.label === activeSector);
+    if (!sec) return null;
+    return { startM: sec.startM, endM: sec.endM };
+  }, [activeSector, pack.sectors]);
+
+  const sectorView = useMemo(() => {
+    if (!sectorWindow) return null;
+    return boundsForMetres(
+      d,
+      x,
+      y,
+      sectorWindow.startM,
+      sectorWindow.endM,
+      0.18,
+    );
+  }, [sectorWindow, d, x, y]);
+
+  const view = manualView ?? sectorView ?? fullView;
+  const zoomed = view !== fullView && (manualView != null || sectorView != null);
+
+  // Scale decorations to current view so the road reads on a huge COTA viewBox.
+  const u = view.w / 55;
+
+  useEffect(() => {
+    if (manualView) return;
+    onViewWindow?.(sectorWindow);
+  }, [sectorWindow, manualView, onViewWindow]);
 
   const pathD = useMemo(() => {
     if (!x.length) return "";
@@ -179,19 +279,15 @@ export function TrackSchematic({
     return pts.join(" ");
   }, [evidence, d, x, y]);
 
-  const marks = useMemo(() => {
-    return LANDMARKS.map((lm) => ({
-      ...lm,
-      ...pointAt(d, x, y, lm.m),
-    }));
-  }, [d, x, y]);
+  const marks = useMemo(
+    () => LANDMARKS.map((lm) => ({ ...lm, ...pointAt(d, x, y, lm.m) })),
+    [d, x, y],
+  );
 
-  const trapMarks = useMemo(() => {
-    return (traps ?? []).map((t) => ({
-      ...t,
-      ...pointAt(d, x, y, t.m),
-    }));
-  }, [traps, d, x, y]);
+  const trapMarks = useMemo(
+    () => (traps ?? []).map((t) => ({ ...t, ...pointAt(d, x, y, t.m) })),
+    [traps, d, x, y],
+  );
 
   const tower = useMemo(() => pointAt(d, x, y, 180), [d, x, y]);
 
@@ -214,28 +310,27 @@ export function TrackSchematic({
           );
         }
       }
-      if (pts.length >= 2) {
-        segs.push({ path: pts.join(" "), gain: vAvg >= 0 });
-      }
+      if (pts.length >= 2) segs.push({ path: pts.join(" "), gain: vAvg >= 0 });
     }
     return segs;
   }, [comparing, speedDelta, d, x, y]);
 
-  const minX = Math.min(...x);
-  const maxX = Math.max(...x);
-  const minY = Math.min(...y);
-  const maxY = Math.max(...y);
-  const pad = stage ? 100 : 55;
-
-  const scrubTo = (clientX: number, clientY: number) => {
-    if (!onPlayhead || !svgRef.current || !d.length) return;
+  const clientToSvg = (clientX: number, clientY: number) => {
     const svg = svgRef.current;
+    if (!svg) return null;
     const pt = svg.createSVGPoint();
     pt.x = clientX;
     pt.y = clientY;
     const ctm = svg.getScreenCTM();
-    if (!ctm) return;
+    if (!ctm) return null;
     const local = pt.matrixTransform(ctm.inverse());
+    return { x: local.x, y: local.y };
+  };
+
+  const scrubTo = (clientX: number, clientY: number) => {
+    if (!onPlayhead || !d.length) return;
+    const local = clientToSvg(clientX, clientY);
+    if (!local) return;
     let best = 0;
     let bestDist = Infinity;
     for (let i = 0; i < x.length; i++) {
@@ -248,6 +343,47 @@ export function TrackSchematic({
       }
     }
     onPlayhead(d[best]);
+  };
+
+  const metresInBox = (box: ViewBox): DistWindow | null => {
+    let start = Infinity;
+    let end = -Infinity;
+    for (let i = 0; i < d.length; i++) {
+      if (
+        x[i] >= box.x &&
+        x[i] <= box.x + box.w &&
+        y[i] >= box.y &&
+        y[i] <= box.y + box.h
+      ) {
+        start = Math.min(start, d[i]);
+        end = Math.max(end, d[i]);
+      }
+    }
+    if (!Number.isFinite(start) || end <= start) return null;
+    return { startM: start, endM: end };
+  };
+
+  const fitLap = () => {
+    setManualView(null);
+    setStretchMode(false);
+    onSector?.("Lap");
+    onViewWindow?.(null);
+  };
+
+  const applyStretchBox = (x0: number, y0: number, x1: number, y1: number) => {
+    const left = Math.min(x0, x1);
+    const top = Math.min(y0, y1);
+    const w = Math.abs(x1 - x0);
+    const h = Math.abs(y1 - y0);
+    if (w < view.w * 0.04 || h < view.h * 0.04) return;
+    const next = { x: left, y: top, w, h };
+    setManualView(next);
+    const win = metresInBox(next);
+    onViewWindow?.(win);
+    if (win) {
+      const mid = (win.startM + win.endM) / 2;
+      onPlayhead?.(mid);
+    }
   };
 
   const sectorColor = (index: number, active: boolean) => {
@@ -265,305 +401,416 @@ export function TrackSchematic({
       }
     }
     if (active || activeSector === "Lap") return focusAccent;
-    return "rgba(154,167,184,0.45)";
+    return "rgba(154,167,184,0.55)";
   };
+
+  // Clear manual zoom when user picks Lap; keep when picking sector (sectorView takes over after clear)
+  useEffect(() => {
+    if (activeSector && activeSector !== "Lap") {
+      setManualView(null);
+    }
+  }, [activeSector]);
 
   return (
     <div
       className={cn(
         "circuit-stage relative flex flex-col overflow-hidden rounded-md border border-[var(--hairline-strong)]",
-        stage ? "h-full min-h-[220px]" : "p-2",
+        stage ? "h-full min-h-[280px]" : "p-2",
       )}
     >
       <div className="circuit-stage-bg pointer-events-none absolute inset-0" />
       {stage && (
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.18]"
+          className="pointer-events-none absolute inset-0 opacity-[0.22]"
           style={{
             backgroundImage: "url(/cota-tower-dusk.jpg)",
             backgroundSize: "cover",
-            backgroundPosition: "center 30%",
+            backgroundPosition: "center 28%",
             maskImage:
-              "radial-gradient(70% 80% at 70% 40%, black 0%, transparent 72%)",
+              "radial-gradient(75% 85% at 72% 35%, black 0%, transparent 70%)",
           }}
         />
       )}
-      <div className="relative z-[1] mb-0.5 flex shrink-0 items-center justify-between gap-2 px-2.5 pt-2">
-        <div>
-          <p className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[var(--mist)]">
-            Circuit of the Americas · Austin
+
+      <div className="relative z-[2] flex shrink-0 items-center justify-between gap-2 px-2.5 pt-1.5">
+        <div className="min-w-0">
+          <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-[var(--mist)]">
+            COTA · Austin
+            {zoomed ? " · stretched" : ""}
           </p>
-          <p className="font-mono text-[0.52rem] text-[var(--mute)]">
-            {comparing
-              ? "Δ speed ribbon · same metre · scrub the lap"
-              : "5.513 km · 20 turns · T1 +41 m"}
+          <p className="truncate font-mono text-[0.5rem] text-[var(--mute)]">
+            {stretchMode
+              ? "Drag a box on the circuit to stretch · Esc/Fit to reset"
+              : zoomed
+                ? "Sector / marquee zoom · traces follow this window"
+                : "Click sector · Stretch to box-zoom · scrub playhead"}
           </p>
         </div>
-        {comparing && onOpenCompare && (
+        <div className="flex shrink-0 flex-wrap items-center gap-1">
           <button
             type="button"
-            onClick={onOpenCompare}
-            className="shrink-0 rounded-sm border border-[var(--signal)]/50 bg-[var(--signal-dim)] px-2 py-1 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-[var(--signal)] transition hover:bg-[var(--signal)] hover:text-[var(--void)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+            onClick={() => setStretchMode((v) => !v)}
+            className={cn(
+              "rounded-sm border px-2 py-1 font-mono text-[0.55rem] uppercase tracking-[0.08em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
+              stretchMode
+                ? "border-[var(--signal)] bg-[var(--signal)] text-[var(--void)]"
+                : "border-[var(--hairline-strong)] text-[var(--mist)] hover:border-[var(--signal)]/50 hover:text-[var(--signal)]",
+            )}
           >
-            Compare detail
+            Stretch
           </button>
-        )}
+          <button
+            type="button"
+            onClick={fitLap}
+            className="rounded-sm border border-[var(--hairline-strong)] px-2 py-1 font-mono text-[0.55rem] uppercase tracking-[0.08em] text-[var(--mist)] hover:text-[var(--chalk)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+          >
+            Fit lap
+          </button>
+          {comparing && onOpenCompare && (
+            <button
+              type="button"
+              onClick={onOpenCompare}
+              className="rounded-sm border border-[var(--signal)]/50 bg-[var(--signal-dim)] px-2 py-1 font-mono text-[0.55rem] uppercase tracking-[0.08em] text-[var(--signal)] hover:bg-[var(--signal)] hover:text-[var(--void)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+            >
+              Compare
+            </button>
+          )}
+        </div>
       </div>
-      <svg
-        ref={svgRef}
-        viewBox={`${minX - pad} ${minY - pad} ${maxX - minX + pad * 2} ${maxY - minY + pad * 2}`}
-        className={cn(
-          "relative z-[1] w-full",
-          stage ? "min-h-0 flex-1 cursor-crosshair px-1" : "h-40",
-        )}
-        role="img"
-        aria-label={`Circuit of the Americas schematic, active sector ${activeSector ?? "none"}, distance ${Math.round(playheadM)} meters`}
-        onPointerDown={(e) => {
-          if (!onPlayhead) return;
-          (e.target as Element).setPointerCapture?.(e.pointerId);
-          scrubTo(e.clientX, e.clientY);
-        }}
-        onPointerMove={(e) => {
-          if (!onPlayhead || e.buttons !== 1) return;
-          scrubTo(e.clientX, e.clientY);
-        }}
-      >
-        <defs>
-          <linearGradient id={`${uid}-asphalt`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#1a2230" />
-            <stop offset="50%" stopColor="#0d1219" />
-            <stop offset="100%" stopColor="#151c28" />
-          </linearGradient>
-          <filter id={`${uid}-bloom`} x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="4" result="b" />
-            <feMerge>
-              <feMergeNode in="b" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-          <filter id={`${uid}-soft`}>
-            <feGaussianBlur stdDeviation="1.2" />
-          </filter>
-        </defs>
 
-        {/* runoff plate */}
-        <path
-          d={pathD}
-          fill="none"
-          stroke="rgba(8,12,18,0.95)"
-          strokeWidth={stage ? 72 : 38}
-          strokeLinejoin="round"
-        />
-        {/* red / white kerbs */}
-        <path
-          d={pathD}
-          fill="none"
-          stroke="rgba(255,77,94,0.55)"
-          strokeWidth={stage ? 52 : 28}
-          strokeLinejoin="round"
-          strokeDasharray="14 18"
-        />
-        <path
-          d={pathD}
-          fill="none"
-          stroke="rgba(232,238,245,0.5)"
-          strokeWidth={stage ? 52 : 28}
-          strokeLinejoin="round"
-          strokeDasharray="14 18"
-          strokeDashoffset="16"
-        />
-        {/* asphalt ribbon */}
-        <path
-          d={pathD}
-          fill="none"
-          stroke="#1e2734"
-          strokeWidth={stage ? 38 : 20}
-          strokeLinejoin="round"
-        />
-        <path
-          d={pathD}
-          fill="none"
-          stroke="#3a4658"
-          strokeWidth={stage ? 26 : 14}
-          strokeLinejoin="round"
-        />
-        {/* Δ speed ribbon when comparing */}
-        {deltaRibbon.map((seg, i) => (
+      <div className="relative z-[1] min-h-0 flex-1">
+        <svg
+          ref={svgRef}
+          viewBox={`${view.x} ${view.y} ${view.w} ${view.h}`}
+          className={cn(
+            "absolute inset-0 h-full w-full",
+            stretchMode ? "cursor-crosshair" : "cursor-crosshair",
+          )}
+          role="img"
+          aria-label={`Circuit of the Americas. ${zoomed ? "Zoomed view. " : ""}Sector ${activeSector ?? "Lap"}. ${Math.round(playheadM)} metres.`}
+          onPointerDown={(e) => {
+            const local = clientToSvg(e.clientX, e.clientY);
+            if (!local) return;
+            (e.target as Element).setPointerCapture?.(e.pointerId);
+            if (stretchMode || e.shiftKey) {
+              dragOrigin.current = local;
+              setDragBox({ x0: local.x, y0: local.y, x1: local.x, y1: local.y });
+              return;
+            }
+            scrubTo(e.clientX, e.clientY);
+          }}
+          onPointerMove={(e) => {
+            if (dragOrigin.current && (stretchMode || e.shiftKey) && e.buttons === 1) {
+              const local = clientToSvg(e.clientX, e.clientY);
+              if (!local) return;
+              setDragBox({
+                x0: dragOrigin.current.x,
+                y0: dragOrigin.current.y,
+                x1: local.x,
+                y1: local.y,
+              });
+              return;
+            }
+            if (!onPlayhead || e.buttons !== 1 || stretchMode) return;
+            scrubTo(e.clientX, e.clientY);
+          }}
+          onPointerUp={() => {
+            if (dragBox && dragOrigin.current) {
+              applyStretchBox(dragBox.x0, dragBox.y0, dragBox.x1, dragBox.y1);
+              setStretchMode(false);
+            }
+            dragOrigin.current = null;
+            setDragBox(null);
+          }}
+          onPointerCancel={() => {
+            dragOrigin.current = null;
+            setDragBox(null);
+          }}
+        >
+          <defs>
+            <filter id={`${uid}-bloom`} x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation={u * 0.35} result="b" />
+              <feMerge>
+                <feMergeNode in="b" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <linearGradient id={`${uid}-road`} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#4a5668" />
+              <stop offset="50%" stopColor="#2c3544" />
+              <stop offset="100%" stopColor="#3d4a5c" />
+            </linearGradient>
+          </defs>
+
+          {/* grass / runoff plate */}
           <path
-            key={`Δ-${i}`}
-            d={seg.path}
+            d={pathD}
             fill="none"
-            stroke={seg.gain ? "var(--signal)" : "var(--trace-amber)"}
-            strokeWidth={stage ? 18 : 12}
+            stroke="rgba(28, 48, 32, 0.55)"
+            strokeWidth={u * 4.2}
             strokeLinejoin="round"
-            strokeLinecap="round"
-            opacity={0.72}
           />
-        ))}
-        {/* center line glow */}
-        <path
-          d={pathD}
-          fill="none"
-          stroke="rgba(232,238,245,0.8)"
-          strokeWidth={stage ? 2.5 : 2}
-          strokeLinejoin="round"
-          strokeDasharray="16 20"
-          opacity="0.65"
-          className="circuit-dash"
-        />
-
-        {sectorPaths.map((sec, index) => {
-          const wholeLap = activeSector === "Lap";
-          const active = wholeLap || activeSector === sec.label;
-          return (
-            <path
-              key={sec.id}
-              d={sec.path}
-              fill="none"
-              strokeWidth={
-                wholeLap
-                  ? stage
-                    ? 8
-                    : 6
-                  : active
-                    ? stage
-                      ? 14
-                      : 11
-                    : stage
-                      ? 6
-                      : 4
-              }
-              strokeLinejoin="round"
-              stroke={sectorColor(index, active)}
-              opacity={wholeLap ? 0.85 : active ? 0.95 : 0.35}
-              filter={active && !wholeLap ? `url(#${uid}-bloom)` : undefined}
-              className="cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSector?.(sec.label);
-              }}
-            />
-          );
-        })}
-
-        {evidenceArc && (
           <path
-            d={evidenceArc}
+            d={pathD}
             fill="none"
-            stroke="var(--trace-cyan)"
-            strokeWidth={stage ? 10 : 7}
-            strokeOpacity="0.9"
-            filter={`url(#${uid}-bloom)`}
+            stroke="rgba(8,12,18,0.95)"
+            strokeWidth={u * 3.4}
+            strokeLinejoin="round"
           />
+          {/* kerbs */}
+          <path
+            d={pathD}
+            fill="none"
+            stroke="rgba(255,77,94,0.75)"
+            strokeWidth={u * 2.55}
+            strokeLinejoin="round"
+            strokeDasharray={`${u * 0.55} ${u * 0.7}`}
+          />
+          <path
+            d={pathD}
+            fill="none"
+            stroke="rgba(232,238,245,0.7)"
+            strokeWidth={u * 2.55}
+            strokeLinejoin="round"
+            strokeDasharray={`${u * 0.55} ${u * 0.7}`}
+            strokeDashoffset={u * 0.62}
+          />
+          {/* asphalt */}
+          <path
+            d={pathD}
+            fill="none"
+            stroke={`url(#${uid}-road)`}
+            strokeWidth={u * 1.85}
+            strokeLinejoin="round"
+          />
+          <path
+            d={pathD}
+            fill="none"
+            stroke="#5a687c"
+            strokeWidth={u * 1.15}
+            strokeLinejoin="round"
+          />
+
+          {deltaRibbon.map((seg, i) => (
+            <path
+              key={`Δ-${i}`}
+              d={seg.path}
+              fill="none"
+              stroke={seg.gain ? "var(--signal)" : "var(--trace-amber)"}
+              strokeWidth={u * 0.95}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              opacity={0.8}
+            />
+          ))}
+
+          <path
+            d={pathD}
+            fill="none"
+            stroke="rgba(232,238,245,0.85)"
+            strokeWidth={u * 0.12}
+            strokeLinejoin="round"
+            strokeDasharray={`${u * 0.55} ${u * 0.7}`}
+            className="circuit-dash"
+          />
+
+          {sectorPaths.map((sec, index) => {
+            const wholeLap = activeSector === "Lap" || !activeSector;
+            const active = wholeLap || activeSector === sec.label;
+            return (
+              <path
+                key={sec.id}
+                d={sec.path}
+                fill="none"
+                strokeWidth={active && !wholeLap ? u * 0.72 : u * 0.38}
+                strokeLinejoin="round"
+                stroke={sectorColor(index, active)}
+                opacity={wholeLap ? 0.9 : active ? 1 : 0.28}
+                filter={active && !wholeLap ? `url(#${uid}-bloom)` : undefined}
+                className="cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setManualView(null);
+                  onSector?.(sec.label);
+                }}
+              />
+            );
+          })}
+
+          {evidenceArc && (
+            <path
+              d={evidenceArc}
+              fill="none"
+              stroke="var(--trace-cyan)"
+              strokeWidth={u * 0.55}
+              strokeOpacity="0.95"
+              filter={`url(#${uid}-bloom)`}
+            />
+          )}
+
+          {stage && !zoomed && (
+            <g
+              transform={`translate(${tower.cx - u * 0.35}, ${tower.cy - u * 2.2})`}
+              opacity="0.85"
+            >
+              <path
+                d={`M ${-0.18 * u} ${0.55 * u} L 0 ${-1.4 * u} L ${0.18 * u} ${0.55 * u} Z`}
+                fill="rgba(255,77,94,0.85)"
+                stroke="rgba(232,238,245,0.65)"
+                strokeWidth={u * 0.06}
+              />
+              <path
+                d={`M 0 ${-0.55 * u} Q ${0.95 * u} ${0.15 * u} ${1.2 * u} ${1 * u}`}
+                fill="none"
+                stroke="rgba(255,77,94,0.7)"
+                strokeWidth={u * 0.08}
+                strokeLinecap="round"
+              />
+            </g>
+          )}
+
+          {marks.map((m) => {
+            if (zoomed && sectorWindow) {
+              if (m.m < sectorWindow.startM - 80 || m.m > sectorWindow.endM + 80)
+                return null;
+            }
+            return (
+              <g key={m.id}>
+                <circle
+                  cx={m.cx}
+                  cy={m.cy}
+                  r={u * 0.42}
+                  fill="rgba(5,7,10,0.88)"
+                  stroke="rgba(198,255,74,0.65)"
+                  strokeWidth={u * 0.06}
+                />
+                <text
+                  x={m.cx}
+                  y={m.cy + u * 0.12}
+                  textAnchor="middle"
+                  fill="var(--chalk)"
+                  fontSize={u * 0.32}
+                  fontFamily="var(--font-mono), monospace"
+                  fontWeight="700"
+                >
+                  {m.label}
+                </text>
+              </g>
+            );
+          })}
+
+          {trapMarks.map((t) => (
+            <g key={t.id}>
+              <rect
+                x={t.cx - u * 0.85}
+                y={t.cy - u * 1.05}
+                width={u * 1.7}
+                height={u * 0.55}
+                rx={u * 0.08}
+                fill="rgba(5,7,10,0.9)"
+                stroke="rgba(58,215,255,0.7)"
+                strokeWidth={u * 0.05}
+              />
+              <text
+                x={t.cx}
+                y={t.cy - u * 0.65}
+                textAnchor="middle"
+                fill="var(--trace-cyan)"
+                fontSize={u * 0.32}
+                fontFamily="var(--font-mono), monospace"
+                fontWeight="700"
+              >
+                {t.label}
+                {t.speed != null ? ` ${t.speed}` : ""}
+              </text>
+            </g>
+          ))}
+
+          {referenceCar && referenceAccent && (
+            <CarWedge
+              cx={referenceCar.cx}
+              cy={referenceCar.cy}
+              angle={referenceCar.angle}
+              fill={referenceAccent}
+              number={referenceNumber}
+              offset={0.55}
+              scale={u * 0.085}
+              glow
+            />
+          )}
+          <CarWedge
+            cx={focusCar.cx}
+            cy={focusCar.cy}
+            angle={focusCar.angle}
+            fill={focusAccent}
+            number={focusNumber}
+            offset={comparing ? -0.35 : 0}
+            scale={u * 0.085}
+            glow
+          />
+
+          {dragBox && (
+            <rect
+              x={Math.min(dragBox.x0, dragBox.x1)}
+              y={Math.min(dragBox.y0, dragBox.y1)}
+              width={Math.abs(dragBox.x1 - dragBox.x0)}
+              height={Math.abs(dragBox.y1 - dragBox.y0)}
+              fill="rgba(198,255,74,0.12)"
+              stroke="var(--signal)"
+              strokeWidth={u * 0.08}
+              strokeDasharray={`${u * 0.25} ${u * 0.2}`}
+            />
+          )}
+        </svg>
+
+        {/* Mini overview when stretched */}
+        {zoomed && stage && (
+          <button
+            type="button"
+            onClick={fitLap}
+            className="absolute bottom-14 right-2 z-[3] h-16 w-24 overflow-hidden rounded border border-[var(--hairline-strong)] bg-[rgba(5,7,10,0.85)] p-0.5 shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+            title="Fit full lap"
+          >
+            <svg
+              viewBox={`${fullView.x} ${fullView.y} ${fullView.w} ${fullView.h}`}
+              className="h-full w-full"
+              aria-hidden
+            >
+              <path
+                d={pathD}
+                fill="none"
+                stroke="rgba(232,238,245,0.35)"
+                strokeWidth={fullView.w / 40}
+              />
+              <rect
+                x={view.x}
+                y={view.y}
+                width={view.w}
+                height={view.h}
+                fill="rgba(198,255,74,0.15)"
+                stroke="var(--signal)"
+                strokeWidth={fullView.w / 120}
+              />
+            </svg>
+          </button>
         )}
 
         {stage && (
-          <g
-            transform={`translate(${tower.cx - 14}, ${tower.cy - 78})`}
-            opacity="0.7"
-          >
-            <path
-              d="M -5 20 L 0 -48 L 5 20 Z"
-              fill="rgba(255,77,94,0.7)"
-              stroke="rgba(232,238,245,0.55)"
-              strokeWidth="2"
-            />
-            <path
-              d="M 0 -18 Q 32 6 40 34"
-              fill="none"
-              stroke="rgba(255,77,94,0.55)"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-          </g>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-[rgba(5,7,10,0.92)] via-[rgba(5,7,10,0.55)] to-transparent pt-6">
+            <div className="pointer-events-auto">
+              <ElevationStrip playheadM={playheadM} className="border-0 bg-transparent" />
+            </div>
+          </div>
         )}
+      </div>
 
-        {marks.map((m) => (
-          <g key={m.id}>
-            <circle
-              cx={m.cx}
-              cy={m.cy}
-              r={stage ? 16 : 11}
-              fill="rgba(5,7,10,0.82)"
-              stroke="rgba(198,255,74,0.45)"
-              strokeWidth="1.5"
-            />
-            <text
-              x={m.cx}
-              y={m.cy + 4}
-              textAnchor="middle"
-              fill="var(--chalk)"
-              fontSize={stage ? 10 : 8}
-              fontFamily="var(--font-mono), monospace"
-              fontWeight="600"
-            >
-              {m.label}
-            </text>
-          </g>
-        ))}
-
-        {trapMarks.map((t) => (
-          <g key={t.id}>
-            <rect
-              x={t.cx - 28}
-              y={t.cy - 34}
-              width="56"
-              height="18"
-              rx="3"
-              fill="rgba(5,7,10,0.88)"
-              stroke="rgba(58,215,255,0.55)"
-              strokeWidth="1.25"
-            />
-            <text
-              x={t.cx}
-              y={t.cy - 21}
-              textAnchor="middle"
-              fill="var(--trace-cyan)"
-              fontSize="11"
-              fontFamily="var(--font-mono), monospace"
-              fontWeight="700"
-            >
-              {t.label}
-              {t.speed != null ? ` ${t.speed}` : ""}
-            </text>
-          </g>
-        ))}
-
-        {referenceCar && referenceAccent && (
-          <CarWedge
-            cx={referenceCar.cx}
-            cy={referenceCar.cy}
-            angle={referenceCar.angle}
-            fill={referenceAccent}
-            number={referenceNumber}
-            offset={20}
-            glow
-          />
-        )}
-        <CarWedge
-          cx={focusCar.cx}
-          cy={focusCar.cy}
-          angle={focusCar.angle}
-          fill={focusAccent}
-          number={focusNumber}
-          offset={comparing ? -12 : 0}
-          glow
-        />
-      </svg>
-
-      {stage && (
-        <div className="relative z-[1] shrink-0">
-          <ElevationStrip playheadM={playheadM} />
-        </div>
-      )}
-
-      <div className="relative z-[1] mt-auto flex shrink-0 flex-wrap items-center gap-2 border-t border-[var(--hairline)] bg-[rgba(5,7,10,0.55)] px-2.5 py-1.5 font-mono text-[0.62rem]">
+      <div className="relative z-[2] flex shrink-0 flex-wrap items-center gap-1.5 border-t border-[var(--hairline)] bg-[rgba(5,7,10,0.72)] px-2.5 py-1 font-mono text-[0.6rem]">
         <button
           type="button"
-          onClick={() => onSector?.("Lap")}
+          onClick={fitLap}
           className={cn(
             "rounded-sm px-1.5 py-0.5",
-            activeSector === "Lap"
+            !activeSector || activeSector === "Lap"
               ? "bg-[var(--signal-dim)] text-[var(--signal)]"
               : "text-[var(--mute)] hover:text-[var(--chalk)]",
           )}
@@ -574,7 +821,10 @@ export function TrackSchematic({
           <button
             key={s.id}
             type="button"
-            onClick={() => onSector?.(s.label)}
+            onClick={() => {
+              setManualView(null);
+              onSector?.(s.label);
+            }}
             className={cn(
               "rounded-sm px-1.5 py-0.5",
               activeSector === s.label
@@ -598,7 +848,7 @@ export function TrackSchematic({
             )}
           </button>
         ))}
-        {comparing && deltaRibbon.length > 0 && (
+        {comparing && (
           <span className="hidden items-center gap-2 sm:inline-flex">
             <span className="inline-flex items-center gap-1 text-[var(--signal)]">
               <span className="inline-block h-1.5 w-3 rounded-sm bg-[var(--signal)]" />
