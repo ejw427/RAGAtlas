@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useId, useMemo, useState } from "react";
 import track from "@/data/mock/cota-track.json";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -8,6 +9,7 @@ import { CarStage } from "@/components/identity/CarStage";
 import { HelmetMark } from "@/components/identity/HelmetMark";
 import { TEAM_ACCENTS } from "@/lib/identity";
 import { prefersReducedMotion } from "@/lib/motion";
+import { VENUE_PHOTOS } from "@/lib/venue-photos";
 
 const LANDMARKS = [
   {
@@ -203,15 +205,23 @@ export function CotaCircuitMap() {
 
   return (
     <div className="relative overflow-hidden border border-[var(--hairline)] bg-[var(--asphalt)]">
+      <Image
+        src={VENUE_PHOTOS.esses}
+        alt=""
+        fill
+        className="object-cover object-[center_35%] opacity-[0.55]"
+        sizes="(max-width: 1120px) 100vw, 1120px"
+        aria-hidden
+      />
       <div
-        className="pointer-events-none absolute inset-0 opacity-40"
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(70% 60% at 30% 40%, rgba(58,215,255,0.08), transparent 55%), radial-gradient(50% 50% at 75% 70%, rgba(198,255,74,0.06), transparent 60%)",
+            "linear-gradient(180deg, rgba(11,15,20,0.45) 0%, rgba(11,15,20,0.72) 100%), radial-gradient(70% 60% at 30% 40%, rgba(58,215,255,0.08), transparent 55%)",
         }}
       />
 
-      <div className="relative border-b border-[var(--hairline)] px-5 py-4 sm:px-6">
+      <div className="relative z-[1] border-b border-[var(--hairline)] px-5 py-4 sm:px-6">
         <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-[var(--signal)]">
           Circuit of the Americas
         </p>
@@ -226,7 +236,7 @@ export function CotaCircuitMap() {
 
       <svg
         viewBox={model.view}
-        className="h-[min(62vw,460px)] w-full lg:h-[480px]"
+        className="relative z-[1] h-[min(62vw,460px)] w-full lg:h-[480px]"
         role="img"
         aria-label="Circuit of the Americas schematic with sector and landmark callouts"
       >
@@ -331,7 +341,7 @@ export function CotaCircuitMap() {
         })}
       </svg>
 
-      <div className="flex flex-wrap gap-2 border-t border-[var(--hairline)] px-4 py-3 sm:px-5">
+      <div className="relative z-[1] flex flex-wrap gap-2 border-t border-[var(--hairline)] px-4 py-3 sm:px-5">
         {LANDMARKS.map((lm) => {
           const on = lm.id === highlightId;
           return (
@@ -352,7 +362,7 @@ export function CotaCircuitMap() {
         })}
       </div>
 
-      <div className="flex flex-wrap gap-4 border-t border-[var(--hairline)] px-5 py-3 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--mute)]">
+      <div className="relative z-[1] flex flex-wrap gap-4 border-t border-[var(--hairline)] px-5 py-3 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--mute)]">
         {SECTORS.map((s) => (
           <span key={s.id} className="inline-flex items-center gap-2">
             <span

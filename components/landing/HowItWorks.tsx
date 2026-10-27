@@ -14,6 +14,25 @@ import {
 } from "@/lib/brand";
 import { TEAM_ACCENTS } from "@/lib/identity";
 import { corpusSummary } from "@/lib/rag";
+import { VENUE_PHOTOS } from "@/lib/venue-photos";
+
+const DAY_STRIP = [
+  {
+    src: VENUE_PHOTOS.esses,
+    alt: "COTA esses in daylight with race traffic",
+    label: "Esses · T3–T6",
+  },
+  {
+    src: VENUE_PHOTOS.pitlane,
+    alt: "Daytime race cars on Circuit of the Americas asphalt",
+    label: "Track · daylight",
+  },
+  {
+    src: VENUE_PHOTOS.garage,
+    alt: "Garage bay at Circuit of the Americas",
+    label: "Garage · pit wall energy",
+  },
+] as const;
 
 const STEPS = [
   {
@@ -87,17 +106,17 @@ export function HowItWorks() {
       <div className="relative isolate overflow-hidden border-b border-[var(--hairline)]">
         <div className="absolute inset-0">
           <Image
-            src="/cota-main-straight-day.jpg"
+            src={VENUE_PHOTOS.mainStraight}
             alt="Circuit of the Americas main straight and grandstand in daylight"
             fill
-            className="object-cover object-[center_40%] opacity-50"
+            className="object-cover object-[center_40%] opacity-70"
             sizes="100vw"
           />
           <div
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(180deg, rgba(11,15,20,0.5) 0%, rgba(11,15,20,0.9) 100%), linear-gradient(90deg, rgba(5,7,10,0.82) 0%, rgba(5,7,10,0.32) 60%, rgba(5,7,10,0.7) 100%)",
+                "linear-gradient(180deg, rgba(11,15,20,0.28) 0%, rgba(11,15,20,0.78) 100%), linear-gradient(90deg, rgba(5,7,10,0.65) 0%, rgba(5,7,10,0.18) 60%, rgba(5,7,10,0.5) 100%)",
             }}
           />
         </div>
@@ -140,6 +159,26 @@ export function HowItWorks() {
             </li>
           ))}
         </ol>
+
+        <div className="mt-10 grid gap-2 sm:grid-cols-3">
+          {DAY_STRIP.map((shot) => (
+            <figure
+              key={shot.src}
+              className="relative isolate min-h-[140px] overflow-hidden border border-[var(--hairline)] sm:min-h-[180px]"
+            >
+              <Image
+                src={shot.src}
+                alt={shot.alt}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 100vw, 360px"
+              />
+              <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[rgba(5,7,10,0.88)] to-transparent px-3 pb-2.5 pt-8 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--signal)]">
+                {shot.label}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
 
         <div className="mt-10 grid gap-6 border-t border-[var(--hairline)] pt-8 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>

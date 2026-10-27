@@ -78,6 +78,15 @@ export function CompareDuo({
         }}
       >
         <div
+          className="pointer-events-none absolute inset-0 opacity-[0.32]"
+          style={{
+            backgroundImage: "url(/cota-track-day.jpg)",
+            backgroundSize: "cover",
+            backgroundPosition: "center 40%",
+          }}
+          aria-hidden
+        />
+        <div
           className="pointer-events-none absolute inset-y-0 left-0 w-1/2 opacity-40"
           style={{
             background: `radial-gradient(ellipse 70% 120% at 8% 50%, ${focusAccent.accent}33, transparent 70%)`,

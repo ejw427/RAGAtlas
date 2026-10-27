@@ -1,14 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import type { ReactNode } from "react";
 import {
   TRACK_PACKAGES,
   type TrackPackage,
   type TrackPackageId,
 } from "@/lib/track-package";
+import { VENUE_PHOTOS } from "@/lib/venue-photos";
 import { cn } from "@/lib/utils";
 
-/** Quiet venue pad behind the car — one landmark, one chip, no clutter. */
+/** Quiet venue pad behind the car — daytime COTA still when the pack is Austin. */
 export function CarStage({
   track = "cota",
   children,
@@ -24,6 +26,7 @@ export function CarStage({
 }) {
   const pkg = typeof track === "string" ? TRACK_PACKAGES[track] : track;
   const atmo = pkg.atmosphere;
+  const dayPhoto = pkg.id === "cota" ? VENUE_PHOTOS.track : null;
 
   return (
     <div
@@ -35,12 +38,24 @@ export function CarStage({
         background: `linear-gradient(165deg, ${atmo.skyTop} 0%, ${atmo.skyBot} 42%, ${atmo.ground} 100%)`,
       }}
     >
+      {dayPhoto && (
+        <Image
+          src={dayPhoto}
+          alt=""
+          fill
+          className="object-cover object-[center_42%] opacity-[0.72]"
+          sizes="(max-width: 640px) 100vw, 420px"
+          aria-hidden
+        />
+      )}
+
       {/* Soft horizon wash */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          background:
-            atmo.landmark === "tower"
+          background: dayPhoto
+            ? "linear-gradient(180deg, rgba(5,7,10,0.18) 0%, rgba(5,7,10,0.28) 50%, rgba(5,7,10,0.55) 100%)"
+            : atmo.landmark === "tower"
               ? "radial-gradient(ellipse 55% 40% at 78% 18%, rgba(255,77,94,0.14), transparent 60%), radial-gradient(ellipse 70% 50% at 20% 80%, rgba(58,215,255,0.07), transparent 55%)"
               : atmo.landmark === "desert"
                 ? "radial-gradient(ellipse 60% 45% at 70% 0%, rgba(255,160,80,0.22), transparent 55%)"
@@ -49,7 +64,7 @@ export function CarStage({
         aria-hidden
       />
 
-      {atmo.landmark === "tower" && (
+      {atmo.landmark === "tower" && !dayPhoto && (
         <svg
           className="pointer-events-none absolute -right-1 top-1 h-[70%] w-12 opacity-35 sm:w-14"
           viewBox="0 0 48 100"

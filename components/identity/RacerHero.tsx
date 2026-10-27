@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { CarLivery } from "@/components/identity/CarLivery";
 import { CarStage } from "@/components/identity/CarStage";
 import { DriverPortrait } from "@/components/identity/DriverPortrait";
@@ -15,6 +16,7 @@ import { ageFromBorn, dossierFor } from "@/lib/driver-dossier";
 import { getDriver, getTrackPackage } from "@/lib/session";
 import type { Driver, Lap } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { VENUE_PHOTOS } from "@/lib/venue-photos";
 
 /** Shared identity banner for plate + racer detail — portrait, house, track car. */
 export function RacerHero({
@@ -40,6 +42,8 @@ export function RacerHero({
   const dossier = dossierFor(driver);
   const age = ageFromBorn(dossier?.born);
 
+  const dayVenue = trackPkg.id === "cota";
+
   return (
     <div
       className={cn(
@@ -52,13 +56,23 @@ export function RacerHero({
         boxShadow: `inset 0 0 40px ${accent.accent}18`,
       }}
     >
+      {dayVenue && (
+        <Image
+          src={VENUE_PHOTOS.mainStraight}
+          alt=""
+          fill
+          className="object-cover object-[center_40%] opacity-[0.22]"
+          sizes="480px"
+          aria-hidden
+        />
+      )}
       <div
         className="pointer-events-none absolute -right-6 -top-8 h-28 w-28 rounded-full opacity-40 blur-2xl"
         style={{ background: accent.accent }}
         aria-hidden
       />
 
-      <div className="flex items-start gap-3">
+      <div className="relative z-[1] flex items-start gap-3">
         <DriverPortrait
           driver={driver}
           size={portraitSize}
@@ -137,7 +151,7 @@ export function RacerHero({
         </div>
       </div>
 
-      <div className="mt-3">
+      <div className="relative z-[1] mt-3">
         <CarStage track={trackPkg}>
           <CarLivery
             accent={accent}

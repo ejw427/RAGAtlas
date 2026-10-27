@@ -150,8 +150,17 @@ export function CircuitMapModal({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="inset-1 top-1 bottom-1 left-1 right-1 z-50 flex max-h-none w-auto flex-col overflow-hidden rounded-lg border border-[var(--hairline-strong)] bg-[var(--void)] p-2 shadow-2xl sm:inset-2 sm:p-3 md:inset-3">
-        <div className="mb-2 flex shrink-0 flex-wrap items-start justify-between gap-3">
+      <SheetContent className="relative inset-1 top-1 bottom-1 left-1 right-1 z-50 flex max-h-none w-auto flex-col overflow-hidden rounded-lg border border-[var(--hairline-strong)] bg-[var(--void)] p-2 shadow-2xl sm:inset-2 sm:p-3 md:inset-3">
+        <div
+          className="pointer-events-none absolute inset-0 z-0 opacity-[0.14]"
+          style={{
+            backgroundImage: "url(/cota-hero-day.jpg)",
+            backgroundSize: "cover",
+            backgroundPosition: "center 35%",
+          }}
+          aria-hidden
+        />
+        <div className="relative z-[1] mb-2 flex shrink-0 flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <SheetTitle className="text-[var(--signal)]">
               Circuit of the Americas - expanded map
@@ -174,7 +183,7 @@ export function CircuitMapModal({
           </button>
         </div>
 
-        <div className="mb-2 flex shrink-0 flex-wrap items-center gap-1.5">
+        <div className="relative z-[1] mb-2 flex shrink-0 flex-wrap items-center gap-1.5">
           <span className="mr-1 font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--mute)]">
             Paint
           </span>
@@ -212,7 +221,7 @@ export function CircuitMapModal({
           </span>
         </div>
 
-        <div className="grid min-h-0 flex-1 gap-2 lg:grid-cols-[minmax(0,1fr)_220px]">
+        <div className="relative z-[1] grid min-h-0 flex-1 gap-2 lg:grid-cols-[minmax(0,1fr)_220px]">
           <div className="min-h-[55vh] overflow-hidden rounded-md border border-[var(--hairline-strong)] lg:min-h-0">
             <TrackSchematic
               stage

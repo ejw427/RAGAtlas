@@ -612,13 +612,13 @@ export function TrackSchematic({
       <div className="circuit-stage-bg pointer-events-none absolute inset-0" />
       {stage && (
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.22]"
+          className="pointer-events-none absolute inset-0 opacity-[0.55]"
           style={{
             backgroundImage: "url(/cota-tower-day.jpg)",
             backgroundSize: "cover",
             backgroundPosition: "center 28%",
             maskImage:
-              "radial-gradient(75% 85% at 72% 35%, black 0%, transparent 70%)",
+              "radial-gradient(90% 95% at 68% 30%, black 0%, transparent 78%)",
           }}
         />
       )}

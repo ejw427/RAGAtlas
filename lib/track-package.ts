@@ -46,13 +46,13 @@ export const TRACK_PACKAGES: Record<TrackPackageId, TrackPackage> = {
     brakeDuct: 0.92,
     rake: 1.18,
     atmosphere: {
-      skyTop: "rgba(6,12,28,0.97)",
-      skyBot: "rgba(22,36,28,0.62)",
-      ground: "rgba(4,6,9,0.92)",
+      skyTop: "rgba(72,118,168,0.92)",
+      skyBot: "rgba(148,176,198,0.55)",
+      ground: "rgba(28,34,40,0.88)",
       kerb: true,
       landmark: "tower",
-      asphalt: "rgba(18,22,28,0.95)",
-      accentGlow: "rgba(255,77,94,0.22)",
+      asphalt: "rgba(42,48,56,0.9)",
+      accentGlow: "rgba(255,77,94,0.18)",
     },
   },
   bahrain: {

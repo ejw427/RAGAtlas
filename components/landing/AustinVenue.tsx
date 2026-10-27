@@ -6,6 +6,7 @@ import { CarStage } from "@/components/identity/CarStage";
 import { CotaCircuitMap } from "@/components/landing/CotaCircuitMap";
 import { PRODUCT, STUDIO } from "@/lib/brand";
 import { TEAM_ACCENTS } from "@/lib/identity";
+import { VENUE_PHOTOS } from "@/lib/venue-photos";
 
 const BEATS = [
   {
@@ -33,7 +34,7 @@ export function AustinVenue() {
     >
       <div className="relative isolate min-h-[min(72vw,420px)] overflow-hidden">
         <Image
-          src="/cota-tower-day.jpg"
+          src={VENUE_PHOTOS.tower}
           alt="Circuit of the Americas observation tower and star-spangled runoff in daylight"
           fill
           className="object-cover object-[center_28%]"
@@ -43,7 +44,7 @@ export function AustinVenue() {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(90deg, rgba(5,7,10,0.82) 0%, rgba(5,7,10,0.38) 52%, rgba(5,7,10,0.18) 100%), linear-gradient(0deg, rgba(5,7,10,0.78) 0%, rgba(5,7,10,0.12) 58%, rgba(5,7,10,0.22) 100%)",
+              "linear-gradient(90deg, rgba(5,7,10,0.7) 0%, rgba(5,7,10,0.22) 55%, rgba(5,7,10,0.08) 100%), linear-gradient(0deg, rgba(5,7,10,0.65) 0%, rgba(5,7,10,0.05) 60%, rgba(5,7,10,0.12) 100%)",
           }}
         />
         <div className="relative z-[1] mx-auto flex min-h-[min(72vw,420px)] max-w-[1120px] flex-col justify-end px-6 pb-12 pt-24">
@@ -84,7 +85,7 @@ export function AustinVenue() {
 
         <div className="relative mt-12 isolate min-h-[240px] overflow-hidden border border-[var(--hairline)] sm:min-h-[280px]">
           <Image
-            src="/cota-track-day.jpg"
+            src={VENUE_PHOTOS.track}
             alt="Daytime Circuit of the Americas — race car on the red-white-blue runoff under clear sky"
             fill
             className="object-cover object-[center_40%]"
@@ -94,7 +95,7 @@ export function AustinVenue() {
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(90deg, rgba(5,7,10,0.88) 0%, rgba(5,7,10,0.4) 55%, rgba(5,7,10,0.5) 100%)",
+                "linear-gradient(90deg, rgba(5,7,10,0.72) 0%, rgba(5,7,10,0.22) 58%, rgba(5,7,10,0.35) 100%)",
             }}
           />
           <div className="relative z-[1] flex h-full min-h-[240px] flex-col justify-end p-6 sm:min-h-[280px] sm:p-8">

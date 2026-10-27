@@ -779,8 +779,17 @@ export function SessionShell() {
   );
 
   return (
-    <div className="flex h-dvh max-h-dvh flex-col overflow-hidden bg-[var(--void)]">
-      <header className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b border-[var(--hairline)] bg-[var(--panel)] px-3 py-1.5 font-mono text-[0.7rem]">
+    <div className="relative flex h-dvh max-h-dvh flex-col overflow-hidden bg-[var(--void)]">
+      <div
+        className="pointer-events-none absolute inset-0 z-0 opacity-[0.2]"
+        style={{
+          backgroundImage: "url(/cota-tower-day.jpg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center 30%",
+        }}
+        aria-hidden
+      />
+      <header className="relative z-[1] flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b border-[var(--hairline)] bg-[var(--panel)]/92 px-3 py-1.5 font-mono text-[0.7rem] backdrop-blur-[2px]">
         <Link
           href="/"
           className="shrink-0 font-display text-[0.95rem] font-semibold tracking-tight text-[var(--chalk)] hover:text-[var(--signal)]"
@@ -815,6 +824,7 @@ export function SessionShell() {
         </span>
       </header>
 
+      <div className="relative z-[1] flex min-h-0 flex-1 flex-col overflow-hidden">
       <CompareDuo
         focusDriver={driver}
         focusLap={lap}
@@ -1002,6 +1012,7 @@ export function SessionShell() {
           {rag}
         </div>
       </div>
+      </div>
 
       <Sheet open={askOpen} onOpenChange={setAskOpen}>
         <SheetContent className="md:inset-x-auto md:right-0 md:bottom-0 md:top-0 md:max-h-none md:w-[min(100vw,380px)] md:rounded-none md:border-l xl:hidden">
@@ -1115,7 +1126,7 @@ export function SessionShell() {
         />
       )}
 
-      <footer className="shrink-0 border-t border-[var(--hairline)] px-3 py-1 text-[0.58rem] text-[var(--mute)]">
+      <footer className="relative z-[1] shrink-0 border-t border-[var(--hairline)] bg-[var(--panel)]/90 px-3 py-1 text-[0.58rem] text-[var(--mute)] backdrop-blur-[2px]">
         {STUDIO} · {PRODUCT} · {AUTHOR} · {pack.meta.driverCount ?? 22} drivers
         · OpenF1 subset + overlays · No SECU ·{" "}
         <Link href="/about" className="text-[var(--trace-cyan)]">

@@ -21,6 +21,30 @@ import { HOUSE_PRESETS } from "@/lib/identity";
 import { corpusSummary } from "@/lib/rag";
 import { getChannels, getSessionPack } from "@/lib/session";
 import { cn } from "@/lib/utils";
+import { VENUE_PHOTOS } from "@/lib/venue-photos";
+
+const ABOUT_DAY_STRIP = [
+  {
+    src: VENUE_PHOTOS.hero,
+    alt: "COTA daytime — Texas flag over the track",
+    label: "Hero · Texas flag",
+  },
+  {
+    src: VENUE_PHOTOS.tower,
+    alt: "COTA observation tower in daylight",
+    label: "Tower · daylight",
+  },
+  {
+    src: VENUE_PHOTOS.esses,
+    alt: "COTA esses in daylight",
+    label: "Esses · T3–T6",
+  },
+  {
+    src: VENUE_PHOTOS.garage,
+    alt: "Garage bay at COTA",
+    label: "Garage",
+  },
+] as const;
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -135,7 +159,7 @@ export default function AboutPage() {
 
       <div className="relative isolate h-40 overflow-hidden border-b border-[var(--hairline)] sm:h-52">
         <Image
-          src="/cota-tower-day.jpg"
+          src={VENUE_PHOTOS.tower}
           alt="Circuit of the Americas observation tower in daylight"
           fill
           className="object-cover object-[center_28%]"
@@ -146,7 +170,7 @@ export default function AboutPage() {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(5,7,10,0.35) 0%, rgba(5,7,10,0.88) 100%)",
+              "linear-gradient(180deg, rgba(5,7,10,0.12) 0%, rgba(5,7,10,0.58) 100%)",
           }}
         />
         <div className="relative z-[1] mx-auto flex h-full max-w-[800px] items-end px-6 pb-5">
@@ -154,6 +178,26 @@ export default function AboutPage() {
             Austin · Circuit of the Americas · 2026 FP2
           </p>
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 border-b border-[var(--hairline)] sm:grid-cols-4">
+        {ABOUT_DAY_STRIP.map((shot) => (
+          <figure
+            key={shot.src}
+            className="relative isolate min-h-[96px] overflow-hidden border-r border-[var(--hairline)] last:border-r-0 sm:min-h-[120px]"
+          >
+            <Image
+              src={shot.src}
+              alt={shot.alt}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 50vw, 25vw"
+            />
+            <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[rgba(5,7,10,0.85)] to-transparent px-2 pb-1.5 pt-6 font-mono text-[0.5rem] uppercase tracking-[0.1em] text-[var(--signal)]">
+              {shot.label}
+            </figcaption>
+          </figure>
+        ))}
       </div>
 
       <article className="mx-auto max-w-[800px] px-6 py-12">
@@ -577,9 +621,10 @@ export default function AboutPage() {
               <li key={s}>Shaped like: {s}</li>
             ))}
             <li>
-              Venue photographs: Circuit of the Americas daytime track / tower
-              stills via Unsplash (Charlie Schroeder, Sai Kiran Belana) and
-              Wikimedia Commons (Steve / mrlaugh — CC BY-SA 2.0 main straight)
+              Venue photographs: daytime Circuit of the Americas stills via
+              Unsplash (Charlie Schroeder, Sai Kiran Belana) and Wikimedia
+              Commons (Steve / mrlaugh — CC BY-SA 2.0 main straight) — used on
+              landing, about, car stages, and session chrome
             </li>
           </ul>
         </section>

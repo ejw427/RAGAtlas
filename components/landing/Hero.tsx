@@ -14,6 +14,7 @@ import {
 } from "@/lib/brand";
 import { TEAM_ACCENTS } from "@/lib/identity";
 import { prefersReducedMotion } from "@/lib/motion";
+import { VENUE_PHOTOS } from "@/lib/venue-photos";
 import track from "@/data/mock/cota-track.json";
 
 const HERO_MARKS = [
@@ -181,7 +182,7 @@ export function Hero() {
     <section className="relative isolate flex min-h-dvh items-end overflow-hidden">
       <div className="absolute inset-0 z-0">
         <Image
-          src="/cota-hero-day.jpg"
+          src={VENUE_PHOTOS.hero}
           alt="Circuit of the Americas in daylight — Texas flag over the star-spangled runoff and race traffic"
           fill
           priority
@@ -194,7 +195,7 @@ export function Hero() {
         className="pointer-events-none absolute inset-0 z-[3]"
         style={{
           background:
-            "linear-gradient(90deg, rgba(5,7,10,0.82) 0%, rgba(5,7,10,0.4) 42%, rgba(5,7,10,0.08) 72%, rgba(5,7,10,0.45) 100%), linear-gradient(0deg, rgba(5,7,10,0.88) 0%, rgba(5,7,10,0.22) 50%, rgba(5,7,10,0.12) 100%)",
+            "linear-gradient(90deg, rgba(5,7,10,0.72) 0%, rgba(5,7,10,0.28) 45%, rgba(5,7,10,0.05) 75%, rgba(5,7,10,0.35) 100%), linear-gradient(0deg, rgba(5,7,10,0.78) 0%, rgba(5,7,10,0.12) 55%, rgba(5,7,10,0.08) 100%)",
         }}
       />
       <div className="cota-kerb pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-1.5" />
