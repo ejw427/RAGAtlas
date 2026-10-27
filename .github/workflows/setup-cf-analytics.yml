@@ -25,16 +25,17 @@ jobs:
             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/rum/site_info/list")
           echo "$LIST" | jq '{success, errors, count: (.result|length)}'
 
-          TOKEN=$(echo "$LIST" | jq -r --arg h "$HOST" '
-            .result[]?
-            | select(
-                ((.rules // []) | map(.host // "") | join(" "))
-                + " " + (.hostname // "")
-                + " " + (.site_name // "")
-                | contains($h)
-              )
-            | .site_tag
-          ' | head -n1)
+          # Prefer an existing zone site (welchsoftware.net covers citetrace.*).
+          # Beacon token field is site_token (not site_tag).
+          TOKEN=$(echo "$LIST" | jq -r --arg h "$HOST" --arg zone "welchsoftware.net" '
+            (.result // [])
+            | map(select(
+                ((.ruleset.zone_name // "") == $zone)
+                or ((.site_name // "") | contains($h))
+                or ((.site_name // "") | contains($zone))
+              ))
+            | .[0].site_token // empty
+          ')
 
           if [ -z "${TOKEN}" ] || [ "${TOKEN}" = "null" ]; then
             CREATE=$(curl -sS -X POST \
@@ -42,10 +43,10 @@ jobs:
               -H "Content-Type: application/json" \
               "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/rum/site_info" \
               --data "{\"auto_install\":false,\"host\":\"${HOST}\"}")
-            echo "$CREATE" | jq '{success, errors, result: (.result | {site_tag, site_name, sn})}'
-            TOKEN=$(echo "$CREATE" | jq -r '.result.site_tag // empty')
+            echo "$CREATE" | jq '{success, errors, result: (.result | {site_tag, site_token, site_name})}'
+            TOKEN=$(echo "$CREATE" | jq -r '.result.site_token // empty')
           else
-            echo "Found existing Web Analytics site for ${HOST}"
+            echo "Found existing Web Analytics site token for welchsoftware.net / ${HOST}"
           fi
 
           if [ -z "${TOKEN}" ]; then
