@@ -15,22 +15,25 @@ export const CANDIDATE_LINE =
   `Built by ${AUTHOR} · ${STUDIO} · first-stab pit wall from public 2026 COTA FP2 OpenF1`;
 /** Canonical live demo URL (use on resume / LinkedIn / applications) */
 export const LIVE_URL = "https://citetrace.welchsoftware.net";
-export const LIVE_SESSION_URL = `${LIVE_URL}/session?driver=LEC&lap=10`;
-/** Default walk-in: Ferrari teammate compare on the pit wall */
-export const LIVE_COMPARE_URL = `${LIVE_URL}/session?house=ferrari`;
-/** Resume / LinkedIn deep link - interview demo script on */
-export const LIVE_DEMO_URL = `${LIVE_URL}/session?demo=1&house=ferrari`;
+/** Default pit wall: FP2 P1 vs P2 (LEC Soft flyer vs ANT Soft flyer) */
+export const SESSION_FIELD_PATH = "/session?a=LEC&lapA=10&b=ANT&lapB=8";
+export const SESSION_FIELD_DEMO_PATH = `${SESSION_FIELD_PATH}&demo=1`;
+export const LIVE_SESSION_URL = `${LIVE_URL}${SESSION_FIELD_PATH}`;
+/** Default walk-in: field winner vs second place */
+export const LIVE_COMPARE_URL = `${LIVE_URL}${SESSION_FIELD_PATH}`;
+/** Resume / LinkedIn deep link - interview walk-through on */
+export const LIVE_DEMO_URL = `${LIVE_URL}${SESSION_FIELD_DEMO_PATH}`;
 export const LIVE_AUDI_URL = `${LIVE_URL}/session?demo=1&house=audi`;
 export const PORTFOLIO_URL = "https://www.welchsoftware.net/projects/citetrace";
 /** Money-shot ask — cite locks playhead on the stadium brake */
 export const DEMO_ASK = "Why did brake temp spike in S3 on lap 10?";
 export const DEMO_NO_HIT = "Who is the championship leader?";
 export const DEMO_STEPS = [
-  "Land > Open the pit wall (Ferrari house)",
+  "Land > Open COTA session (P1 LEC vs P2 ANT)",
   "Open the sector that owns the gap",
   `Ask: ${DEMO_ASK}`,
   "Click the cite > playhead locks on the map and the traces",
-  "Ask again: teammate gap, weather, radio empty, OF1 vs OVL — then the no-hit probe",
+  "Ask again: field pace, weather, radio empty, OF1 vs OVL — then the no-hit probe",
 ] as const;
 
 /** Freshness lead — use at the top of every outreach email */

@@ -98,7 +98,7 @@ Send-ready emails: `D:\welch-website\public\private\ew-f1-20261024\emails.html` 
 |-------|----------------|
 | Resume / LinkedIn / email | `https://citetrace.welchsoftware.net` |
 | Portfolio context | `https://www.welchsoftware.net/projects/citetrace` |
-| Resume / interview demo | `https://citetrace.welchsoftware.net/session?demo=1&house=ferrari` |
+| Resume / interview demo | `https://citetrace.welchsoftware.net/session?a=LEC&lapA=10&b=ANT&lapB=8&demo=1` |
 | Audi Revolut F1 walk-in | `https://citetrace.welchsoftware.net/session?demo=1&house=audi` |
 | McLaren walk-in | `https://citetrace.welchsoftware.net/session?demo=1&house=mclaren` |
 | Williams walk-in | `https://citetrace.welchsoftware.net/session?demo=1&house=williams` |

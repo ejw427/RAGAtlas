@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CarLivery } from "@/components/identity/CarLivery";
 import { CarStage } from "@/components/identity/CarStage";
 import { CotaCircuitMap } from "@/components/landing/CotaCircuitMap";
-import { PRODUCT, STUDIO } from "@/lib/brand";
+import { PRODUCT, SESSION_FIELD_DEMO_PATH, STUDIO } from "@/lib/brand";
 import { TEAM_ACCENTS } from "@/lib/identity";
 import { VENUE_PHOTOS } from "@/lib/venue-photos";
 
@@ -141,7 +141,7 @@ export function AustinVenue() {
             </div>
             <div className="mt-5">
               <Button asChild>
-                <Link href="/session?demo=1&house=ferrari">
+                <Link href={SESSION_FIELD_DEMO_PATH}>
                   Open COTA session
                 </Link>
               </Button>

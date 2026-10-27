@@ -9,6 +9,8 @@ import {
   METHOD_HEADLINE,
   PORTFOLIO_URL,
   PRODUCT,
+  SESSION_FIELD_DEMO_PATH,
+  SESSION_FIELD_PATH,
   TAGLINE,
   WEDGE,
 } from "@/lib/brand";
@@ -65,9 +67,9 @@ const CHIPS = [
     hint: "942°C peak · S3 heavy",
   },
   {
-    href: "/session?house=ferrari&q=How%20does%20Leclerc%20compare%20to%20Hamilton%3F&citeId=cite_teammate",
-    label: "Compare · LEC vs HAM",
-    hint: "−615 ms Soft flyers",
+    href: `${SESSION_FIELD_PATH}&citeId=cite_teammate&q=How%20does%20Leclerc%20compare%20to%20Antonelli%3F`,
+    label: "Compare · LEC vs ANT",
+    hint: "P1 vs P2 · −42 ms Soft flyers",
   },
   {
     href: "/session?driver=LEC&lap=10&citeId=cite_weather&q=Did%20the%20track%20cool%20during%20FP2%3F",
@@ -204,7 +206,7 @@ export function HowItWorks() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button asChild size="sm">
-              <Link href="/session?demo=1&house=ferrari">Open pit wall</Link>
+              <Link href={SESSION_FIELD_DEMO_PATH}>Open pit wall</Link>
             </Button>
             <Button asChild size="sm" variant="ghost">
               <Link href="/about">Full method</Link>

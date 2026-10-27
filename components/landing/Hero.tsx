@@ -8,6 +8,7 @@ import { CarStage } from "@/components/identity/CarStage";
 import {
   CANDIDATE_LINE,
   PRODUCT,
+  SESSION_FIELD_DEMO_PATH,
   STUDIO,
   TAGLINE,
   WEDGE,
@@ -219,12 +220,12 @@ export function Hero() {
         </p>
         <div className="mt-8 flex flex-wrap items-stretch gap-3">
           <Link
-            href="/session?demo=1&house=ferrari"
+            href={SESSION_FIELD_DEMO_PATH}
             className="group flex min-w-[11rem] flex-col justify-center rounded-sm bg-[var(--signal)] px-4 py-3 text-[var(--asphalt)] shadow-[var(--glow-signal)] transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
           >
             <span className="font-semibold leading-tight">Open COTA session</span>
             <span className="mt-0.5 font-mono text-[0.58rem] font-medium uppercase tracking-[0.1em] opacity-75">
-              Pit wall · ask → cite → playhead lock
+              P1 LEC vs P2 ANT · cite locks playhead
             </span>
           </Link>
           <Link

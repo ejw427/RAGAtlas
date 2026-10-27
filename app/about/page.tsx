@@ -13,6 +13,8 @@ import {
   METHOD_HEADLINE,
   PORTFOLIO_URL,
   PRODUCT,
+  SESSION_FIELD_DEMO_PATH,
+  SESSION_FIELD_PATH,
   STUDIO,
   TAGLINE,
   WEDGE,
@@ -152,7 +154,7 @@ export default function AboutPage() {
             </Link>
           </div>
           <Button asChild size="sm">
-            <Link href="/session?demo=1&house=ferrari">Open pit wall</Link>
+            <Link href={SESSION_FIELD_DEMO_PATH}>Open pit wall</Link>
           </Button>
         </div>
       </header>
@@ -294,7 +296,7 @@ export default function AboutPage() {
             </p>
           </div>
           <Button asChild size="sm" className="mt-2">
-            <Link href="/session?demo=1&house=ferrari">Open pit wall</Link>
+            <Link href={SESSION_FIELD_DEMO_PATH}>Open pit wall</Link>
           </Button>
         </section>
 
@@ -404,9 +406,9 @@ export default function AboutPage() {
               hint="Playhead eases to synthetic 942°C peak on the real heavy zone"
             />
             <DemoChip
-              href="/session?house=ferrari&q=How%20does%20Leclerc%20compare%20to%20Hamilton%3F&citeId=cite_teammate"
-              label="Compare · LEC vs HAM"
-              hint="Soft flyers −615 ms · same ST 319 — gap mostly S2"
+              href={`${SESSION_FIELD_PATH}&citeId=cite_field_pace&q=How%20does%20Leclerc%20compare%20to%20Antonelli%3F`}
+              label="Compare · LEC vs ANT"
+              hint="P1 vs P2 Soft flyers · −42 ms on the flyer"
             />
             <DemoChip
               href="/session?driver=LEC&lap=10&citeId=cite_field_pace&q=Who%20was%20fastest%20in%20FP2%20in%20this%20pack%3F"
@@ -440,7 +442,7 @@ export default function AboutPage() {
             />
           </div>
           <Button asChild>
-            <Link href="/session?demo=1&house=ferrari">Open pit wall</Link>
+            <Link href={SESSION_FIELD_DEMO_PATH}>Open pit wall</Link>
           </Button>
         </section>
 
@@ -631,7 +633,7 @@ export default function AboutPage() {
 
         <div className="mt-12 flex flex-wrap gap-4 border-t border-[var(--hairline)] pt-8">
           <Button asChild>
-            <Link href="/session?demo=1&house=ferrari">Open pit wall</Link>
+            <Link href={SESSION_FIELD_DEMO_PATH}>Open pit wall</Link>
           </Button>
           <Button asChild variant="rail">
             <Link href="/session?driver=LEC&lap=10&citeId=cite_brake_spike">

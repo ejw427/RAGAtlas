@@ -207,6 +207,32 @@ export function fieldBestLap(excludeLapId?: string): Lap | undefined {
   return laps[0];
 }
 
+/** P1 vs P2 best flyers — default pit-wall compare for the field. */
+export function fieldTopTwoCompare(): {
+  focusDriverId: string;
+  focusLap: number;
+  referenceDriverId: string;
+  referenceLap: number;
+} | null {
+  const pack = getSessionPack();
+  const sorted = pack.laps.slice().sort((a, b) => a.timeMs - b.timeMs);
+  const seen = new Set<string>();
+  const best: Lap[] = [];
+  for (const lap of sorted) {
+    if (seen.has(lap.driverId)) continue;
+    seen.add(lap.driverId);
+    best.push(lap);
+    if (best.length >= 2) break;
+  }
+  if (best.length < 2) return null;
+  return {
+    focusDriverId: best[0].driverId,
+    focusLap: best[0].number,
+    referenceDriverId: best[1].driverId,
+    referenceLap: best[1].number,
+  };
+}
+
 export function otherCompoundLap(driverId: string, currentLap: Lap): Lap | undefined {
   const current = compoundOf(currentLap);
   const laps = getLapsForDriver(driverId).filter((l) => l.id !== currentLap.id);

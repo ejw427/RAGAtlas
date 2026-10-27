@@ -30,6 +30,7 @@ import {
   otherCompoundLap,
   RACE_PLOT_IDS,
   resolveDriverParam,
+  fieldTopTwoCompare,
   resolveHouse,
   resolveLapNumber,
   sectorDeltas,
@@ -84,21 +85,30 @@ function resolveSessionParams(searchParams: URLSearchParams) {
     };
   }
 
+  const hasExplicitPair =
+    Boolean(searchParams.get("a") || searchParams.get("driver")) ||
+    Boolean(searchParams.get("b"));
+  const fieldLead = !hasExplicitPair ? fieldTopTwoCompare() : null;
+
   const focusId =
     resolveDriverParam(searchParams.get("a")) ??
     resolveDriverParam(searchParams.get("driver")) ??
+    fieldLead?.focusDriverId ??
     defaultDriverId();
   const focusLap = resolveLapNumber(
     focusId,
     searchParams.get("lapA") ?? searchParams.get("lap"),
-    defaultLapNumber(focusId),
+    fieldLead?.focusLap ?? defaultLapNumber(focusId),
   );
-  const refId = resolveDriverParam(searchParams.get("b"));
+  const refId =
+    resolveDriverParam(searchParams.get("b")) ??
+    fieldLead?.referenceDriverId ??
+    null;
   const refLap = refId
     ? resolveLapNumber(
         refId,
         searchParams.get("lapB"),
-        defaultLapNumber(refId),
+        fieldLead?.referenceLap ?? defaultLapNumber(refId),
       )
     : null;
 
