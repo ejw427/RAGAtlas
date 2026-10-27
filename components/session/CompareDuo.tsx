@@ -1,6 +1,6 @@
 "use client";
 
-import { CarSilhouette } from "@/components/identity/CarSilhouette";
+import { CarLivery } from "@/components/identity/CarLivery";
 import { CarStage } from "@/components/identity/CarStage";
 import { DriverPortrait } from "@/components/identity/DriverPortrait";
 import {
@@ -189,10 +189,9 @@ export function CompareDuo({
               <span className="font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--signal)]">
                 Reference
               </span>
-              <CarSilhouette
-                accent="rgba(198,255,74,0.35)"
-                second="rgba(154,167,184,0.45)"
-                width={140}
+              <CarLivery
+                house="ferrari"
+                width={160}
                 track={getTrackPackage()}
               />
               <span className="font-display text-base font-semibold text-[var(--chalk)]">
@@ -302,7 +301,7 @@ function RacerCard({
           borderColor: `${accent.accent}40`,
           background: `linear-gradient(180deg, ${accent.accent}55 0%, ${accent.accent}18 45%, rgba(5,7,10,0.5) 100%)`,
         }}
-        title="Session accent. Not a team asset."
+        title="OpenF1 team colour · editorial livery for demo recognition"
       >
         <HouseMark
           house={accent.house}
@@ -341,7 +340,12 @@ function RacerCard({
           title="Open racer card"
           className="relative shrink-0 rounded-sm transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
         >
-          <DriverPortrait driver={driver} size={68} track={trackPkg} />
+          <DriverPortrait
+            driver={driver}
+            size={68}
+            track={trackPkg}
+            preferHelmet
+          />
           <span
             className={cn(
               "absolute -top-1 font-mono text-[0.45rem] font-bold uppercase tracking-[0.16em] text-[var(--void)]",
@@ -485,19 +489,17 @@ function RacerCard({
               track={trackPkg}
               compact
               showNote={false}
-              className="min-w-[148px] border-[var(--hairline-strong)] sm:min-w-[200px]"
+              className="min-w-[168px] border-[var(--hairline-strong)] sm:min-w-[220px]"
             >
-              <CarSilhouette
-                accent={accent.accent}
-                second={accent.second}
+              <CarLivery
+                accent={accent}
                 number={driver.number}
                 compoundLetter={compound[0]?.toUpperCase()}
-                width={188}
+                width={210}
                 track={trackPkg}
-                showPackageChip
               />
               <span className="mt-0.5 block text-center font-mono text-[0.42rem] uppercase tracking-[0.12em] text-[var(--trace-cyan)]">
-                Tap car · {trackPkg.chip}
+                Tap for popup · {trackPkg.chip}
               </span>
             </CarStage>
           </button>

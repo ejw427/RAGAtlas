@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { dossierFor, ageFromBorn, bornYear } from "@/lib/driver-dossier";
 import { HelmetMark } from "@/components/identity/HelmetMark";
 import { accentFor } from "@/lib/identity";
+import { getTrackPackage } from "@/lib/session";
 import type { Driver } from "@/lib/types";
 
 /**
@@ -13,6 +14,7 @@ import type { Driver } from "@/lib/types";
 export function RacerDossier({ driver }: { driver: Driver }) {
   const dossier = dossierFor(driver);
   const accent = accentFor(driver);
+  const trackPkg = getTrackPackage();
   if (!dossier) return null;
 
   const age = ageFromBorn(dossier.born);
@@ -54,10 +56,12 @@ export function RacerDossier({ driver }: { driver: Driver }) {
           body={dossier.helmet}
           mark={
             <HelmetMark
+              driver={driver}
               number={driver.number}
               accent={accent.accent}
               second={accent.second}
-              size={44}
+              size={56}
+              track={trackPkg}
             />
           }
         />

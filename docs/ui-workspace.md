@@ -6,7 +6,7 @@ Product: **CiteTrace** — *Ask the lap. Trust the trace.*
 Live: [citetrace.welchsoftware.net](https://citetrace.welchsoftware.net)
 This document is the UI specification for the session screen. The waveforms stay. The wall around them changes.
 
-Independent work. Not affiliated with any Formula 1 team, the FIA, Formula 1, or a telemetry vendor. Session accents and car drawings in this spec are original Welch Software marks. They are not team logos, liveries, helmets, or photographs.
+Independent work. Not affiliated with, endorsed by, or licensed by any Formula 1 team, the FIA, Formula 1, or a telemetry vendor. Session car liveries and helmet art in the live demo are editorial public media for recognition only — not a commercial product. Product chrome (void, chalk, signal green) remains Welch Software.
 
 Data underneath the layout: 2026 United States GP, Circuit of the Americas, FP2, OpenF1 public subset, 22 drivers, 5,513 m. Thermal and driver-overlay channels are synthetic and stay labeled **OVL**. Broadcast channels stay labeled **OF1**.
 

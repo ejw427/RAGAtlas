@@ -9,6 +9,7 @@ import {
   getChannel,
   getSample,
   getSessionPack,
+  getTrackPackage,
 } from "@/lib/session";
 import { interpolateAt, cn } from "@/lib/utils";
 
@@ -182,6 +183,7 @@ export function TrackSchematic({
   const showSectorPaint =
     paintMode === "both" || paintMode === "sector";
   const pack = getSessionPack();
+  const trackPkg = getTrackPackage();
   const { x, y, d } = pack.trackXY.series;
   const svgRef = useRef<SVGSVGElement>(null);
   const uid = useId();
@@ -1028,6 +1030,7 @@ export function TrackSchematic({
               glow
               pulseKey={`ref-${referenceCode ?? ""}-${referenceNumber ?? ""}-${lapId ?? ""}`}
               onSelect={onInspectReference}
+              track={trackPkg}
             />
           )}
           <CarMarker
@@ -1043,6 +1046,7 @@ export function TrackSchematic({
             glow
             pulseKey={`foc-${focusCode ?? ""}-${focusNumber ?? ""}-${lapId ?? ""}`}
             onSelect={onInspectFocus}
+            track={trackPkg}
           />
 
           {dragBox && (

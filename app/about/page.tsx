@@ -168,9 +168,10 @@ export default function AboutPage() {
         <p className="mt-4 text-[var(--mist)] leading-relaxed">
           {PRODUCT} is a {STUDIO} portfolio prototype: React/TypeScript craft for
           dense time-series workspaces, multi-store session literacy (samples +
-          metadata + notes), and evidence-bound retrieval - not a chatbot toy.
-          Independent work. Not affiliated with Formula 1 teams, commercial
-          telemetry vendors, Formula 1, or the FIA.
+          metadata + notes), and evidence-bound retrieval — not a chatbot toy.
+          Independent work. Not affiliated with, endorsed by, or licensed by
+          Formula 1, the FIA, or any team. Session car and helmet graphics are
+          editorial public media for demo recognition only.
         </p>
         <p className="mt-3 font-mono text-[0.65rem] text-[var(--mute)]">
           Live:{" "}
@@ -507,7 +508,11 @@ export default function AboutPage() {
             <li>Employment, offers, or partnerships with any team or vendor</li>
             <li>Live SECU, paddock RF, factory VPN, or real team channel maps</li>
             <li>
-              Vendor Viewer UI clones, logos, or Automation / SQL Race credentials
+              A licence to use Formula 1, team, or driver marks commercially —
+              liveries and helmets here are editorial demo context only
+            </li>
+            <li>
+              Vendor Viewer UI clones or Automation / SQL Race credentials
             </li>
             <li>Kafka/Docker as a runtime dependency for this portfolio slice</li>
             <li>

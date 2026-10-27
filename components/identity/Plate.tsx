@@ -1,7 +1,7 @@
 "use client";
 
 import { DriverPortrait } from "@/components/identity/DriverPortrait";
-import { CarSilhouette } from "@/components/identity/CarSilhouette";
+import { CarLivery } from "@/components/identity/CarLivery";
 import { CarStage } from "@/components/identity/CarStage";
 import {
   accentFor,
@@ -57,10 +57,15 @@ export function Plate({
           type="button"
           onClick={onInspect}
           disabled={!onInspect}
-          title="Open racer detail"
+          title="Open racer popup"
           className="rounded-sm transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
         >
-          <DriverPortrait driver={driver} size={52} track={trackPkg} />
+          <DriverPortrait
+            driver={driver}
+            size={52}
+            track={trackPkg}
+            preferHelmet
+          />
         </button>
         <button
           type="button"
@@ -82,12 +87,11 @@ export function Plate({
           type="button"
           onClick={onInspect}
           disabled={!onInspect}
-          title="Open racer detail"
+          title="Open racer popup"
           className="transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
         >
-          <CarSilhouette
-            accent={accent.accent}
-            second={accent.second}
+          <CarLivery
+            accent={accent}
             number={driver.number}
             compoundLetter={compoundLetter(compound)}
             width={168}
@@ -112,10 +116,16 @@ export function Plate({
           type="button"
           onClick={onInspect}
           disabled={!onInspect}
-          title="Open full racer card"
+          title="Open racer popup"
           className="flex w-full items-start gap-3 rounded-sm text-left transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
         >
-          <DriverPortrait driver={driver} size={92} track={trackPkg} showCode />
+          <DriverPortrait
+            driver={driver}
+            size={92}
+            track={trackPkg}
+            showCode
+            preferHelmet
+          />
           <div className="min-w-0 flex-1 pt-1">
             <p
               className="font-display text-4xl font-black leading-none tabular-nums"
@@ -133,14 +143,14 @@ export function Plate({
               {driver.code}
             </p>
             <p className="mt-1 font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--trace-cyan)]">
-              Tap portrait for detail
+              Tap for racer popup
             </p>
           </div>
         </button>
 
         <p
           className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[var(--mist)]"
-          title="Session accent. Not a team asset."
+          title="OpenF1 team colour · editorial livery for demo recognition"
         >
           {driver.team ?? "Independent"}
         </p>
@@ -149,20 +159,19 @@ export function Plate({
           type="button"
           onClick={onInspect}
           disabled={!onInspect}
-          title="Open full racer card"
+          title="Open racer popup"
           className="w-full rounded-md transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] disabled:cursor-default"
         >
           <CarStage track={trackPkg} className="hover:border-[var(--signal)]/40">
-            <CarSilhouette
-              accent={accent.accent}
-              second={accent.second}
+            <CarLivery
+              accent={accent}
               number={driver.number}
               compoundLetter={compoundLetter(compound)}
-              width={248}
+              width={280}
               track={trackPkg}
             />
             <p className="mt-1 text-center font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--trace-cyan)]">
-              Inspect car · {trackPkg.chip}
+              Tap car · popup · {trackPkg.chip}
             </p>
           </CarStage>
         </button>

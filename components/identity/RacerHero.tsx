@@ -1,8 +1,9 @@
 "use client";
 
-import { CarSilhouette } from "@/components/identity/CarSilhouette";
+import { CarLivery } from "@/components/identity/CarLivery";
 import { CarStage } from "@/components/identity/CarStage";
 import { DriverPortrait } from "@/components/identity/DriverPortrait";
+import { HelmetMark } from "@/components/identity/HelmetMark";
 import { HouseMark } from "@/components/identity/HouseMark";
 import {
   accentFor,
@@ -63,6 +64,7 @@ export function RacerHero({
           size={portraitSize}
           track={trackPkg}
           showCode
+          preferHelmet
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
@@ -96,7 +98,10 @@ export function RacerHero({
             />
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <span className="rounded-sm border border-[var(--signal)]/35 bg-[var(--signal-dim)]/40 px-1.5 py-0.5 font-mono text-[0.5rem] uppercase tracking-[0.12em] text-[var(--signal)]">
+            <span
+              className="rounded-sm border border-[var(--signal)]/35 bg-[var(--signal-dim)]/40 px-1.5 py-0.5 font-mono text-[0.5rem] uppercase tracking-[0.12em] text-[var(--signal)]"
+              title={trackPkg.plain}
+            >
               {trackPkg.chip}
             </span>
             <span className="rounded-sm border border-[var(--hairline)] px-1.5 py-0.5 font-mono text-[0.5rem] uppercase tracking-[0.12em] text-[var(--mist)]">
@@ -114,22 +119,32 @@ export function RacerHero({
               </span>
             )}
           </div>
-          <p className="mt-2 font-mono text-[0.55rem] uppercase tracking-[0.14em] text-[var(--mute)]">
-            Session accent · not a team trademark
-          </p>
+          <div className="mt-2 flex items-center gap-2">
+            <HelmetMark
+              driver={driver}
+              number={driver.number}
+              accent={accent.accent}
+              second={accent.second}
+              size={64}
+              track={trackPkg}
+            />
+            <p className="max-w-[12rem] font-mono text-[0.55rem] uppercase leading-snug tracking-[0.12em] text-[var(--mute)]">
+              {trackPkg.id === "cota"
+                ? "COTA weekend shell · Austin special when published"
+                : `${trackPkg.chip} · season helmet`}
+            </p>
+          </div>
         </div>
       </div>
 
       <div className="mt-3">
         <CarStage track={trackPkg}>
-          <CarSilhouette
-            accent={accent.accent}
-            second={accent.second}
+          <CarLivery
+            accent={accent}
             number={driver.number}
             compoundLetter={compoundLetter(compound)}
             width={carWidth}
             track={trackPkg}
-            showPackageChip
           />
         </CarStage>
       </div>

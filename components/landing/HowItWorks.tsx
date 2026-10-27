@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { CarSilhouette } from "@/components/identity/CarSilhouette";
+import { CarLivery } from "@/components/identity/CarLivery";
 import { CarStage } from "@/components/identity/CarStage";
 import {
   DEMO_ASK,
@@ -18,20 +18,23 @@ import { corpusSummary } from "@/lib/rag";
 const STEPS = [
   {
     n: "01",
-    title: "Ask the lap",
-    body: "Query the COTA pack — thermal, pace, weather, pits, race control, teammate gap, OF1 vs OVL — not the open web.",
+    title: "Ask a session question",
+    plain: "Type what a race engineer would ask — not a web search.",
+    body: "Query this COTA FP2 pack only: brake heat, pace, weather, pits, race control, teammate gap, OpenF1 vs overlay labels.",
     mark: "Thermal · Pace · Ops · Compare",
   },
   {
     n: "02",
-    title: "Get a cite",
-    body: "Every claim binds to evidence chips. Retrieve first, then Workers AI phrases only from cites — no match > fail closed.",
+    title: "Read the evidence cite",
+    plain: "Every answer points at a labelled source chip.",
+    body: "Retrieve first. The model may only phrase from those cites. No match means an honest fail — never a guess.",
     mark: "S3 brake · Soft flyer",
   },
   {
     n: "03",
-    title: "Lock the trace",
-    body: "Click a cite > playhead and evidence band lock on the waveforms. Walk a hiring manager through what you can prove.",
+    title: "Lock it on the lap",
+    plain: "Click a cite → the map and waveforms jump there.",
+    body: "Playhead and evidence band snap to the metres that prove the claim. Walk someone through what you can show, not what you claim.",
     mark: "Playhead + band",
   },
 ] as const;
@@ -117,18 +120,21 @@ export function HowItWorks() {
           {STEPS.map((step) => (
             <li
               key={step.n}
-              className="border-t border-[var(--hairline-strong)] pt-4"
+              className="rounded-sm border border-[var(--hairline)] bg-[var(--panel)]/40 px-4 py-4"
             >
               <p className="font-mono text-[0.6rem] tracking-[0.14em] text-[var(--mute)]">
-                {step.n}
+                Step {step.n}
               </p>
               <p className="mt-1 font-display text-lg font-semibold text-[var(--chalk)]">
                 {step.title}
               </p>
+              <p className="mt-1.5 text-[0.8rem] font-medium leading-snug text-[var(--signal)]">
+                {step.plain}
+              </p>
               <p className="mt-2 text-[0.85rem] leading-relaxed text-[var(--mist)]">
                 {step.body}
               </p>
-              <p className="mt-3 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--signal)]">
+              <p className="mt-3 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--mute)]">
                 {step.mark}
               </p>
             </li>
@@ -147,14 +153,12 @@ export function HowItWorks() {
             </p>
             <div className="mt-4 max-w-sm">
               <CarStage track="cota">
-                <CarSilhouette
-                  accent={TEAM_ACCENTS.Ferrari.accent}
-                  second={TEAM_ACCENTS.Ferrari.second}
+                <CarLivery
+                  accent={TEAM_ACCENTS.Ferrari}
                   number={16}
                   compoundLetter="S"
-                  width={260}
+                  width={320}
                   track="cota"
-                  showPackageChip
                 />
               </CarStage>
             </div>

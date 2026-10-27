@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { CarSilhouette } from "@/components/identity/CarSilhouette";
+import { CarLivery } from "@/components/identity/CarLivery";
 import { CarStage } from "@/components/identity/CarStage";
 import { CotaCircuitMap } from "@/components/landing/CotaCircuitMap";
 import { PRODUCT, STUDIO } from "@/lib/brand";
@@ -110,29 +110,29 @@ export function AustinVenue() {
             </p>
             <div className="mt-5 grid max-w-xl gap-3 sm:grid-cols-2">
               <CarStage track="cota" className="border-[var(--hairline-strong)]">
-                <CarSilhouette
-                  accent={TEAM_ACCENTS.Ferrari.accent}
-                  second={TEAM_ACCENTS.Ferrari.second}
+                <CarLivery
+                  accent={TEAM_ACCENTS.Ferrari}
                   number={16}
                   compoundLetter="S"
-                  width={220}
+                  width={260}
                   track="cota"
                 />
               </CarStage>
               <CarStage track="cota" className="border-[var(--hairline-strong)]">
-                <CarSilhouette
-                  accent={TEAM_ACCENTS.Ferrari.accent}
-                  second={TEAM_ACCENTS.Ferrari.second}
+                <CarLivery
+                  accent={TEAM_ACCENTS.Ferrari}
                   number={44}
                   compoundLetter="S"
-                  width={220}
+                  width={260}
                   track="cota"
                 />
               </CarStage>
             </div>
             <div className="mt-5">
               <Button asChild>
-                <Link href="/session?house=ferrari">Open the pit wall</Link>
+                <Link href="/session?demo=1&house=ferrari">
+                  Open COTA session
+                </Link>
               </Button>
             </div>
           </div>

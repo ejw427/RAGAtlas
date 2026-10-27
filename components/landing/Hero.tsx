@@ -3,8 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useId, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { CarSilhouette } from "@/components/identity/CarSilhouette";
+import { CarLivery } from "@/components/identity/CarLivery";
 import { CarStage } from "@/components/identity/CarStage";
 import {
   CANDIDATE_LINE,
@@ -18,9 +17,9 @@ import { prefersReducedMotion } from "@/lib/motion";
 import track from "@/data/mock/cota-track.json";
 
 const HERO_MARKS = [
-  { label: "T1", m: 420 },
-  { label: "Esses", m: 980 },
-  { label: "Stadium", m: 4100 },
+  { label: "T1", hint: "Climb", m: 420 },
+  { label: "Esses", hint: "Rhythm", m: 980 },
+  { label: "Stadium", hint: "Brakes", m: 4100 },
 ] as const;
 
 function pointAt(
@@ -138,24 +137,38 @@ function CotaTrackOverlay() {
       </g>
       {marks.map((m) => (
         <g key={m.label}>
-          <circle
-            cx={m.x}
-            cy={m.y}
-            r="36"
-            fill="rgba(5,7,10,0.55)"
-            stroke="rgba(198,255,74,0.75)"
+          <rect
+            x={m.x - 58}
+            y={m.y - 36}
+            width="116"
+            height="72"
+            rx="36"
+            fill="rgba(5,7,10,0.72)"
+            stroke="rgba(198,255,74,0.8)"
             strokeWidth="4"
           />
           <text
             x={m.x}
-            y={m.y + 8}
+            y={m.y - 2}
             textAnchor="middle"
             fill="var(--signal)"
-            fontSize="28"
+            fontSize="26"
             fontFamily="var(--font-mono), monospace"
-            fontWeight="600"
+            fontWeight="700"
           >
             {m.label}
+          </text>
+          <text
+            x={m.x}
+            y={m.y + 24}
+            textAnchor="middle"
+            fill="rgba(232,238,245,0.78)"
+            fontSize="18"
+            fontFamily="var(--font-mono), monospace"
+            fontWeight="500"
+            letterSpacing="0.06em"
+          >
+            {m.hint}
           </text>
         </g>
       ))}
@@ -203,34 +216,50 @@ export function Hero() {
           or the stadium stop, trust the trace. Built to demo performance
           engineering craft to race teams.
         </p>
-        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-          <Button asChild>
-            <Link href="/session?demo=1&house=ferrari">Open the pit wall</Link>
-          </Button>
-          <Button asChild variant="ghost">
-            <Link href="/session?demo=1&house=ferrari">Ask the lap</Link>
-          </Button>
-          <Button asChild variant="ghost">
-            <Link href="#how-it-works">How it works</Link>
-          </Button>
+        <div className="mt-8 flex flex-wrap items-stretch gap-3">
+          <Link
+            href="/session?demo=1&house=ferrari"
+            className="group flex min-w-[11rem] flex-col justify-center rounded-sm bg-[var(--signal)] px-4 py-3 text-[var(--asphalt)] shadow-[var(--glow-signal)] transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+          >
+            <span className="font-semibold leading-tight">Open COTA session</span>
+            <span className="mt-0.5 font-mono text-[0.58rem] font-medium uppercase tracking-[0.1em] opacity-75">
+              Live telemetry desk · Ferrari house
+            </span>
+          </Link>
+          <Link
+            href="/session?demo=1&house=ferrari&q=Why%20did%20brake%20temp%20spike%20in%20S3%20on%20lap%2010%3F"
+            className="group flex min-w-[11rem] flex-col justify-center rounded-sm border border-[var(--hairline-strong)] bg-[var(--panel)]/80 px-4 py-3 text-[var(--chalk)] backdrop-blur-sm transition hover:border-[var(--signal)]/45 hover:bg-[var(--rail)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+          >
+            <span className="font-semibold leading-tight">Try a grounded ask</span>
+            <span className="mt-0.5 font-mono text-[0.58rem] font-medium uppercase tracking-[0.1em] text-[var(--mute)]">
+              Brake spike · cite locks playhead
+            </span>
+          </Link>
+          <Link
+            href="#how-it-works"
+            className="group flex min-w-[11rem] flex-col justify-center rounded-sm border border-transparent px-4 py-3 text-[var(--mist)] transition hover:border-[var(--hairline)] hover:text-[var(--chalk)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+          >
+            <span className="font-semibold leading-tight">See the method</span>
+            <span className="mt-0.5 font-mono text-[0.58rem] font-medium uppercase tracking-[0.1em] text-[var(--mute)]">
+              Ask → cite → lock on map
+            </span>
+          </Link>
         </div>
-        <div className="mt-6 max-w-md">
-          <CarStage track="cota" compact showNote={false}>
-            <div className="flex w-full items-end justify-between gap-2 px-1">
-              <CarSilhouette
-                accent={TEAM_ACCENTS.Ferrari.accent}
-                second={TEAM_ACCENTS.Ferrari.second}
+        <div className="mt-6 max-w-lg">
+          <CarStage track="cota" showNote={false}>
+            <div className="flex w-full items-end justify-between gap-3 px-1">
+              <CarLivery
+                accent={TEAM_ACCENTS.Ferrari}
                 number={16}
                 compoundLetter="S"
-                width={200}
+                width={260}
                 track="cota"
               />
-              <CarSilhouette
-                accent={TEAM_ACCENTS.Ferrari.accent}
-                second={TEAM_ACCENTS.Ferrari.second}
+              <CarLivery
+                accent={TEAM_ACCENTS.Ferrari}
                 number={44}
                 compoundLetter="S"
-                width={160}
+                width={210}
                 track="cota"
               />
             </div>

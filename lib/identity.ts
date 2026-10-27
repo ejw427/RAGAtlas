@@ -6,6 +6,7 @@ import {
   getLapsForDriver,
   getSessionPack,
 } from "@/lib/session";
+import { OPENF1_TEAM_COLOURS } from "@/lib/team-media";
 
 export type TeamAccent = {
   house: string;
@@ -13,32 +14,13 @@ export type TeamAccent = {
   second: string;
 };
 
-/** Session accents - original Welch Software marks, not team assets. */
-export const TEAM_ACCENTS: Record<string, TeamAccent> = {
-  Ferrari: { house: "ferrari", accent: "#E10600", second: "#F0E7D0" },
-  Mercedes: { house: "mercedes", accent: "#00D2BE", second: "#C5CCD6" },
-  McLaren: { house: "mclaren", accent: "#FF8000", second: "#1A1C1F" },
-  "Red Bull Racing": {
-    house: "redbull",
-    accent: "#1E2A78",
-    second: "#F0D030",
-  },
-  "Aston Martin": {
-    house: "astonmartin",
-    accent: "#006F62",
-    second: "#D6DE6B",
-  },
-  Williams: { house: "williams", accent: "#0A2240", second: "#7FB2FF" },
-  Alpine: { house: "alpine", accent: "#005BA8", second: "#FF87BC" },
-  "Haas F1 Team": { house: "haas", accent: "#E8E8E8", second: "#B42318" },
-  "Racing Bulls": {
-    house: "racingbulls",
-    accent: "#2F6BFF",
-    second: "#F4F1EA",
-  },
-  Audi: { house: "audi", accent: "#BB0A30", second: "#C5CCD3" },
-  Cadillac: { house: "cadillac", accent: "#C4A35A", second: "#141414" },
-};
+/** Exact OpenF1 team_colour from the live COTA session pack. */
+export const TEAM_ACCENTS: Record<string, TeamAccent> = Object.fromEntries(
+  Object.entries(OPENF1_TEAM_COLOURS).map(([team, c]) => [
+    team,
+    { house: c.house, accent: c.accent, second: c.second },
+  ]),
+) as Record<string, TeamAccent>;
 
 export const FALLBACK_ACCENT: TeamAccent = {
   house: "field",

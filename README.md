@@ -5,7 +5,8 @@
 [Welch Software](./) portfolio prototype: a **knowledge + narrative layer** over ATLAS-shaped session telemetry — session RAG that cites notes/channels/lap windows, **and** a live-style engineering workspace (waveforms, playhead, circuit schematic, compare, debrief timeline).
 
 > **2026 COTA FP2** · OpenF1 public subset + synthetic ATLAS thermal overlays · No SECU / team feeds  
-> Independent — **not affiliated with Formula 1 teams, commercial telemetry vendors, Formula 1, or the FIA.**  
+> Independent — **not affiliated with, endorsed by, or licensed by Formula 1, the FIA, or any team.**  
+> Car / helmet art is **editorial public media for demo recognition only** — not a commercial product.  
 > Concepts inspired by public [ATLAS](https://www.motionapplied.com/brands/atlas/) documentation.
 
 Formerly sketched as “RAGAtlas”; product name is **CiteTrace** (cite → evidence, trace → telemetry) under the **Welch Software** studio label.

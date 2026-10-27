@@ -1,6 +1,13 @@
+import {
+  TRACK_PACKAGES,
+  type TrackPackage,
+  type TrackPackageId,
+} from "@/lib/track-package";
+
 /**
  * Top-down open-wheel mark for the circuit stage.
  * Clickable when onSelect is set — opens the racer card.
+ * Track package scales rear wing / cooling silhouette for COTA vs others.
  */
 export function CarMarker({
   cx,
@@ -15,6 +22,7 @@ export function CarMarker({
   glow,
   onSelect,
   pulseKey,
+  track = "cota",
 }: {
   cx: number;
   cy: number;
@@ -29,11 +37,16 @@ export function CarMarker({
   onSelect?: () => void;
   /** Change this when the racer identity changes so the mark flashes. */
   pulseKey?: string;
+  track?: TrackPackageId | TrackPackage;
 }) {
+  const pkg = typeof track === "string" ? TRACK_PACKAGES[track] : track;
   const rad = ((angle + 90) * Math.PI) / 180;
   const ox = Math.cos(rad) * offset * scale;
   const oy = Math.sin(rad) * offset * scale;
   const s = scale;
+  const wingH = 18 * s * (0.85 + (pkg.rearWing - 1) * 0.55);
+  const wingW = 3.8 * s * (0.9 + (pkg.rearWing - 1) * 0.35);
+  const coolInset = 0.28 + pkg.cooling * 0.12;
 
   return (
     <g
@@ -98,12 +111,12 @@ export function CarMarker({
         stroke="none"
       />
 
-      {/* Rear wing + endplates */}
+      {/* Rear wing + endplates — taller for high-DF packages (COTA) */}
       <rect
         x={-17.5 * s}
-        y={-9 * s}
-        width={3.8 * s}
-        height={18 * s}
+        y={-wingH / 2}
+        width={wingW}
+        height={wingH}
         rx={0.5 * s}
         fill={second}
         stroke="rgba(5,7,10,0.8)"
@@ -111,26 +124,26 @@ export function CarMarker({
       />
       <rect
         x={-16.6 * s}
-        y={-7 * s}
+        y={-wingH * 0.38}
         width={1.6 * s}
-        height={14 * s}
+        height={wingH * 0.76}
         rx={0.25 * s}
         fill="rgba(5,7,10,0.5)"
       />
       <rect
         x={-19 * s}
-        y={-9.5 * s}
+        y={-wingH / 2 - 0.5 * s}
         width={1.2 * s}
-        height={19 * s}
+        height={wingH + s}
         rx={0.2 * s}
         fill={fill}
         opacity="0.85"
       />
       <rect
         x={-14.2 * s}
-        y={-9.5 * s}
+        y={-wingH / 2 - 0.5 * s}
         width={1.2 * s}
-        height={19 * s}
+        height={wingH + s}
         rx={0.2 * s}
         fill={fill}
         opacity="0.85"
@@ -143,10 +156,10 @@ export function CarMarker({
         stroke="rgba(5,7,10,0.85)"
         strokeWidth={1.05 * s}
       />
-      {/* Sidepod inlet shading */}
+      {/* Sidepod inlet shading — wider on heat packages */}
       <path
         d={`M ${-9 * s} ${-3.8 * s} L ${5 * s} ${-2.8 * s} L ${6 * s} ${2.8 * s} L ${-9 * s} ${3.8 * s} Z`}
-        fill="rgba(5,7,10,0.32)"
+        fill={`rgba(5,7,10,${coolInset})`}
       />
       <path
         d={`M ${-6 * s} ${-2.2 * s} L ${2 * s} ${-1.6 * s}`}
@@ -166,29 +179,29 @@ export function CarMarker({
         fill="rgba(242,246,251,0.18)"
       />
 
-      {/* Front wing */}
+      {/* Front wing — wider on high frontWing packages */}
       <rect
         x={15.5 * s}
-        y={-8 * s}
+        y={-8 * s * pkg.frontWing}
         width={2.9 * s}
-        height={16 * s}
+        height={16 * s * pkg.frontWing}
         rx={0.4 * s}
         fill={second}
         opacity="0.96"
       />
       <line
         x1={16.9 * s}
-        y1={-6.2 * s}
+        y1={-6.2 * s * pkg.frontWing}
         x2={16.9 * s}
-        y2={6.2 * s}
+        y2={6.2 * s * pkg.frontWing}
         stroke="rgba(242,246,251,0.4)"
         strokeWidth={0.5 * s}
       />
       <line
         x1={17.6 * s}
-        y1={-5 * s}
+        y1={-5 * s * pkg.frontWing}
         x2={17.6 * s}
-        y2={5 * s}
+        y2={5 * s * pkg.frontWing}
         stroke="rgba(5,7,10,0.35)"
         strokeWidth={0.4 * s}
       />

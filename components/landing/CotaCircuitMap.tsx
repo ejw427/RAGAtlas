@@ -2,17 +2,70 @@
 
 import { useEffect, useId, useMemo, useState } from "react";
 import track from "@/data/mock/cota-track.json";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { CarLivery } from "@/components/identity/CarLivery";
+import { CarStage } from "@/components/identity/CarStage";
+import { HelmetMark } from "@/components/identity/HelmetMark";
+import { TEAM_ACCENTS } from "@/lib/identity";
 import { prefersReducedMotion } from "@/lib/motion";
 
 const LANDMARKS = [
-  { id: "sf", label: "S/F", m: 0, hint: "Start / finish" },
-  { id: "t1", label: "T1", m: 420, hint: "Uphill crest" },
-  { id: "esses", label: "Esses", m: 980, hint: "T3-T6 rhythm" },
-  { id: "s1", label: "S1", m: 1483, hint: "Sector split" },
-  { id: "t11", label: "T11", m: 2600, hint: "Hairpin" },
-  { id: "s2", label: "S2", m: 3672, hint: "Into stadium" },
-  { id: "stadium", label: "Stadium", m: 4100, hint: "T12-T15" },
-  { id: "t19", label: "T19", m: 5100, hint: "Track limits" },
+  {
+    id: "sf",
+    label: "S/F",
+    m: 0,
+    hint: "Start / finish",
+    body: "Timing line for the lap. Sector 1 begins here — every flyer and cite distance is measured from this metre.",
+  },
+  {
+    id: "t1",
+    label: "T1",
+    m: 420,
+    hint: "Uphill crest",
+    body: "The climb that defines COTA. Commitment on throttle, crest speed, then the first heavy brake of the lap — the garage argues this corner all weekend.",
+  },
+  {
+    id: "esses",
+    label: "Esses",
+    m: 980,
+    hint: "T3–T6 rhythm",
+    body: "Linked left-rights where car balance and kerb use show up in steering and lateral load. Rhythm section — not a single apex.",
+  },
+  {
+    id: "s1",
+    label: "S1",
+    m: 1483,
+    hint: "Sector split",
+    body: "End of sector 1. Compare Focus vs Reference sector times here to see who owned the opening third of the lap.",
+  },
+  {
+    id: "t11",
+    label: "T11",
+    m: 2600,
+    hint: "Hairpin",
+    body: "Slow hairpin at the back of the circuit. Brake pressure and traction on exit matter for the long run into sector 2.",
+  },
+  {
+    id: "s2",
+    label: "S2",
+    m: 3672,
+    hint: "Into stadium",
+    body: "Sector 2 split — the bridge into the amphitheater. Pace through here sets up the money-shot stadium stop.",
+  },
+  {
+    id: "stadium",
+    label: "Stadium",
+    m: 4100,
+    hint: "T12–T15 brakes",
+    body: "Heavy stop into the amphitheater. Peak brake temp and pressure shape live here — the cite most hiring managers will remember.",
+  },
+  {
+    id: "t19",
+    label: "T19",
+    m: 5100,
+    hint: "Track limits",
+    body: "Final corner complex before the line. Track-limits risk and exit speed onto the start/finish straight.",
+  },
 ] as const;
 
 const SECTORS = [
@@ -86,7 +139,8 @@ function TowerGlyph({
 export function CotaCircuitMap() {
   const uid = useId();
   const [drawn, setDrawn] = useState(false);
-  const [active, setActive] = useState<string | null>("t1");
+  const [active, setActive] = useState<string | null>(null);
+  const [popupId, setPopupId] = useState<string | null>(null);
 
   const model = useMemo(() => {
     const xs = track.x as number[];
@@ -139,7 +193,13 @@ export function CotaCircuitMap() {
     return () => window.clearTimeout(t);
   }, []);
 
-  const activeMark = model.marks.find((m) => m.id === active) ?? model.marks[1];
+  const highlightId = popupId ?? active ?? "t1";
+  const popupMark = LANDMARKS.find((m) => m.id === popupId) ?? null;
+
+  const openLandmark = (id: string) => {
+    setActive(id);
+    setPopupId(id);
+  };
 
   return (
     <div className="relative overflow-hidden border border-[var(--hairline)] bg-[var(--asphalt)]">
@@ -150,154 +210,146 @@ export function CotaCircuitMap() {
             "radial-gradient(70% 60% at 30% 40%, rgba(58,215,255,0.08), transparent 55%), radial-gradient(50% 50% at 75% 70%, rgba(198,255,74,0.06), transparent 60%)",
         }}
       />
-      <div className="relative grid gap-0 lg:grid-cols-[1.35fr_0.65fr]">
-        <svg
-          viewBox={model.view}
-          className="h-[min(58vw,420px)] w-full lg:h-[460px]"
-          role="img"
-          aria-label="Circuit of the Americas schematic with sector and landmark callouts"
-        >
-          <defs>
-            <linearGradient id={`${uid}-glow`} x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="rgba(58,215,255,0.5)" />
-              <stop offset="55%" stopColor="rgba(198,255,74,0.45)" />
-              <stop offset="100%" stopColor="rgba(255,176,32,0.4)" />
-            </linearGradient>
-            <filter id={`${uid}-bloom`}>
-              <feGaussianBlur stdDeviation="8" result="b" />
-              <feMerge>
-                <feMergeNode in="b" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
 
+      <div className="relative border-b border-[var(--hairline)] px-5 py-4 sm:px-6">
+        <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-[var(--signal)]">
+          Circuit of the Americas
+        </p>
+        <h3 className="mt-1 font-display text-xl font-semibold tracking-tight text-[var(--chalk)]">
+          Austin. 5.513 km. 20 turns.
+        </h3>
+        <p className="mt-2 max-w-2xl text-[0.85rem] leading-relaxed text-[var(--mist)]">
+          Tap a corner mark for a popup — T1 climb, esses rhythm, stadium stop,
+          T19 limits. Same asphalt as the 2026 United States GP FP2 pack.
+        </p>
+      </div>
+
+      <svg
+        viewBox={model.view}
+        className="h-[min(62vw,460px)] w-full lg:h-[480px]"
+        role="img"
+        aria-label="Circuit of the Americas schematic with sector and landmark callouts"
+      >
+        <defs>
+          <linearGradient id={`${uid}-glow`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="rgba(58,215,255,0.5)" />
+            <stop offset="55%" stopColor="rgba(198,255,74,0.45)" />
+            <stop offset="100%" stopColor="rgba(255,176,32,0.4)" />
+          </linearGradient>
+          <filter id={`${uid}-bloom`}>
+            <feGaussianBlur stdDeviation="8" result="b" />
+            <feMerge>
+              <feMergeNode in="b" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        <path
+          d={model.path}
+          fill="none"
+          stroke="rgba(232,238,245,0.06)"
+          strokeWidth="140"
+          strokeLinejoin="round"
+        />
+        <path
+          d={model.path}
+          fill="none"
+          stroke={`url(#${uid}-glow)`}
+          strokeWidth="22"
+          strokeLinejoin="round"
+          filter={`url(#${uid}-bloom)`}
+          opacity={0.55}
+          pathLength={model.length}
+          className={drawn ? undefined : "hero-track-draw"}
+        />
+
+        {model.sectorPaths.map((sec) => (
           <path
-            d={model.path}
+            key={sec.id}
+            d={sec.path}
             fill="none"
-            stroke="rgba(232,238,245,0.06)"
-            strokeWidth="140"
+            stroke={sec.color}
+            strokeWidth="12"
             strokeLinejoin="round"
+            opacity={0.85}
           />
-          <path
-            d={model.path}
-            fill="none"
-            stroke={`url(#${uid}-glow)`}
-            strokeWidth="22"
-            strokeLinejoin="round"
-            filter={`url(#${uid}-bloom)`}
-            opacity={0.55}
-            pathLength={model.length}
-            className={drawn ? undefined : "hero-track-draw"}
-          />
+        ))}
 
-          {model.sectorPaths.map((sec) => (
-            <path
-              key={sec.id}
-              d={sec.path}
-              fill="none"
-              stroke={sec.color}
-              strokeWidth="12"
-              strokeLinejoin="round"
-              opacity={0.85}
-            />
-          ))}
+        <path
+          d={model.path}
+          fill="none"
+          stroke="rgba(232,238,245,0.55)"
+          strokeWidth="3"
+          strokeDasharray="28 36"
+          strokeLinejoin="round"
+          className="hero-dash"
+          opacity={0.45}
+        />
 
-          <path
-            d={model.path}
-            fill="none"
-            stroke="rgba(232,238,245,0.55)"
-            strokeWidth="3"
-            strokeDasharray="28 36"
-            strokeLinejoin="round"
-            className="hero-dash"
-            opacity={0.45}
-          />
+        <TowerGlyph x={model.tower.x - 120} y={model.tower.y - 180} scale={1.15} />
 
-          <TowerGlyph x={model.tower.x - 120} y={model.tower.y - 180} scale={1.15} />
+        {model.marks.map((m) => {
+          const on = m.id === highlightId;
+          return (
+            <g key={m.id}>
+              <circle
+                cx={m.x}
+                cy={m.y}
+                r={on ? 52 : 34}
+                fill={on ? "rgba(198,255,74,0.2)" : "rgba(5,7,10,0.55)"}
+                stroke={on ? "var(--signal)" : "rgba(232,238,245,0.35)"}
+                strokeWidth={on ? 5 : 3}
+                className="cursor-pointer"
+                onMouseEnter={() => setActive(m.id)}
+                onFocus={() => setActive(m.id)}
+                onClick={() => openLandmark(m.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    openLandmark(m.id);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`${m.label}: ${m.hint}. Open details.`}
+              />
+              <text
+                x={m.x}
+                y={m.y + 8}
+                textAnchor="middle"
+                fill={on ? "var(--signal)" : "var(--chalk)"}
+                fontSize={on ? 34 : 28}
+                fontFamily="var(--font-mono), monospace"
+                fontWeight={600}
+                className="pointer-events-none"
+              >
+                {m.label}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
 
-          {model.marks.map((m) => {
-            const on = m.id === active;
-            return (
-              <g key={m.id}>
-                <circle
-                  cx={m.x}
-                  cy={m.y}
-                  r={on ? 48 : 32}
-                  fill={on ? "rgba(198,255,74,0.18)" : "rgba(5,7,10,0.55)"}
-                  stroke={on ? "var(--signal)" : "rgba(232,238,245,0.35)"}
-                  strokeWidth={on ? 5 : 3}
-                  className="cursor-pointer"
-                  onMouseEnter={() => setActive(m.id)}
-                  onFocus={() => setActive(m.id)}
-                  tabIndex={0}
-                  role="button"
-                  aria-label={`${m.label}: ${m.hint}`}
-                />
-                <text
-                  x={m.x}
-                  y={m.y + 8}
-                  textAnchor="middle"
-                  fill={on ? "var(--signal)" : "var(--chalk)"}
-                  fontSize={on ? 34 : 28}
-                  fontFamily="var(--font-mono), monospace"
-                  fontWeight={600}
-                  className="pointer-events-none"
-                >
-                  {m.label}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-
-        <aside className="flex flex-col justify-between border-t border-[var(--hairline)] p-5 lg:border-l lg:border-t-0 lg:p-6">
-          <div>
-            <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-[var(--signal)]">
-              Circuit of the Americas
-            </p>
-            <h3 className="mt-1 font-display text-xl font-semibold tracking-tight text-[var(--chalk)]">
-              Austin. 5.513 km. 20 turns.
-            </h3>
-            <p className="mt-2 text-[0.85rem] leading-relaxed text-[var(--mist)]">
-              The demo pack is the 2026 United States GP FP2 session - same
-              asphalt your engineers argue about: T1 climb, esses rhythm,
-              stadium stop, T19 limits.
-            </p>
-          </div>
-
-          <div className="mt-6 space-y-2">
-            {LANDMARKS.map((lm) => {
-              const on = lm.id === active;
-              return (
-                <button
-                  key={lm.id}
-                  type="button"
-                  onMouseEnter={() => setActive(lm.id)}
-                  onFocus={() => setActive(lm.id)}
-                  className={`flex w-full items-baseline justify-between gap-3 border px-3 py-2 text-left transition-colors ${
-                    on
-                      ? "border-[var(--signal)] bg-[var(--signal-dim)]"
-                      : "border-[var(--hairline)] bg-[var(--panel)] hover:border-[var(--hairline-strong)]"
-                  }`}
-                >
-                  <span
-                    className={`font-mono text-[0.72rem] ${on ? "text-[var(--signal)]" : "text-[var(--chalk)]"}`}
-                  >
-                    {lm.label}
-                  </span>
-                  <span className="font-mono text-[0.6rem] text-[var(--mute)]">
-                    {lm.hint} · {lm.m} m
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          <p className="mt-5 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--mute)]">
-            Active · {activeMark.label} · {activeMark.hint}
-          </p>
-        </aside>
+      <div className="flex flex-wrap gap-2 border-t border-[var(--hairline)] px-4 py-3 sm:px-5">
+        {LANDMARKS.map((lm) => {
+          const on = lm.id === highlightId;
+          return (
+            <button
+              key={lm.id}
+              type="button"
+              onClick={() => openLandmark(lm.id)}
+              className={`rounded-full border px-3 py-1.5 font-mono text-[0.65rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] ${
+                on
+                  ? "border-[var(--signal)] bg-[var(--signal-dim)] text-[var(--signal)]"
+                  : "border-[var(--hairline)] bg-[var(--panel)] text-[var(--mist)] hover:border-[var(--hairline-strong)] hover:text-[var(--chalk)]"
+              }`}
+            >
+              <span className="font-semibold">{lm.label}</span>
+              <span className="ml-1.5 opacity-70">{lm.hint}</span>
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex flex-wrap gap-4 border-t border-[var(--hairline)] px-5 py-3 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-[var(--mute)]">
@@ -311,6 +363,65 @@ export function CotaCircuitMap() {
           </span>
         ))}
       </div>
+
+      <Sheet
+        open={popupId != null}
+        onOpenChange={(o) => {
+          if (!o) setPopupId(null);
+        }}
+      >
+        <SheetContent variant="popup" className="w-[min(100vw-1.25rem,480px)]">
+          {popupMark && (
+            <>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <SheetTitle className="text-[var(--signal)]">
+                    {popupMark.label} · {popupMark.hint}
+                  </SheetTitle>
+                  <p className="mt-1 font-mono text-[0.62rem] text-[var(--mute)]">
+                    Circuit of the Americas · {popupMark.m} m from S/F
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPopupId(null)}
+                  className="shrink-0 rounded-sm border border-[var(--hairline-strong)] px-2.5 py-1 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-[var(--mist)] hover:border-[var(--signal)]/50 hover:text-[var(--signal)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+                >
+                  Close
+                </button>
+              </div>
+
+              <p className="mt-4 text-[0.9rem] leading-relaxed text-[var(--mist)]">
+                {popupMark.body}
+              </p>
+
+              <div className="mt-5 grid gap-3 sm:grid-cols-[auto_1fr] sm:items-end">
+                <HelmetMark
+                  code="lec"
+                  number={16}
+                  accent={TEAM_ACCENTS.Ferrari.accent}
+                  second={TEAM_ACCENTS.Ferrari.second}
+                  size={88}
+                  track="cota"
+                />
+                <CarStage track="cota">
+                  <CarLivery
+                    accent={TEAM_ACCENTS.Ferrari}
+                    number={16}
+                    compoundLetter="S"
+                    width={300}
+                    track="cota"
+                  />
+                </CarStage>
+              </div>
+              <p className="mt-2 font-mono text-[0.55rem] leading-relaxed text-[var(--mute)]">
+                2026 Ferrari side render + Leclerc kit on the COTA weekend
+                frame.
+              </p>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

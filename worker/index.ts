@@ -45,7 +45,8 @@ type AskMiss = {
   message: string;
 };
 
-const MODEL = "@cf/meta/llama-3.1-8b-instruct";
+/** FP8 8B instruct — non-deprecated stand-in for llama-3.1-8b-instruct */
+const MODEL = "@cf/meta/llama-3.1-8b-instruct-fp8";
 
 const SYSTEM = `You are CiteTrace session RAG for a motorsport telemetry demo.
 Answer ONLY using the evidence JSON the user provides.

@@ -1,146 +1,119 @@
 "use client";
 
-import { useId } from "react";
-import { helmetMotif } from "@/lib/identity";
+import { useState } from "react";
+import { helmetPickFor } from "@/lib/team-media";
+import {
+  TRACK_PACKAGES,
+  type TrackPackage,
+  type TrackPackageId,
+} from "@/lib/track-package";
+import type { Driver } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
-/** Original geometric helmet — not a driver photograph or team asset. */
+/**
+ * Real helmet art — Austin special on COTA when published, else season kit.
+ * Badge says which shell you're looking at.
+ */
 export function HelmetMark({
+  driver,
+  code,
   number,
   accent,
   second,
   size = 72,
+  track,
+  className,
 }: {
+  driver?: Driver;
+  code?: string;
   number?: number;
   accent: string;
   second: string;
   size?: number;
+  track?: TrackPackageId | TrackPackage;
+  className?: string;
 }) {
-  const motif = helmetMotif(number);
-  const uid = useId().replace(/:/g, "");
+  const resolvedCode = driver?.code ?? code;
+  const pick = helmetPickFor(resolvedCode, track);
+  const [failed, setFailed] = useState(false);
+  const showImg = Boolean(pick?.src) && !failed;
+  const pkg =
+    track == null
+      ? null
+      : typeof track === "string"
+        ? TRACK_PACKAGES[track]
+        : track;
+  const isCota = pkg?.id === "cota";
+  const isDesert = pkg?.id === "bahrain";
+  const isAustinSpecial = pick?.kind === "austin";
 
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 72 72"
+    <div
+      className={cn("relative shrink-0 overflow-hidden rounded-md", className)}
+      style={{
+        width: size,
+        height: size,
+        boxShadow: `0 0 0 1px ${accent}55, 0 8px 20px rgba(0,0,0,0.45)`,
+        background: isDesert
+          ? `radial-gradient(circle at 70% 0%, rgba(255,160,80,0.35), ${second}22 55%, #0b0f14)`
+          : `radial-gradient(circle at 40% 20%, ${accent}44, #0b0f14 70%)`,
+      }}
       role="img"
-      aria-hidden
+      aria-label={
+        number != null
+          ? `Helmet #${number}${pick ? ` · ${pick.label}` : ""}`
+          : pick?.label ?? "Driver helmet"
+      }
+      title={pick?.label}
     >
-      <defs>
-        <linearGradient id={`${uid}-shell`} x1="0.2" y1="0" x2="0.8" y2="1">
-          <stop offset="0%" stopColor={second} stopOpacity="0.95" />
-          <stop offset="45%" stopColor={accent} />
-          <stop offset="100%" stopColor={accent} stopOpacity="0.85" />
-        </linearGradient>
-        <linearGradient id={`${uid}-visor`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#e8eef5" stopOpacity="0.35" />
-          <stop offset="40%" stopColor="#0b0f14" stopOpacity="0.95" />
-          <stop offset="100%" stopColor="#121820" stopOpacity="0.9" />
-        </linearGradient>
-        <clipPath id={`${uid}-clip`}>
-          <path d="M14 46c0-16 9-30 22-30s22 14 22 30v8H14z" />
-        </clipPath>
-      </defs>
-
-      {/* chin / collar ring */}
-      <ellipse
-        cx="36"
-        cy="58"
-        rx="20"
-        ry="7"
-        fill="rgba(5,7,10,0.55)"
-      />
-
-      {/* shell */}
-      <path
-        d="M14 46c0-16 9-30 22-30s22 14 22 30v8c0 2.8-2 5-5 5H19c-3 0-5-2.2-5-5z"
-        fill={`url(#${uid}-shell)`}
-        stroke="rgba(5,7,10,0.35)"
-        strokeWidth="1"
-      />
-
-      {/* motif under visor */}
-      <g clipPath={`url(#${uid}-clip)`}>
-        {motif === 0 && (
-          <>
-            <path d="M18 20h36v7H18z" fill={second} opacity="0.92" />
-            <path d="M18 30h36v3H18z" fill="rgba(5,7,10,0.35)" />
-          </>
+      {isCota && (
+        <div
+          className="cota-kerb pointer-events-none absolute inset-x-0 top-0 z-[2] h-1 opacity-90"
+          aria-hidden
+        />
+      )}
+      {showImg ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={pick!.src}
+          alt=""
+          width={size}
+          height={size}
+          className={cn(
+            "h-full w-full",
+            isAustinSpecial
+              ? "object-contain object-center bg-[rgba(5,7,10,0.55)] p-0.5"
+              : "object-cover object-[center_12%]",
+          )}
+          onError={() => setFailed(true)}
+          draggable={false}
+        />
+      ) : (
+        <div
+          className="flex h-full w-full items-center justify-center font-mono text-[0.7rem] font-bold"
+          style={{ color: accent }}
+        >
+          {number ?? "H"}
+        </div>
+      )}
+      <span
+        className={cn(
+          "absolute bottom-0.5 left-0.5 z-[2] max-w-[72%] truncate rounded-sm px-1 py-px font-mono text-[0.38rem] uppercase tracking-[0.1em]",
+          isAustinSpecial
+            ? "bg-[var(--signal)] text-[var(--void)]"
+            : "bg-[rgba(5,7,10,0.82)] text-[var(--mist)]",
         )}
-        {motif === 1 && (
-          <path
-            d="M36 14 L52 42 L20 42 Z"
-            fill={second}
-            opacity="0.88"
-          />
-        )}
-        {motif === 2 && (
-          <>
-            <rect
-              x="14"
-              y="16"
-              width="22"
-              height="36"
-              fill={second}
-              opacity="0.65"
-            />
-            <rect
-              x="36"
-              y="16"
-              width="22"
-              height="36"
-              fill="rgba(5,7,10,0.3)"
-            />
-            <path
-              d="M34 16 V52"
-              stroke="rgba(232,238,245,0.35)"
-              strokeWidth="2"
-            />
-          </>
-        )}
-      </g>
-
-      {/* visor band */}
-      <path
-        d="M17 40h38v9c0 2.2-1.6 4-4 4H21c-2.4 0-4-1.8-4-4z"
-        fill={`url(#${uid}-visor)`}
-      />
-      <path
-        d="M20 42.5 H52"
-        stroke="rgba(232,238,245,0.28)"
-        strokeWidth="1.2"
-      />
-
-      {/* crown highlight */}
-      <path
-        d="M22 26c5-8 11-12 14-12s9 4 14 12"
-        fill="none"
-        stroke="rgba(232,238,245,0.28)"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-
-      {/* cheek vents */}
-      <path
-        d="M18 50h6M48 50h6"
-        stroke="rgba(5,7,10,0.4)"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-
+      >
+        {isAustinSpecial ? "Austin" : isCota ? "Season" : pick?.kind === "season" ? "Kit" : "—"}
+      </span>
       {number != null && (
-        <text
-          x="36"
-          y="34"
-          textAnchor="middle"
-          fill="rgba(5,7,10,0.55)"
-          fontSize="11"
-          fontFamily="var(--font-mono), monospace"
-          fontWeight="900"
+        <span
+          className="absolute bottom-0.5 right-0.5 z-[2] rounded-sm px-1 py-px font-mono text-[0.45rem] font-bold text-[var(--void)]"
+          style={{ background: accent }}
         >
           {number}
-        </text>
+        </span>
       )}
-    </svg>
+    </div>
   );
 }

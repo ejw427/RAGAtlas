@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { CarSilhouette } from "@/components/identity/CarSilhouette";
+import { CarLivery } from "@/components/identity/CarLivery";
 import { DriverPortrait } from "@/components/identity/DriverPortrait";
 import { ElevationStrip } from "@/components/session/ElevationStrip";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -90,8 +90,17 @@ export function CompareDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="md:inset-x-auto md:right-0 md:top-0 md:bottom-0 md:max-h-none md:w-[min(100vw,440px)] md:rounded-none md:border-l">
-        <SheetTitle>Compare detail · Focus - Reference</SheetTitle>
+      <SheetContent variant="popup" className="w-[min(100vw-1.25rem,640px)]">
+        <div className="flex items-start justify-between gap-3">
+          <SheetTitle>Compare detail · Focus − Reference</SheetTitle>
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="shrink-0 rounded-sm border border-[var(--hairline-strong)] px-2.5 py-1 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-[var(--mist)] hover:border-[var(--signal)]/50 hover:text-[var(--signal)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+          >
+            Close
+          </button>
+        </div>
 
         <div className="mt-4 space-y-4">
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
@@ -107,6 +116,7 @@ export function CompareDetailSheet({
                   driver={focusDriver}
                   size={44}
                   track={trackPkg}
+                  preferHelmet
                 />
                 <div className="min-w-0">
                   <p className="truncate font-display text-sm font-bold text-[var(--chalk)]">
@@ -120,12 +130,11 @@ export function CompareDetailSheet({
                   </p>
                 </div>
               </div>
-              <CarSilhouette
-                accent={focusAccent.accent}
-                second={focusAccent.second}
+              <CarLivery
+                accent={focusAccent}
                 number={focusDriver.number}
                 compoundLetter={compoundLetter(compoundOf(focusLap))}
-                width={120}
+                width={140}
                 track={trackPkg}
               />
             </div>
@@ -159,6 +168,7 @@ export function CompareDetailSheet({
                   driver={referenceDriver}
                   size={44}
                   track={trackPkg}
+                  preferHelmet
                 />
                 <div className="min-w-0">
                   <p className="truncate font-display text-sm font-bold text-[var(--chalk)]">
@@ -172,12 +182,11 @@ export function CompareDetailSheet({
                   </p>
                 </div>
               </div>
-              <CarSilhouette
-                accent={refAccent.accent}
-                second={refAccent.second}
+              <CarLivery
+                accent={refAccent}
                 number={referenceDriver.number}
                 compoundLetter={compoundLetter(compoundOf(referenceLap))}
-                width={120}
+                width={140}
                 track={trackPkg}
               />
             </div>

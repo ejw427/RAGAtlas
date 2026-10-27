@@ -12,11 +12,12 @@ export function DisclaimerFooter({ compact = false }: { compact?: boolean }) {
     >
       <div className="mx-auto flex max-w-[1120px] flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <p>
-          <span className="text-[var(--chalk)]">{STUDIO}</span> · {PRODUCT} -
-          independent portfolio prototype. Not affiliated with Formula 1 teams,
-          commercial telemetry vendors, Formula 1, or the FIA. 2026 COTA OpenF1
-          subset + synthetic ATLAS-style overlays · No SECU / team feeds ·
-          Concepts inspired by public ATLAS documentation.
+          <span className="text-[var(--chalk)]">{STUDIO}</span> · {PRODUCT} —
+          independent portfolio prototype. Not affiliated with, endorsed by, or
+          licensed by Formula 1, the FIA, or any team. Car liveries, kit, and
+          helmet art are editorial public media used for demo context only —
+          not a commercial product. 2026 COTA OpenF1 subset + synthetic
+          ATLAS-style overlays · No SECU / team feeds.
         </p>
         <div className="flex shrink-0 flex-col gap-1 font-mono text-[0.7rem] sm:items-end">
           <a
