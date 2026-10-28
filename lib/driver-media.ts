@@ -10,9 +10,12 @@ type MediaEntry = {
 
 const byCode = media as Record<string, MediaEntry>;
 
-export function headshotFor(driver: Driver | undefined): string | null {
-  if (!driver?.code) return null;
-  const code = driver.code.toLowerCase();
-  const entry = byCode[code];
+export function headshotForCode(code: string | undefined): string | null {
+  if (!code) return null;
+  const entry = byCode[code.toLowerCase()];
   return entry?.file ?? null;
+}
+
+export function headshotFor(driver: Driver | undefined): string | null {
+  return headshotForCode(driver?.code);
 }

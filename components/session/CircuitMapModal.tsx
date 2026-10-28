@@ -150,7 +150,7 @@ export function CircuitMapModal({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="relative inset-1 top-1 bottom-1 left-1 right-1 z-50 flex max-h-none w-auto flex-col overflow-hidden rounded-lg border border-[var(--hairline-strong)] bg-[var(--void)] p-2 shadow-2xl sm:inset-2 sm:p-3 md:inset-3">
+      <SheetContent className="fixed inset-1 z-50 flex h-auto max-h-none w-auto flex-col overflow-hidden rounded-lg border border-[var(--hairline-strong)] bg-[var(--void)] p-2 shadow-2xl sm:inset-2 sm:p-3 md:inset-3">
         <div
           className="pointer-events-none absolute inset-0 z-0 opacity-[0.14]"
           style={{

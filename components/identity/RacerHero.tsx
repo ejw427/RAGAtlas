@@ -143,9 +143,7 @@ export function RacerHero({
               track={trackPkg}
             />
             <p className="max-w-[12rem] font-mono text-[0.55rem] uppercase leading-snug tracking-[0.12em] text-[var(--mute)]">
-              {trackPkg.id === "cota"
-                ? "COTA weekend shell · Austin special when published"
-                : `${trackPkg.chip} · season helmet`}
+              Driver portrait · race helmet when authentic art lands
             </p>
           </div>
         </div>

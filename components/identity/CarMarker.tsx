@@ -40,9 +40,13 @@ export function CarMarker({
   track?: TrackPackageId | TrackPackage;
 }) {
   const pkg = typeof track === "string" ? TRACK_PACKAGES[track] : track;
-  const rad = ((angle + 90) * Math.PI) / 180;
+  // Quantize for stable SSR/client SVG attrs (avoids atan2 float hydration noise).
+  const a = Math.round(angle * 1e4) / 1e4;
+  const rad = ((a + 90) * Math.PI) / 180;
   const ox = Math.cos(rad) * offset * scale;
   const oy = Math.sin(rad) * offset * scale;
+  const tx = Math.round((cx + ox) * 1e4) / 1e4;
+  const ty = Math.round((cy + oy) * 1e4) / 1e4;
   const s = scale;
   const wingH = 18 * s * (0.85 + (pkg.rearWing - 1) * 0.55);
   const wingW = 3.8 * s * (0.9 + (pkg.rearWing - 1) * 0.35);
@@ -51,7 +55,7 @@ export function CarMarker({
   return (
     <g
       key={pulseKey}
-      transform={`translate(${cx + ox}, ${cy + oy}) rotate(${angle})`}
+      transform={`translate(${tx}, ${ty}) rotate(${a})`}
       className={onSelect ? "car-marker-hit" : undefined}
       style={onSelect ? { cursor: "pointer" } : undefined}
       onPointerDown={
@@ -257,7 +261,7 @@ export function CarMarker({
           fontSize={14 * s}
           fontFamily="var(--font-mono), monospace"
           fontWeight="800"
-          transform={`rotate(${-angle})`}
+          transform={`rotate(${-a})`}
           style={{
             paintOrder: "stroke",
             stroke: "rgba(5,7,10,0.9)",
@@ -276,7 +280,7 @@ export function CarMarker({
           fontSize={9.5 * s}
           fontFamily="var(--font-mono), monospace"
           fontWeight="700"
-          transform={`rotate(${-angle})`}
+          transform={`rotate(${-a})`}
           style={{
             paintOrder: "stroke",
             stroke: "rgba(5,7,10,0.92)",

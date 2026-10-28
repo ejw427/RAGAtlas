@@ -72,11 +72,13 @@ export function StageAcqBar({
         <button
           type="button"
           onClick={onClearWindow}
-          className="rounded-sm border border-[var(--signal)]/50 bg-[var(--signal-dim)] px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-[0.1em] text-[var(--signal)] transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
-          title="Reset map + graphs to full lap"
+          className="rounded-sm border border-[var(--signal)] bg-[var(--signal-dim)] px-2.5 py-1 font-mono text-[0.58rem] font-semibold uppercase tracking-[0.1em] text-[var(--signal)] shadow-[0_0_0_1px_rgba(198,255,74,0.3)] transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+          title="Reset map + graphs to the full lap"
         >
-          Fit lap · {Math.round(viewWindow.startM)}–
-          {Math.round(viewWindow.endM)} m
+          Reset zoom · full lap
+          <span className="ml-1.5 font-normal tabular-nums opacity-75">
+            {Math.round(viewWindow.startM)}–{Math.round(viewWindow.endM)} m
+          </span>
         </button>
       )}
       {comparing && onSolo && (

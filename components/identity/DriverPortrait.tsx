@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { HelmetMark } from "@/components/identity/HelmetMark";
 import { headshotFor } from "@/lib/driver-media";
 import { accentFor } from "@/lib/identity";
 import { helmetPickFor } from "@/lib/team-media";
@@ -19,7 +18,10 @@ export function DriverPortrait({
   className,
   track,
   showCode = false,
-  /** Prefer helmet art (Austin special on COTA) over cropped headshot. */
+  /**
+   * Prefer race-authentic helmet art when we have it.
+   * Cartoon / suit-render stand-ins are ignored — headshot wins.
+   */
   preferHelmet = false,
 }: {
   driver: Driver;
@@ -33,8 +35,9 @@ export function DriverPortrait({
   const accent = accentFor(driver);
   const head = headshotFor(driver);
   const pick = helmetPickFor(driver.code, track);
-  const helmet = pick?.src ?? null;
-  const primary = preferHelmet ? helmet ?? head : head ?? helmet;
+  const raceHelmet = pick?.src ?? null;
+  // Headshot is the default face of the product; helmet only when authentic.
+  const primary = preferHelmet ? raceHelmet ?? head : head ?? raceHelmet;
   const [failed, setFailed] = useState(false);
   const showImg = Boolean(primary) && !failed;
   const pkg =
@@ -44,13 +47,13 @@ export function DriverPortrait({
         ? TRACK_PACKAGES[track]
         : track;
   const isCota = pkg?.id === "cota";
-  const isAustin = pick?.kind === "austin" && primary === helmet;
+  const showingHelmet = Boolean(raceHelmet && primary === raceHelmet);
 
   return (
     <div
       className={cn("relative shrink-0", className)}
       style={{ width: size, height: size }}
-      title={preferHelmet ? pick?.label : undefined}
+      title={showingHelmet ? pick?.label : undefined}
     >
       <div
         className="absolute -inset-[2px] rounded-full opacity-95"
@@ -84,40 +87,27 @@ export function DriverPortrait({
             height={size}
             className={cn(
               "h-full w-full",
-              isAustin
+              showingHelmet
                 ? "object-contain object-center bg-[rgba(5,7,10,0.65)]"
-                : preferHelmet || primary === helmet
-                  ? "object-cover object-[center_8%]"
-                  : "object-cover object-top",
+                : "object-cover object-top",
             )}
             onError={() => setFailed(true)}
           />
         ) : (
           <div
-            className="flex h-full w-full items-center justify-center"
+            className="flex h-full w-full items-center justify-center font-mono text-[0.85rem] font-bold"
             style={{
               background: `radial-gradient(circle at 40% 30%, ${accent.accent}33, var(--panel) 70%)`,
+              color: accent.accent,
             }}
           >
-            <HelmetMark
-              driver={driver}
-              number={driver.number}
-              accent={accent.accent}
-              second={accent.second}
-              size={Math.round(size * 0.78)}
-              track={pkg ?? undefined}
-            />
+            {driver.code?.slice(0, 3) ?? "—"}
           </div>
         )}
       </div>
-      {preferHelmet && isAustin && (
+      {showingHelmet && pick?.kind === "austin" && (
         <span className="absolute -left-0.5 bottom-3 rounded-sm bg-[var(--signal)] px-1 py-px font-mono text-[0.38rem] uppercase tracking-[0.12em] text-[var(--void)]">
           Austin
-        </span>
-      )}
-      {preferHelmet && isCota && !isAustin && (
-        <span className="absolute -left-0.5 bottom-3 rounded-sm bg-[rgba(5,7,10,0.88)] px-1 py-px font-mono text-[0.38rem] uppercase tracking-[0.12em] text-[var(--mist)] shadow-[0_0_0_1px_var(--hairline)]">
-          Season
         </span>
       )}
       {driver.number != null && (

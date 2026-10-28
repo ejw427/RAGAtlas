@@ -799,9 +799,9 @@ export function SessionShell() {
         }}
         aria-hidden
       />
-      {/* Header scrolls away with the page; pit wall fills the viewport once it's gone. */}
-      <div className="relative z-[1] flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
-        <header className="relative z-[1] flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b border-[var(--hairline)] bg-[var(--panel)]/92 px-3 py-1.5 font-mono text-[0.7rem] backdrop-blur-[2px]">
+      {/* One page scroll: top chrome leaves; workspace is min-h-full so map/stage own the screen. */}
+      <div className="relative z-[1] min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <header className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b border-[var(--hairline)] bg-[var(--panel)]/92 px-3 py-1.5 font-mono text-[0.7rem] backdrop-blur-[2px]">
           <Link
             href="/"
             className="shrink-0 font-display text-[0.95rem] font-semibold tracking-tight text-[var(--chalk)] hover:text-[var(--signal)]"
@@ -836,193 +836,194 @@ export function SessionShell() {
           </span>
         </header>
 
-        <div className="flex min-h-full flex-1 flex-col">
-          <CompareDuo
-            focusDriver={driver}
-            focusLap={lap}
-            focusLaps={driverLaps}
-            referenceDriver={referenceDriver}
-            referenceLap={referenceLap}
-            referenceLaps={referenceLaps}
-            onFocusDriver={selectDriver}
-            onFocusLap={selectLap}
-            onReferenceDriver={selectReferenceDriver}
-            onReferenceLap={selectReferenceLap}
-            onSwap={swapCars}
-            onClear={clearReference}
-            onTeammate={fillTeammate}
-            onFieldBest={fillFieldBest}
-            onOtherCompound={fillOtherCompound}
-            canOtherCompound={Boolean(otherCompoundLap(driverId, lap))}
-            onOpenCompare={compareLapId ? openCompare : undefined}
-            onInspectFocus={() => setRacerSheet("Focus")}
-            onInspectReference={
-              referenceDriver && referenceLap
-                ? () => setRacerSheet("Reference")
-                : undefined
-            }
+        <CompareDuo
+          focusDriver={driver}
+          focusLap={lap}
+          focusLaps={driverLaps}
+          referenceDriver={referenceDriver}
+          referenceLap={referenceLap}
+          referenceLaps={referenceLaps}
+          onFocusDriver={selectDriver}
+          onFocusLap={selectLap}
+          onReferenceDriver={selectReferenceDriver}
+          onReferenceLap={selectReferenceLap}
+          onSwap={swapCars}
+          onClear={clearReference}
+          onTeammate={fillTeammate}
+          onFieldBest={fillFieldBest}
+          onOtherCompound={fillOtherCompound}
+          canOtherCompound={Boolean(otherCompoundLap(driverId, lap))}
+          onOpenCompare={compareLapId ? openCompare : undefined}
+          onInspectFocus={() => setRacerSheet("Focus")}
+          onInspectReference={
+            referenceDriver && referenceLap
+              ? () => setRacerSheet("Reference")
+              : undefined
+          }
+        />
+
+        {deltas && (
+          <DeltaRibbon
+            lapMs={deltas.lapMs}
+            sectorsMs={deltas.sectorsMs}
+            activeSector={activeSector}
+            onSelect={selectSector}
+            onOpenCompare={openCompare}
           />
+        )}
 
-          {deltas && (
-            <DeltaRibbon
-              lapMs={deltas.lapMs}
-              sectorsMs={deltas.sectorsMs}
-              activeSector={activeSector}
-              onSelect={selectSector}
-              onOpenCompare={openCompare}
-            />
-          )}
+        {demoOpen && (
+          <DemoGuide
+            step={demoStep}
+            gainLabel={gain?.label ?? "S2"}
+            onStep={runDemoStep}
+            onDismiss={dismissDemo}
+          />
+        )}
 
-          {demoOpen && (
-            <DemoGuide
-              step={demoStep}
-              gainLabel={gain?.label ?? "S2"}
-              onStep={runDemoStep}
-              onDismiss={dismissDemo}
-            />
-          )}
-
-          {/* Page scroll owns the header on narrow; columns scroll inside on wide desks. */}
-          <div className="flex min-h-0 flex-1 flex-col md:grid md:grid-cols-[220px_minmax(0,1fr)_240px] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden xl:grid-cols-[210px_minmax(0,1fr)_210px_280px]">
-            <div className="min-h-0 md:overflow-y-auto md:overscroll-contain">
-              <div className="md:hidden">
-                <Plate
-                  driver={driver}
-                  lap={lap}
-                  activeSector={activeSector}
-                  sectorDeltasMs={deltas?.sectorsMs ?? null}
-                  onSelectSector={selectSector}
-                  onInspect={() => setRacerSheet("Focus")}
-                  compact
-                />
-              </div>
-              <div className="hidden md:block">
-                <Plate
-                  driver={driver}
-                  lap={lap}
-                  activeSector={activeSector}
-                  sectorDeltasMs={deltas?.sectorsMs ?? null}
-                  onSelectSector={selectSector}
-                  onInspect={() => setRacerSheet("Focus")}
-                />
-              </div>
+        {/* Locked to the scrollport on wide desks so dock lists scroll instead of stretching the map. */}
+        <div className="flex min-h-full flex-col md:grid md:h-full md:max-h-full md:grid-cols-[220px_minmax(0,1fr)_240px] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden xl:grid-cols-[210px_minmax(0,1fr)_210px_280px]">
+          <div className="md:min-h-0 md:overflow-hidden">
+            <div className="md:hidden">
+              <Plate
+                driver={driver}
+                lap={lap}
+                activeSector={activeSector}
+                sectorDeltasMs={deltas?.sectorsMs ?? null}
+                onSelectSector={selectSector}
+                onInspect={() => setRacerSheet("Focus")}
+                compact
+              />
             </div>
+            <div className="hidden h-full min-h-0 md:block">
+              <Plate
+                driver={driver}
+                lap={lap}
+                activeSector={activeSector}
+                sectorDeltasMs={deltas?.sectorsMs ?? null}
+                onSelectSector={selectSector}
+                onInspect={() => setRacerSheet("Focus")}
+              />
+            </div>
+          </div>
 
-            <main
-              className={`flex min-h-[85vh] flex-col gap-2 bg-[var(--asphalt)] p-2 md:min-h-0 md:overflow-y-auto md:overscroll-contain md:p-2.5 xl:p-3 ${
-                compareLapId ? "compare-stage-glow" : ""
-              }`}
-            >
-              <div className="h-[min(48vw,360px)] shrink-0 overflow-hidden md:h-[min(34vh,360px)] md:min-h-[260px]">
-                <TrackSchematic
-                  stage
-                  paintMode={compareLapId ? "both" : "sector"}
-                  activeSector={activeSector}
-                  playheadM={playheadM}
-                  evidence={evidence}
-                  onPlayhead={onPlayhead}
-                  onSector={selectSector}
-                  focusAccent={focusAccent.accent}
-                  referenceAccent={
-                    compareLapId ? referenceAccent.accent : undefined
-                  }
-                  focusNumber={driver.number}
-                  referenceNumber={referenceDriver?.number}
-                  focusCode={driver.code}
-                  referenceCode={referenceDriver?.code}
-                  comparing={Boolean(compareLapId)}
-                  traps={traps}
-                  sectorDeltaMs={deltas?.sectorsMs ?? null}
-                  gainSectorIndex={gain?.index ?? null}
-                  lossSectorIndex={
-                    loss && loss.ms > 0 ? loss.index : null
-                  }
-                  channelDelta={channelDelta}
-                  deltaChannelLabel={deltaLegend.label}
-                  deltaAheadLabel={deltaLegend.ahead}
-                  deltaBehindLabel={deltaLegend.behind}
-                  onOpenCompare={compareLapId ? openCompare : undefined}
-                  onViewWindow={setMapWindow}
-                  viewWindow={mapWindow}
-                  onExpand={() => setMapOpen(true)}
-                  onInspectFocus={() => setRacerSheet("Focus")}
-                  onInspectReference={
-                    referenceDriver && referenceLap
-                      ? () => setRacerSheet("Reference")
-                      : undefined
-                  }
-                  lapId={lapId}
-                  compareLapId={compareLapId}
-                />
-              </div>
-              <div className="flex min-h-[720px] flex-1 flex-col gap-1.5 md:min-h-[620px]">
-                <StageAcqBar
-                  plotChannelIds={plotChannelIds}
-                  comparing={Boolean(compareLapId)}
-                  onSetPlots={setPlots}
-                  onSolo={compareLapId ? clearReference : undefined}
-                  totalChannels={defaultPlotIds().length}
-                  viewWindow={mapWindow}
-                  onClearWindow={() => {
-                    setMapWindow(null);
-                    selectSector("Lap");
-                  }}
-                />
-                <TelemetryStage
-                  lapId={lapId}
-                  compareLapId={compareLapId}
-                  playheadM={playheadM}
-                  onPlayhead={onPlayhead}
-                  evidence={evidence}
-                  activeCite={selectedCite}
-                  drawKey={`${lapId}-${compareLapId ?? "solo"}-${plotChannelIds.join(",")}-${mapWindow?.startM ?? 0}-${mapWindow?.endM ?? 0}`}
-                  plotChannelIds={plotChannelIds}
-                  focusAccent={focusAccent.accent}
-                  referenceAccent={
-                    compareLapId ? referenceAccent.accent : undefined
-                  }
-                  focusLabel={`${driver.code} ${driver.number ?? ""}`.trim()}
-                  referenceLabel={
-                    referenceDriver
-                      ? `${referenceDriver.code} ${referenceDriver.number ?? ""}`.trim()
-                      : undefined
-                  }
-                  onOpenCompare={compareLapId ? openCompare : undefined}
-                  viewWindow={mapWindow}
-                  onViewWindow={setMapWindow}
-                  sectorDeltaMs={deltas?.sectorsMs ?? null}
-                  deltaChannelId={compareLapId ? activeDeltaChannel : null}
-                  onDeltaChannel={compareLapId ? setCompareChannel : undefined}
-                />
-              </div>
-            </main>
-
-            <div className="min-h-[360px] border-t border-[var(--hairline)] md:min-h-0 md:overflow-y-auto md:overscroll-contain md:border-t-0">
-              <SelectDock
+          <main
+            className={`flex flex-col gap-2 bg-[var(--asphalt)] p-2 md:min-h-0 md:overflow-hidden md:p-2.5 xl:p-3 ${
+              compareLapId ? "compare-stage-glow" : ""
+            }`}
+          >
+            <div className="h-[min(48vw,360px)] shrink-0 overflow-hidden md:h-[min(36vh,340px)] md:min-h-[240px]">
+              <TrackSchematic
+                stage
+                paintMode={compareLapId ? "both" : "sector"}
+                activeSector={activeSector}
+                playheadM={playheadM}
+                evidence={evidence}
+                onPlayhead={onPlayhead}
+                onSector={selectSector}
+                focusAccent={focusAccent.accent}
+                referenceAccent={
+                  compareLapId ? referenceAccent.accent : undefined
+                }
+                focusNumber={driver.number}
+                referenceNumber={referenceDriver?.number}
+                focusCode={driver.code}
+                referenceCode={referenceDriver?.code}
+                comparing={Boolean(compareLapId)}
+                traps={traps}
+                sectorDeltaMs={deltas?.sectorsMs ?? null}
+                gainSectorIndex={gain?.index ?? null}
+                lossSectorIndex={
+                  loss && loss.ms > 0 ? loss.index : null
+                }
+                channelDelta={channelDelta}
+                deltaChannelLabel={deltaLegend.label}
+                deltaAheadLabel={deltaLegend.ahead}
+                deltaBehindLabel={deltaLegend.behind}
+                onOpenCompare={compareLapId ? openCompare : undefined}
+                onViewWindow={setMapWindow}
+                viewWindow={mapWindow}
+                onExpand={() => setMapOpen(true)}
+                onInspectFocus={() => setRacerSheet("Focus")}
+                onInspectReference={
+                  referenceDriver && referenceLap
+                    ? () => setRacerSheet("Reference")
+                    : undefined
+                }
+                lapId={lapId}
+                compareLapId={compareLapId}
+              />
+            </div>
+            <div className="flex min-h-[420px] flex-1 flex-col gap-1.5 md:min-h-0">
+              <StageAcqBar
+                plotChannelIds={plotChannelIds}
+                comparing={Boolean(compareLapId)}
+                onSetPlots={setPlots}
+                onSolo={compareLapId ? clearReference : undefined}
+                totalChannels={defaultPlotIds().length}
+                viewWindow={mapWindow}
+                onClearWindow={() => {
+                  setMapWindow(null);
+                  selectSector("Lap");
+                }}
+              />
+              <TelemetryStage
                 lapId={lapId}
                 compareLapId={compareLapId}
                 playheadM={playheadM}
-                activeCiteId={selectedCite?.id ?? null}
-                onTimelineCite={(id) => {
-                  const c = getCite(id);
-                  if (c) lockCite(c);
-                }}
+                onPlayhead={onPlayhead}
+                evidence={evidence}
+                activeCite={selectedCite}
+                drawKey={`${lapId}-${compareLapId ?? "solo"}-${plotChannelIds.join(",")}-${mapWindow?.startM ?? 0}-${mapWindow?.endM ?? 0}`}
                 plotChannelIds={plotChannelIds}
-                onTogglePlot={togglePlot}
-                onSetPlots={setPlots}
+                focusAccent={focusAccent.accent}
+                referenceAccent={
+                  compareLapId ? referenceAccent.accent : undefined
+                }
+                focusLabel={`${driver.code} ${driver.number ?? ""}`.trim()}
+                referenceLabel={
+                  referenceDriver
+                    ? `${referenceDriver.code} ${referenceDriver.number ?? ""}`.trim()
+                    : undefined
+                }
+                onOpenCompare={compareLapId ? openCompare : undefined}
+                viewWindow={mapWindow}
+                onViewWindow={(w) => {
+                  setMapWindow(w);
+                  if (!w) selectSector("Lap");
+                }}
+                sectorDeltaMs={deltas?.sectorsMs ?? null}
                 deltaChannelId={compareLapId ? activeDeltaChannel : null}
                 onDeltaChannel={compareLapId ? setCompareChannel : undefined}
-                emphasizeBrake={driverId === pack.primaryDriverId}
-                driverLaps={driverLaps}
-                lapNumber={lapNumber}
-                onSelectLap={selectLap}
-                onAsk={openAskPanel}
               />
             </div>
+          </main>
 
-            <div className="hidden min-h-0 overflow-y-auto overscroll-contain border-l border-[var(--hairline)] xl:block">
-              {rag}
-            </div>
+          <div className="max-h-[min(42vh,420px)] min-h-0 overflow-hidden border-t border-[var(--hairline)] md:max-h-none md:border-t-0">
+            <SelectDock
+              lapId={lapId}
+              compareLapId={compareLapId}
+              playheadM={playheadM}
+              activeCiteId={selectedCite?.id ?? null}
+              onTimelineCite={(id) => {
+                const c = getCite(id);
+                if (c) lockCite(c);
+              }}
+              plotChannelIds={plotChannelIds}
+              onTogglePlot={togglePlot}
+              onSetPlots={setPlots}
+              deltaChannelId={compareLapId ? activeDeltaChannel : null}
+              onDeltaChannel={compareLapId ? setCompareChannel : undefined}
+              emphasizeBrake={driverId === pack.primaryDriverId}
+              driverLaps={driverLaps}
+              lapNumber={lapNumber}
+              onSelectLap={selectLap}
+              onAsk={openAskPanel}
+            />
+          </div>
+
+          <div className="hidden min-h-0 overflow-hidden border-l border-[var(--hairline)] xl:block">
+            {rag}
           </div>
         </div>
       </div>

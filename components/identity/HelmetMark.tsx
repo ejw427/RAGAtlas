@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { headshotFor, headshotForCode } from "@/lib/driver-media";
 import { helmetPickFor } from "@/lib/team-media";
 import {
   TRACK_PACKAGES,
@@ -11,8 +12,8 @@ import type { Driver } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 /**
- * Real helmet art — Austin special on COTA when published, else season kit.
- * Badge says which shell you're looking at.
+ * Race-authentic helmet when published; otherwise the driver headshot.
+ * Skips cartoon stand-ins and full-body kit renders in /helmets.
  */
 export function HelmetMark({
   driver,
@@ -35,8 +36,10 @@ export function HelmetMark({
 }) {
   const resolvedCode = driver?.code ?? code;
   const pick = helmetPickFor(resolvedCode, track);
+  const head = headshotFor(driver) ?? headshotForCode(resolvedCode);
+  const src = pick?.src ?? head;
   const [failed, setFailed] = useState(false);
-  const showImg = Boolean(pick?.src) && !failed;
+  const showImg = Boolean(src) && !failed;
   const pkg =
     track == null
       ? null
@@ -61,10 +64,14 @@ export function HelmetMark({
       role="img"
       aria-label={
         number != null
-          ? `Helmet #${number}${pick ? ` · ${pick.label}` : ""}`
-          : pick?.label ?? "Driver helmet"
+          ? isAustinSpecial
+            ? `Helmet #${number} · ${pick!.label}`
+            : `Driver portrait #${number}`
+          : isAustinSpecial
+            ? pick!.label
+            : "Driver portrait"
       }
-      title={pick?.label}
+      title={isAustinSpecial ? pick!.label : "Driver portrait"}
     >
       {isCota && (
         <div
@@ -75,7 +82,7 @@ export function HelmetMark({
       {showImg ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={pick!.src}
+          src={src!}
           alt=""
           width={size}
           height={size}
@@ -83,7 +90,7 @@ export function HelmetMark({
             "h-full w-full",
             isAustinSpecial
               ? "object-contain object-center bg-[rgba(5,7,10,0.55)] p-0.5"
-              : "object-cover object-[center_12%]",
+              : "object-cover object-top",
           )}
           onError={() => setFailed(true)}
           draggable={false}
@@ -93,7 +100,7 @@ export function HelmetMark({
           className="flex h-full w-full items-center justify-center font-mono text-[0.7rem] font-bold"
           style={{ color: accent }}
         >
-          {number ?? "H"}
+          {resolvedCode?.slice(0, 3).toUpperCase() ?? number ?? "—"}
         </div>
       )}
       <span
@@ -104,7 +111,7 @@ export function HelmetMark({
             : "bg-[rgba(5,7,10,0.82)] text-[var(--mist)]",
         )}
       >
-        {isAustinSpecial ? "Austin" : isCota ? "Season" : pick?.kind === "season" ? "Kit" : "—"}
+        {isAustinSpecial ? "Austin" : "Driver"}
       </span>
       {number != null && (
         <span

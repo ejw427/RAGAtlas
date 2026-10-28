@@ -425,7 +425,7 @@ export function CotaCircuitMap() {
                 </CarStage>
               </div>
               <p className="mt-2 font-mono text-[0.55rem] leading-relaxed text-[var(--mute)]">
-                2026 Ferrari side render + Leclerc kit on the COTA weekend
+                2026 Ferrari side render + Leclerc portrait on the COTA weekend
                 frame.
               </p>
             </>

@@ -87,8 +87,8 @@ export function RagRail({
     <aside
       className={
         compact
-          ? "flex h-full min-h-0 flex-col gap-2.5 overflow-auto bg-[var(--rail)] p-2.5"
-          : "flex h-full min-h-0 flex-col gap-3 overflow-auto bg-[var(--rail)] p-3 md:border-l md:border-[var(--hairline)]"
+          ? "flex h-full min-h-0 flex-col gap-2.5 overflow-hidden bg-[var(--rail)] p-2.5"
+          : "flex h-full min-h-0 flex-col gap-3 overflow-hidden bg-[var(--rail)] p-3 md:border-l md:border-[var(--hairline)]"
       }
     >
       <div>
@@ -119,7 +119,7 @@ export function RagRail({
         </Button>
       </form>
 
-      <div className="flex max-h-40 flex-wrap gap-1.5 overflow-auto">
+      <div className="flex flex-wrap gap-1.5">
         {visibleSeeds.map((s) => (
           <button
             key={s.query}

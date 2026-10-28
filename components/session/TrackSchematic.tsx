@@ -47,8 +47,13 @@ function pointAt(
   const cy = y[lo] + (y[hi] - y[lo]) * t;
   const dx = x[hi] - x[Math.max(0, lo - 1)];
   const dy = y[hi] - y[Math.max(0, lo - 1)];
-  const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
-  return { cx, cy, angle };
+  const angle =
+    Math.round(((Math.atan2(dy, dx) * 180) / Math.PI) * 1e4) / 1e4;
+  return {
+    cx: Math.round(cx * 1e4) / 1e4,
+    cy: Math.round(cy * 1e4) / 1e4,
+    angle,
+  };
 }
 
 function boundsForMetres(

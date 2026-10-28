@@ -3,8 +3,13 @@ import type { TrackPackage, TrackPackageId } from "@/lib/track-package";
 
 /**
  * Editorial media map for the COTA demo.
- * Car side renders + Austin special helmets are public-media caches for
- * recognition only — not affiliated with / licensed by F1 or any team.
+ * Car side renders are public-media caches for recognition only —
+ * not affiliated with / licensed by F1 or any team.
+ *
+ * Helmet note: `public/helmets/cota-*.png` are cartoon stand-ins and
+ * `public/helmets/*.webp` are full-body kit renders — neither is race-
+ * authentic helmet photography. Portraits use OpenF1 headshots instead
+ * until real shell art lands.
  */
 /** CDN slug under /cars/{slug}.webp — 2026 side renders. */
 export const TEAM_CAR_SLUG: Record<string, string> = {
@@ -52,24 +57,14 @@ export const OPENF1_TEAM_COLOURS: Record<
 };
 
 /**
- * Drivers with a documented United States GP 2026 special helmet
- * (Helmet Archive / team reveals). Everyone else runs their season shell.
+ * Reserved for real United States GP special-helmet photography.
+ * Empty until authentic shell art replaces the cartoon stand-ins on disk.
  */
-export const COTA_SPECIAL_HELMET_CODES = new Set([
-  "ver",
-  "lec",
-  "ham",
-  "nor",
-  "pia",
-  "alb",
-  "sai",
-  "col",
-  "bea",
-]);
+export const COTA_SPECIAL_HELMET_CODES = new Set<string>([]);
 
 export type HelmetPick = {
   src: string;
-  /** austin = US GP one-off; season = regular 2026 kit render */
+  /** austin = US GP one-off; season = regular kit helmet render */
   kind: "austin" | "season";
   label: string;
 };
@@ -97,13 +92,13 @@ function trackId(
   return typeof track === "string" ? track : track.id;
 }
 
-/** Season kit / helmet render (right-facing F1 media). */
+/** @deprecated Full-body kit renders live at this path — not helmets. */
 export function seasonHelmetSrc(code: string | undefined): string | null {
   if (!code) return null;
   return `/helmets/${code.toLowerCase()}.webp`;
 }
 
-/** Austin / COTA one-off helmet art when it exists for this driver. */
+/** Real Austin / COTA one-off helmet art when published. */
 export function cotaSpecialHelmetSrc(code: string | undefined): string | null {
   if (!code) return null;
   const c = code.toLowerCase();
@@ -112,8 +107,8 @@ export function cotaSpecialHelmetSrc(code: string | undefined): string | null {
 }
 
 /**
- * Pick the right helmet for the venue.
- * On COTA: Austin special if published, else season shell (labelled).
+ * Race-authentic helmet photography only.
+ * Returns null when we only have cartoons / suit renders — callers show a headshot.
  */
 export function helmetPickFor(
   code: string | undefined,
@@ -123,33 +118,18 @@ export function helmetPickFor(
   const c = code.toLowerCase();
   const id = trackId(track);
 
-  if (id === "cota") {
+  if (id === "cota" || id == null) {
     const special = cotaSpecialHelmetSrc(c);
-    if (special) {
-      return {
-        src: special,
-        kind: "austin",
-        label: "Austin special",
-      };
-    }
-    const season = seasonHelmetSrc(c);
-    if (season) {
-      return {
-        src: season,
-        kind: "season",
-        label: "Season helmet · no Austin one-off",
-      };
-    }
-    return null;
+    if (!special) return null;
+    return {
+      src: special,
+      kind: "austin",
+      label: "Austin special",
+    };
   }
 
-  const season = seasonHelmetSrc(c);
-  if (!season) return null;
-  return {
-    src: season,
-    kind: "season",
-    label: id === "bahrain" ? "Season helmet · Sakhir" : "Season helmet",
-  };
+  // No verified race-shell photography for other venues yet.
+  return null;
 }
 
 export function helmetSrcFor(

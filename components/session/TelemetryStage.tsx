@@ -74,7 +74,7 @@ export function TelemetryStage({
   onOpenCompare?: () => void;
   /** Stretch x-domain to match map zoom / sector. */
   viewWindow?: { startM: number; endM: number } | null;
-  /** Bidirectional: Ctrl+wheel on graphs zooms the distance window (and map). */
+  /** Bidirectional: drag-brush / Ctrl+wheel on graphs zooms the distance window (and map). */
   onViewWindow?: (window: { startM: number; endM: number } | null) => void;
   /** Focus - Reference sector gaps (ms). Colors the stage green/amber. */
   sectorDeltaMs?: [number, number, number] | null;
@@ -91,6 +91,14 @@ export function TelemetryStage({
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [shellH, setShellH] = useState(0);
+  /** Live drag selection across distance (metres). */
+  const [brush, setBrush] = useState<{ a: number; b: number } | null>(null);
+  const brushOrigin = useRef<{ startM: number; clientX: number } | null>(
+    null,
+  );
+  const brushActive = useRef(false);
+  /** Suppress channel click that follows a completed brush gesture. */
+  const skipClickRef = useRef(false);
   const lengthM = lapDistanceM();
   const pack = getSessionPack();
   const lap = getLapById(lapId);
@@ -347,11 +355,12 @@ export function TelemetryStage({
     return { pos, neg, zeroY, range: { vmin, vmax } };
   };
 
-  const onPointer = (clientX: number) => {
+  const clientToPlot = (clientX: number) => {
     const svg = svgRef.current;
-    if (!svg) return;
+    if (!svg) return null;
     const rect = svg.getBoundingClientRect();
     const px = ((clientX - rect.left) / rect.width) * W;
+    if (px < padL - 2 || px > W - padR + 2) return null;
     const m = Math.max(
       domainStart,
       Math.min(
@@ -359,7 +368,35 @@ export function TelemetryStage({
         domainStart + ((px - padL) / plotW) * domainSpan,
       ),
     );
-    onPlayhead(m);
+    return { px, m };
+  };
+
+  const finishBrush = (clientX: number) => {
+    const origin = brushOrigin.current;
+    const wasBrush = brushActive.current;
+    brushOrigin.current = null;
+    brushActive.current = false;
+    setBrush(null);
+    if (!origin || !wasBrush || !onViewWindow) return;
+    skipClickRef.current = true;
+    window.setTimeout(() => {
+      skipClickRef.current = false;
+    }, 0);
+    const hit = clientToPlot(clientX);
+    const endM = hit?.m ?? origin.startM;
+    let start = Math.min(origin.startM, endM);
+    let end = Math.max(origin.startM, endM);
+    const minSpan = Math.max(60, lengthM * 0.035);
+    if (end - start < minSpan) {
+      onPlayhead(endM);
+      return;
+    }
+    // Nested zoom stays inside the current domain.
+    start = Math.max(domainStart, start);
+    end = Math.min(domainEnd, end);
+    if (end - start < minSpan) return;
+    onViewWindow({ startM: start, endM: end });
+    onPlayhead((start + end) / 2);
   };
 
   const focusChannelId =
@@ -404,10 +441,20 @@ export function TelemetryStage({
             {" · "}
             <span className="text-[var(--mist)]">
               {compareLapId
-                ? "click channel → map green/red · enlarge · Ctrl+wheel"
-                : "click name to enlarge · Ctrl+wheel zoom"}
+                ? "drag to zoom · click channel → map · Ctrl+wheel"
+                : "drag across traces to zoom map + graphs · Ctrl+wheel"}
             </span>
           </p>
+          {viewWindow && onViewWindow && (
+            <button
+              type="button"
+              onClick={() => onViewWindow(null)}
+              className="rounded-sm border border-[var(--signal)] bg-[var(--signal-dim)] px-2.5 py-1 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-[var(--signal)] shadow-[0_0_0_1px_rgba(198,255,74,0.25)] transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+              title="Reset graphs and map to the full lap"
+            >
+              Reset zoom · full lap
+            </button>
+          )}
           {focusLabel && (
             <span className="inline-flex flex-wrap items-center gap-2 font-mono text-[0.62rem] text-[var(--mist)]">
               <span className="inline-flex items-center gap-1.5 rounded-sm border border-[var(--hairline)] bg-[rgba(5,7,10,0.55)] px-1.5 py-0.5">
@@ -553,11 +600,37 @@ export function TelemetryStage({
               : `Telemetry stage. Playhead at ${Math.round(playheadM)} meters. ${channels.length} channels.`
           }
           onPointerDown={(e) => {
-            (e.target as Element).setPointerCapture?.(e.pointerId);
-            onPointer(e.clientX);
+            if (e.button !== 0) return;
+            const hit = clientToPlot(e.clientX);
+            if (!hit) return;
+            (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+            brushOrigin.current = {
+              startM: hit.m,
+              clientX: e.clientX,
+            };
+            brushActive.current = false;
+            setBrush(null);
+            onPlayhead(hit.m);
           }}
           onPointerMove={(e) => {
-            if (e.buttons === 1) onPointer(e.clientX);
+            if (e.buttons !== 1 || !brushOrigin.current) return;
+            const hit = clientToPlot(e.clientX);
+            if (!hit) return;
+            const dx = Math.abs(e.clientX - brushOrigin.current.clientX);
+            if (dx > 10) {
+              brushActive.current = true;
+              setBrush({ a: brushOrigin.current.startM, b: hit.m });
+            } else if (!brushActive.current) {
+              onPlayhead(hit.m);
+            }
+          }}
+          onPointerUp={(e) => {
+            finishBrush(e.clientX);
+          }}
+          onPointerCancel={() => {
+            brushOrigin.current = null;
+            brushActive.current = false;
+            setBrush(null);
           }}
           onPointerLeave={() => setHoverId(null)}
         >
@@ -749,6 +822,7 @@ export function TelemetryStage({
                 onClick={
                   compareLapId && onDeltaChannel
                     ? () => {
+                        if (skipClickRef.current) return;
                         selectCompareChannel(ch.id);
                         setExpandedId((cur) =>
                           cur === ch.id && isMapDelta ? null : ch.id,
@@ -1061,6 +1135,38 @@ export function TelemetryStage({
                 </g>
               );
             })()}
+
+          {/* Drag-brush zoom preview */}
+          {brush && (
+            <g pointerEvents="none">
+              <rect
+                x={Math.min(xOf(brush.a), xOf(brush.b))}
+                y={plotTop}
+                width={Math.max(2, Math.abs(xOf(brush.b) - xOf(brush.a)))}
+                height={H - plotTop}
+                fill="rgba(198,255,74,0.16)"
+                stroke="var(--signal)"
+                strokeWidth={1.25}
+                strokeDasharray="4 3"
+              />
+              <text
+                x={
+                  (Math.min(xOf(brush.a), xOf(brush.b)) +
+                    Math.max(xOf(brush.a), xOf(brush.b))) /
+                  2
+                }
+                y={plotTop + 14}
+                textAnchor="middle"
+                fill="var(--signal)"
+                fontSize="10"
+                fontFamily="var(--font-mono)"
+                fontWeight={700}
+              >
+                {Math.round(Math.min(brush.a, brush.b))}–
+                {Math.round(Math.max(brush.a, brush.b))} m · zoom
+              </text>
+            </g>
+          )}
 
           {/* Playhead */}
           <rect
