@@ -22,6 +22,7 @@ export function StageAcqBar({
   totalChannels,
   viewWindow = null,
   onClearWindow,
+  compact = false,
 }: {
   plotChannelIds: string[];
   comparing: boolean;
@@ -30,6 +31,8 @@ export function StageAcqBar({
   totalChannels: number;
   viewWindow?: { startM: number; endM: number } | null;
   onClearWindow?: () => void;
+  /** Phone / narrow column — single scrolling row, less chrome. */
+  compact?: boolean;
 }) {
   const allIds = defaultPlotIds();
 
@@ -40,10 +43,19 @@ export function StageAcqBar({
   });
 
   return (
-    <div className="flex shrink-0 flex-wrap items-center gap-1.5 border border-[var(--hairline)] bg-[var(--panel)] px-2.5 py-1.5">
-      <p className="mr-1 font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--mute)]">
-        Acq · stage
-      </p>
+    <div
+      className={cn(
+        "flex shrink-0 items-center gap-1.5 border border-[var(--hairline)] bg-[var(--panel)]",
+        compact
+          ? "overflow-x-auto overscroll-x-contain px-2 py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          : "flex-wrap px-2.5 py-1.5",
+      )}
+    >
+      {!compact && (
+        <p className="mr-1 font-mono text-[0.5rem] uppercase tracking-[0.14em] text-[var(--mute)]">
+          Acq · stage
+        </p>
+      )}
       {PRESET_ORDER.map((name) => {
         const hot = activePreset === name;
         const count = resolvePreset(name, allIds).length;
@@ -54,7 +66,10 @@ export function StageAcqBar({
             onClick={() => onSetPlots(resolvePreset(name, allIds))}
             title={`${count} channels`}
             className={cn(
-              "min-h-7 rounded-sm border px-2 font-mono text-[0.58rem] uppercase tracking-[0.08em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
+              "shrink-0 rounded-sm border font-mono uppercase tracking-[0.08em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
+              compact
+                ? "min-h-7 px-1.5 text-[0.52rem]"
+                : "min-h-7 px-2 text-[0.58rem]",
               hot
                 ? "border-[var(--signal)] bg-[var(--signal-dim)] text-[var(--signal)]"
                 : "border-[var(--hairline)] text-[var(--mist)] hover:border-[var(--signal)]/45 hover:text-[var(--signal)]",
@@ -65,38 +80,50 @@ export function StageAcqBar({
           </button>
         );
       })}
-      <span className="font-mono text-[0.58rem] tabular-nums text-[var(--mute)]">
-        {plotChannelIds.length}/{totalChannels} plotted
-      </span>
+      {!compact && (
+        <span className="font-mono text-[0.58rem] tabular-nums text-[var(--mute)]">
+          {plotChannelIds.length}/{totalChannels} plotted
+        </span>
+      )}
       {viewWindow && onClearWindow && (
         <button
           type="button"
           onClick={onClearWindow}
-          className="rounded-sm border border-[var(--signal)] bg-[var(--signal-dim)] px-2.5 py-1 font-mono text-[0.58rem] font-semibold uppercase tracking-[0.1em] text-[var(--signal)] shadow-[0_0_0_1px_rgba(198,255,74,0.3)] transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+          className={cn(
+            "shrink-0 rounded-sm border border-[var(--signal)] bg-[var(--signal-dim)] font-mono font-semibold uppercase tracking-[0.1em] text-[var(--signal)] shadow-[0_0_0_1px_rgba(198,255,74,0.3)] transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
+            compact ? "px-2 py-0.5 text-[0.52rem]" : "px-2.5 py-1 text-[0.58rem]",
+          )}
           title="Reset map + graphs to the full lap"
         >
-          Reset zoom · full lap
-          <span className="ml-1.5 font-normal tabular-nums opacity-75">
-            {Math.round(viewWindow.startM)}–{Math.round(viewWindow.endM)} m
-          </span>
+          {compact ? "Full lap" : "Reset zoom · full lap"}
+          {!compact && (
+            <span className="ml-1.5 font-normal tabular-nums opacity-75">
+              {Math.round(viewWindow.startM)}–{Math.round(viewWindow.endM)} m
+            </span>
+          )}
         </button>
       )}
       {comparing && onSolo && (
         <button
           type="button"
           onClick={onSolo}
-          className="ml-auto min-h-7 rounded-sm border border-[var(--trace-cyan)]/45 bg-[rgba(58,215,255,0.1)] px-2.5 font-mono text-[0.58rem] uppercase tracking-[0.08em] text-[var(--trace-cyan)] transition hover:bg-[rgba(58,215,255,0.2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+          className={cn(
+            "shrink-0 rounded-sm border border-[var(--trace-cyan)]/45 bg-[rgba(58,215,255,0.1)] font-mono uppercase tracking-[0.08em] text-[var(--trace-cyan)] transition hover:bg-[rgba(58,215,255,0.2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]",
+            compact
+              ? "ml-auto min-h-7 px-2 text-[0.52rem]"
+              : "ml-auto min-h-7 px-2.5 text-[0.58rem]",
+          )}
           title="Clear Reference and focus one car"
         >
-          Solo · 1 car
+          {compact ? "Solo" : "Solo · 1 car"}
         </button>
       )}
-      {!comparing && (
+      {!comparing && !compact && (
         <span className="ml-auto font-mono text-[0.5rem] uppercase tracking-[0.12em] text-[var(--signal)]">
           Solo · pick Reference to overlay
         </span>
       )}
-      {comparing && !onSolo && (
+      {comparing && !onSolo && !compact && (
         <span className="ml-auto font-mono text-[0.5rem] uppercase tracking-[0.12em] text-[var(--trace-cyan)]">
           Dual draw · Focus solid · Ref dashed
         </span>

@@ -44,7 +44,7 @@ export const DEMO_STEPS = [
 
 /** Freshness lead — use at the top of every outreach email */
 export const FRESHNESS_LEAD =
-  "I just shipped CiteTrace — a first-stab pit wall built from public OpenF1 results for the 2026 United States GP · Circuit of the Americas · FP2 (session found online, all 22 drivers). Circuit on stage, any-car compare, cite→playhead lock, labeled ATLAS-shaped overlays (OF1 vs OVL).";
+  "I developed CiteTrace as a live portfolio demo for race-ops / telemetry software roles — a pit wall built from public OpenF1 results for the 2026 United States GP · Circuit of the Americas · FP2 (session found online, all 22 drivers). Circuit on stage, any-car compare, cite→playhead lock, labeled ATLAS-shaped overlays (OF1 vs OVL).";
 
 /** Default outreach blurb (Ferrari money-shot) */
 export const EMAIL_BLURB = `${FRESHNESS_LEAD} Waveforms are table stakes. Grounded answers are the job. Live: ${LIVE_URL} · Portfolio: ${PORTFOLIO_URL} · Demo: ${LIVE_DEMO_URL}`;
@@ -54,3 +54,14 @@ export const EMAIL_BLURB_AUDI = `${FRESHNESS_LEAD} Audi walk-in: Bortoleto Mediu
 
 /** Motion Applied / ATLAS FAE outreach */
 export const EMAIL_BLURB_MOTION = `${FRESHNESS_LEAD} Shaped around public ATLAS vocabulary without cloning the viewer — the cite locks the playhead. Ask: "${DEMO_ASK}" → ${LIVE_DEMO_URL} · ${PORTFOLIO_URL}`;
+
+/** GM Motorsports / Cadillac house */
+export const LIVE_CADILLAC_URL = `${LIVE_URL}/session?demo=1&house=cadillac`;
+export const EMAIL_BLURB_GM = `${FRESHNESS_LEAD} Cadillac house walk-in for GM Motorsports (F1 + WEC + IMSA tooling path): ${LIVE_CADILLAC_URL} · ${PORTFOLIO_URL}`;
+
+/** Team Penske */
+export const EMAIL_BLURB_PENSKE = `${FRESHNESS_LEAD} C# / Blazor racing-ops story (Meridian) + CiteTrace race UX. Demo: ${LIVE_DEMO_URL} · ${PORTFOLIO_URL}`;
+
+/** Nov 2026 private apply hub (after welch-website deploy) */
+export const RACE_PACK_HUB =
+  "https://www.welchsoftware.net/private/ew-race-20261104/";

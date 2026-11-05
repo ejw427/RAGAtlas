@@ -50,7 +50,7 @@ import {
   lapDistanceM,
   sectorLabel,
 } from "@/lib/session";
-import { peakInWindow } from "@/lib/utils";
+import { cn, peakInWindow } from "@/lib/utils";
 import { animateValue } from "@/lib/motion";
 import type { CiteTarget } from "@/lib/types";
 import {
@@ -195,7 +195,10 @@ export function SessionShell() {
     nonce: number;
   } | null>(null);
   const [emphasizeCites, setEmphasizeCites] = useState(false);
+  const [narrowStage, setNarrowStage] = useState(false);
+  const [stageChannelExpanded, setStageChannelExpanded] = useState(false);
   const lengthM = lapDistanceM();
+  const channelFocusCompact = narrowStage && stageChannelExpanded;
 
   useEffect(() => {
     if (boot.demoForced) {
@@ -692,6 +695,15 @@ export function SessionShell() {
     setAskOpen(true);
   };
 
+  // Phone / short column: compact stage chrome + shrink map while a channel is enlarged.
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const sync = () => setNarrowStage(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
   const runDemoStep = (step: DemoStep) => {
     setDemoStep(step);
     setDemoOpen(true);
@@ -884,7 +896,7 @@ export function SessionShell() {
         {/* Locked to the scrollport on wide desks so dock lists scroll instead of stretching the map. */}
         <div className="flex min-h-full flex-col md:grid md:h-full md:max-h-full md:grid-cols-[220px_minmax(0,1fr)_240px] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden xl:grid-cols-[210px_minmax(0,1fr)_210px_280px]">
           <div className="md:min-h-0 md:overflow-hidden">
-            <div className="md:hidden">
+            <div className={channelFocusCompact ? "hidden" : "md:hidden"}>
               <Plate
                 driver={driver}
                 lap={lap}
@@ -912,7 +924,13 @@ export function SessionShell() {
               compareLapId ? "compare-stage-glow" : ""
             }`}
           >
-            <div className="h-[min(48vw,360px)] shrink-0 overflow-hidden md:h-[min(36vh,340px)] md:min-h-[240px]">
+            <div
+              className={
+                channelFocusCompact
+                  ? "h-[min(28vw,140px)] shrink-0 overflow-hidden transition-[height] duration-200 ease-out md:h-[min(36vh,340px)] md:min-h-[240px]"
+                  : "h-[min(48vw,360px)] shrink-0 overflow-hidden transition-[height] duration-200 ease-out md:h-[min(36vh,340px)] md:min-h-[240px]"
+              }
+            >
               <TrackSchematic
                 stage
                 paintMode={compareLapId ? "both" : "sector"}
@@ -954,7 +972,12 @@ export function SessionShell() {
                 compareLapId={compareLapId}
               />
             </div>
-            <div className="flex min-h-[420px] flex-1 flex-col gap-1.5 md:min-h-0">
+            <div
+              className={cn(
+                "flex flex-1 flex-col md:min-h-0",
+                channelFocusCompact ? "min-h-[520px] gap-1" : "min-h-[420px] gap-1.5",
+              )}
+            >
               <StageAcqBar
                 plotChannelIds={plotChannelIds}
                 comparing={Boolean(compareLapId)}
@@ -966,6 +989,7 @@ export function SessionShell() {
                   setMapWindow(null);
                   selectSector("Lap");
                 }}
+                compact={narrowStage}
               />
               <TelemetryStage
                 lapId={lapId}
@@ -995,6 +1019,7 @@ export function SessionShell() {
                 sectorDeltaMs={deltas?.sectorsMs ?? null}
                 deltaChannelId={compareLapId ? activeDeltaChannel : null}
                 onDeltaChannel={compareLapId ? setCompareChannel : undefined}
+                onExpandedChange={(id) => setStageChannelExpanded(Boolean(id))}
               />
             </div>
           </main>

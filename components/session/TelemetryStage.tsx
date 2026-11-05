@@ -39,6 +39,9 @@ function strokeFor(ch: Channel) {
   return COLOR[ch.colorToken] ?? "var(--chalk)";
 }
 
+/** Narrow stage: phone / short column — collapses chrome + focuses one channel. */
+const COMPACT_STAGE_PX = 640;
+
 export function TelemetryStage({
   lapId,
   compareLapId,
@@ -58,6 +61,7 @@ export function TelemetryStage({
   sectorDeltaMs = null,
   deltaChannelId = null,
   onDeltaChannel,
+  onExpandedChange,
 }: {
   lapId: string;
   compareLapId: string | null;
@@ -82,6 +86,8 @@ export function TelemetryStage({
   deltaChannelId?: string | null;
   /** Click a channel row to drive map compare paint. */
   onDeltaChannel?: (channelId: string) => void;
+  /** Notify parent when a channel is enlarged (for compact map / layout). */
+  onExpandedChange?: (channelId: string | null) => void;
 }) {
   const channels = stageChannels(plotChannelIds);
   const uid = useId();
@@ -91,6 +97,7 @@ export function TelemetryStage({
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [shellH, setShellH] = useState(0);
+  const [shellW, setShellW] = useState(0);
   /** Live drag selection across distance (metres). */
   const [brush, setBrush] = useState<{ a: number; b: number } | null>(null);
   const brushOrigin = useRef<{ startM: number; clientX: number } | null>(
@@ -99,6 +106,8 @@ export function TelemetryStage({
   const brushActive = useRef(false);
   /** Suppress channel click that follows a completed brush gesture. */
   const skipClickRef = useRef(false);
+  const compact = shellW > 0 && shellW < COMPACT_STAGE_PX;
+  const focusMode = compact && expandedId != null;
   const lengthM = lapDistanceM();
   const pack = getSessionPack();
   const lap = getLapById(lapId);
@@ -111,13 +120,19 @@ export function TelemetryStage({
     const el = shellRef.current;
     if (!el) return;
     const ro = new ResizeObserver((entries) => {
-      const h = entries[0]?.contentRect.height ?? 0;
-      setShellH(h);
+      const box = entries[0]?.contentRect;
+      setShellH(box?.height ?? 0);
+      setShellW(box?.width ?? 0);
     });
     ro.observe(el);
     setShellH(el.clientHeight);
+    setShellW(el.clientWidth);
     return () => ro.disconnect();
   }, []);
+
+  useEffect(() => {
+    onExpandedChange?.(expandedId);
+  }, [expandedId, onExpandedChange]);
 
   const traps = useMemo(() => {
     const open = lap?.openf1;
@@ -229,29 +244,100 @@ export function TelemetryStage({
     onDeltaChannel?.(channelId);
   };
   const n = Math.max(plots.length + (showDelta ? 1 : 0), 1);
-  const axisH = 28;
+  const axisH = compact ? 22 : 28;
   // Readable rows; expanded channel gets a hero band so you can scrub detail.
-  const baseMin = n >= 12 ? 52 : n >= 8 ? 58 : 68;
+  // On narrow stages, collapse siblings so the focused channel actually fits.
+  const baseMin = compact
+    ? n >= 12
+      ? 36
+      : n >= 8
+        ? 40
+        : 48
+    : n >= 12
+      ? 52
+      : n >= 8
+        ? 58
+        : 68;
   const fitted =
     shellH > 0 ? Math.floor((shellH - axisH - 4) / n) : baseMin;
-  const normalRow = Math.max(baseMin, Math.min(fitted, 100));
-  const expandRow = Math.max(240, Math.round(normalRow * 2.85));
-  const rowHeights = plots.map(({ ch }) =>
-    expandedId === ch.id ? expandRow : normalRow,
+  const normalRow = Math.max(
+    baseMin,
+    Math.min(fitted, compact ? 72 : 100),
   );
-  const deltaRowH = showDelta ? (expandedId === "__delta" ? expandRow : normalRow) : 0;
+  const collapsedRow = focusMode ? (compact ? 24 : 32) : normalRow;
+  const expandRow = focusMode
+    ? Math.max(
+        168,
+        Math.min(
+          Math.round((shellH || 280) * 0.58),
+          Math.max(200, Math.round((shellW || 360) * 0.55)),
+        ),
+      )
+    : Math.max(240, Math.round(normalRow * 2.85));
+  const rowHeights = plots.map(({ ch }) =>
+    expandedId === ch.id ? expandRow : collapsedRow,
+  );
+  const deltaRowH = showDelta
+    ? expandedId === "__delta"
+      ? expandRow
+      : collapsedRow
+    : 0;
   const rowsH =
     rowHeights.reduce((a, b) => a + b, 0) + deltaRowH;
   const W = 960;
   const H = axisH + rowsH + 4;
-  const padL = compareLapId ? 124 : 108;
-  const padR = compareLapId ? 96 : 78;
+  const padL = compareLapId
+    ? compact
+      ? 108
+      : 124
+    : compact
+      ? 96
+      : 108;
+  const padR = compareLapId
+    ? compact
+      ? 78
+      : 96
+    : compact
+      ? 64
+      : 78;
   const plotW = W - padL - padR;
   const plotTop = axisH;
   const fillsShell = false; // prefer scroll so 12+ channels stay readable
 
   const rowTop = (idx: number) =>
     plotTop + rowHeights.slice(0, idx).reduce((a, b) => a + b, 0);
+
+  // Keep the enlarged channel in view on phones.
+  useEffect(() => {
+    if (!expandedId || !shellRef.current || !svgRef.current) return;
+    const idx =
+      expandedId === "__delta"
+        ? plots.length
+        : plots.findIndex(({ ch }) => ch.id === expandedId);
+    if (idx < 0) return;
+    const y0 = rowTop(idx);
+    const rowH =
+      expandedId === "__delta"
+        ? deltaRowH
+        : (rowHeights[idx] ?? normalRow);
+    const svg = svgRef.current;
+    const shell = shellRef.current;
+    const scale = svg.clientWidth / W || 1;
+    const top = y0 * scale;
+    const height = rowH * scale;
+    const pad = 12;
+    const viewTop = shell.scrollTop;
+    const viewBottom = viewTop + shell.clientHeight;
+    if (top < viewTop + pad) {
+      shell.scrollTo({ top: Math.max(0, top - pad), behavior: "smooth" });
+    } else if (top + height > viewBottom - pad) {
+      shell.scrollTo({
+        top: Math.max(0, top + height - shell.clientHeight + pad),
+        behavior: "smooth",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- scroll when expand target changes
+  }, [expandedId, compact, expandRow]);
 
   const xOf = (m: number) =>
     padL + ((m - domainStart) / domainSpan) * plotW;
@@ -418,48 +504,94 @@ export function TelemetryStage({
     Math.round(domainStart + t * domainSpan),
   );
 
-  return (
-    <div className="flex h-full min-h-0 flex-1 flex-col gap-1.5 overflow-hidden">
-      <div className="flex shrink-0 flex-wrap items-end justify-between gap-2 px-0.5">
-        <div className="flex items-baseline gap-3">
-          <p className="font-display text-xl font-semibold tracking-tight text-[var(--chalk)] tabular-nums">
-            {Math.round(playheadM)}
-            <span className="ml-1 font-mono text-xs font-normal text-[var(--mute)]">
-              m
-            </span>
-          </p>
-          <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-[var(--mute)]">
-            {channels.length} channels · distance
-            {compareLapId ? " · dual draw" : ""}
-            {viewWindow
-              ? ` · window ${Math.round(domainStart)}-${Math.round(domainEnd)} m`
-              : ""}
-            {" · "}
-            <span className="text-[var(--mute)]">OF1</span>
-            {" / "}
-            <span className="text-[var(--trace-amber)]">OVL</span>
-            {" · "}
-            <span className="text-[var(--mist)]">
-              {compareLapId
-                ? "drag to zoom · click channel → map · Ctrl+wheel"
-                : "drag across traces to zoom map + graphs · Ctrl+wheel"}
-            </span>
-          </p>
-          {viewWindow && onViewWindow && (
-            <button
-              type="button"
-              onClick={() => onViewWindow(null)}
-              className="rounded-sm border border-[var(--signal)] bg-[var(--signal-dim)] px-2.5 py-1 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-[var(--signal)] shadow-[0_0_0_1px_rgba(198,255,74,0.25)] transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
-              title="Reset graphs and map to the full lap"
-            >
-              Reset zoom · full lap
-            </button>
+  const sectorChips = sectors.map((s, i) => {
+    const delta = sectorDeltaMs?.[i];
+    const ahead = delta != null && delta <= 0;
+    const behind = delta != null && delta > 0;
+    return (
+      <span
+        key={s.id}
+        className={cn(
+          "inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5",
+          ahead && "bg-[var(--signal-dim)] text-[var(--signal)]",
+          behind && "bg-[rgba(255,77,94,0.16)] text-[var(--fault)]",
+        )}
+      >
+        <span
+          className={cn(
+            "h-1.5 w-1.5 rounded-full",
+            ahead
+              ? "bg-[var(--signal)]"
+              : behind
+                ? "bg-[var(--fault)]"
+                : "bg-[var(--trace-cyan)]/80",
           )}
-          {focusLabel && (
-            <span className="inline-flex flex-wrap items-center gap-2 font-mono text-[0.62rem] text-[var(--mist)]">
-              <span className="inline-flex items-center gap-1.5 rounded-sm border border-[var(--hairline)] bg-[rgba(5,7,10,0.55)] px-1.5 py-0.5">
+        />
+        {s.label}
+        {delta != null ? (
+          <span className="font-bold tabular-nums">
+            {delta > 0 ? "+" : "-"}
+            {Math.abs(delta / 1000).toFixed(3)}
+          </span>
+        ) : (
+          <span className="text-[var(--mute)]">
+            {Math.round(s.startM)}-{Math.round(s.endM)}
+          </span>
+        )}
+      </span>
+    );
+  });
+
+  const expandedChannel =
+    expandedId && expandedId !== "__delta" ? getChannel(expandedId) : null;
+
+  return (
+    <div
+      className={cn(
+        "flex h-full min-h-0 flex-1 flex-col overflow-hidden",
+        compact ? "gap-1" : "gap-1.5",
+      )}
+    >
+      {compact ? (
+        <div className="flex shrink-0 flex-col gap-1 px-0.5">
+          <div className="flex items-center gap-2">
+            <p className="font-display text-lg font-semibold tracking-tight text-[var(--chalk)] tabular-nums">
+              {Math.round(playheadM)}
+              <span className="ml-0.5 font-mono text-[0.65rem] font-normal text-[var(--mute)]">
+                m
+              </span>
+            </p>
+            {focusMode && (
+              <span className="min-w-0 truncate rounded-sm border border-[var(--signal)]/40 bg-[var(--signal-dim)] px-1.5 py-0.5 font-mono text-[0.58rem] font-semibold uppercase tracking-[0.08em] text-[var(--signal)]">
+                {expandedId === "__delta"
+                  ? `Δ${mapDeltaLegend.label}`
+                  : (expandedChannel?.displayName ??
+                    expandedChannel?.name ??
+                    "Channel")}
+                <button
+                  type="button"
+                  onClick={() => setExpandedId(null)}
+                  className="ml-1.5 text-[var(--mist)] underline-offset-2 hover:text-[var(--chalk)] hover:underline"
+                >
+                  close
+                </button>
+              </span>
+            )}
+            {!focusMode && (
+              <p className="min-w-0 flex-1 truncate font-mono text-[0.52rem] uppercase tracking-[0.12em] text-[var(--mute)]">
+                {channels.length} ch
+                {compareLapId ? " · dual" : ""}
+                {viewWindow
+                  ? ` · ${Math.round(domainStart)}–${Math.round(domainEnd)}`
+                  : ""}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[0.55rem] text-[var(--mist)]">
+            {focusLabel && (
+              <span className="inline-flex items-center gap-1">
                 <span
-                  className="inline-block h-1 w-5 rounded-full"
+                  className="inline-block h-1 w-3.5 rounded-full"
                   style={{ background: focusAccent ?? "var(--signal)" }}
                 />
                 <span
@@ -468,17 +600,13 @@ export function TelemetryStage({
                 >
                   {focusLabel}
                 </span>
-              </span>
-              {referenceLabel && compareLapId && (
-                <>
-                  <span className="font-display text-[0.7rem] font-black text-[var(--trace-cyan)]">
-                    VS
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-sm border border-[var(--hairline)] bg-[rgba(5,7,10,0.55)] px-1.5 py-0.5">
+                {referenceLabel && compareLapId && (
+                  <>
+                    <span className="text-[var(--trace-cyan)]">/</span>
                     <span
-                      className="inline-block h-1 w-5 rounded-full"
+                      className="inline-block h-1 w-3.5 rounded-full"
                       style={{
-                        background: `repeating-linear-gradient(90deg, ${referenceAccent ?? "#6b7788"} 0 3px, transparent 3px 6px)`,
+                        background: `repeating-linear-gradient(90deg, ${referenceAccent ?? "#6b7788"} 0 2px, transparent 2px 4px)`,
                       }}
                     />
                     <span
@@ -487,93 +615,148 @@ export function TelemetryStage({
                     >
                       {referenceLabel}
                     </span>
-                  </span>
-                </>
-              )}
-              {compareLapId && (
-                <span className="inline-flex items-center gap-2 rounded-sm border border-[var(--hairline)] px-1.5 py-0.5">
-                  <span className="font-mono text-[0.55rem] uppercase tracking-[0.08em] text-[var(--mute)]">
-                    map Δ{mapDeltaLegend.label}
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[var(--signal)]">
-                    <span className="inline-block h-2 w-2 rounded-sm bg-[var(--signal)] shadow-[0_0_8px_rgba(198,255,74,0.8)]" />
-                    {mapDeltaLegend.ahead}
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[var(--fault)]">
-                    <span className="inline-block h-2 w-2 rounded-sm bg-[var(--fault)] shadow-[0_0_8px_rgba(255,77,94,0.7)]" />
-                    {mapDeltaLegend.behind}
+                  </>
+                )}
+              </span>
+            )}
+            {compareLapId && (
+              <span className="inline-flex items-center gap-1 text-[var(--mute)]">
+                Δ{mapDeltaLegend.label}
+                <span className="text-[var(--signal)]">+</span>
+                <span className="text-[var(--fault)]">−</span>
+              </span>
+            )}
+            {sectorChips}
+            {activeCite && (
+              <span className="truncate text-[var(--signal)]">
+                {activeCite.label}
+              </span>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="flex shrink-0 flex-wrap items-end justify-between gap-2 px-0.5">
+          <div className="flex items-baseline gap-3">
+            <p className="font-display text-xl font-semibold tracking-tight text-[var(--chalk)] tabular-nums">
+              {Math.round(playheadM)}
+              <span className="ml-1 font-mono text-xs font-normal text-[var(--mute)]">
+                m
+              </span>
+            </p>
+            <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-[var(--mute)]">
+              {channels.length} channels · distance
+              {compareLapId ? " · dual draw" : ""}
+              {viewWindow
+                ? ` · window ${Math.round(domainStart)}-${Math.round(domainEnd)} m`
+                : ""}
+              {" · "}
+              <span className="text-[var(--mute)]">OF1</span>
+              {" / "}
+              <span className="text-[var(--trace-amber)]">OVL</span>
+              {" · "}
+              <span className="text-[var(--mist)]">
+                {compareLapId
+                  ? "drag to zoom · click channel → map · Ctrl+wheel"
+                  : "drag across traces to zoom map + graphs · Ctrl+wheel"}
+              </span>
+            </p>
+            {viewWindow && onViewWindow && (
+              <button
+                type="button"
+                onClick={() => onViewWindow(null)}
+                className="rounded-sm border border-[var(--signal)] bg-[var(--signal-dim)] px-2.5 py-1 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-[var(--signal)] shadow-[0_0_0_1px_rgba(198,255,74,0.25)] transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+                title="Reset graphs and map to the full lap"
+              >
+                Reset zoom · full lap
+              </button>
+            )}
+            {focusLabel && (
+              <span className="inline-flex flex-wrap items-center gap-2 font-mono text-[0.62rem] text-[var(--mist)]">
+                <span className="inline-flex items-center gap-1.5 rounded-sm border border-[var(--hairline)] bg-[rgba(5,7,10,0.55)] px-1.5 py-0.5">
+                  <span
+                    className="inline-block h-1 w-5 rounded-full"
+                    style={{ background: focusAccent ?? "var(--signal)" }}
+                  />
+                  <span
+                    className="font-semibold"
+                    style={{ color: focusAccent ?? "var(--signal)" }}
+                  >
+                    {focusLabel}
                   </span>
                 </span>
-              )}
-            </span>
-          )}
-          {activeCite && (
-            <span className="font-mono text-[0.68rem] text-[var(--signal)]">
-              {activeCite.label}
-            </span>
-          )}
-          {compareLapId && onOpenCompare && (
-            <button
-              type="button"
-              onClick={onOpenCompare}
-              className="rounded-sm border border-[var(--trace-cyan)]/50 bg-[rgba(58,215,255,0.12)] px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-[var(--trace-cyan)] transition hover:bg-[rgba(58,215,255,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
-            >
-              Racer detail
-            </button>
-          )}
-        </div>
-        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[0.6rem] text-[var(--mist)]">
-          {sectors.map((s, i) => {
-            const delta = sectorDeltaMs?.[i];
-            const ahead = delta != null && delta <= 0;
-            const behind = delta != null && delta > 0;
-            return (
-              <span
-                key={s.id}
-                className={cn(
-                  "inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5",
-                  ahead && "bg-[var(--signal-dim)] text-[var(--signal)]",
-                  behind && "bg-[rgba(255,77,94,0.16)] text-[var(--fault)]",
+                {referenceLabel && compareLapId && (
+                  <>
+                    <span className="font-display text-[0.7rem] font-black text-[var(--trace-cyan)]">
+                      VS
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-sm border border-[var(--hairline)] bg-[rgba(5,7,10,0.55)] px-1.5 py-0.5">
+                      <span
+                        className="inline-block h-1 w-5 rounded-full"
+                        style={{
+                          background: `repeating-linear-gradient(90deg, ${referenceAccent ?? "#6b7788"} 0 3px, transparent 3px 6px)`,
+                        }}
+                      />
+                      <span
+                        className="font-semibold"
+                        style={{ color: referenceAccent ?? "var(--mute)" }}
+                      >
+                        {referenceLabel}
+                      </span>
+                    </span>
+                  </>
                 )}
-              >
-                <span
-                  className={cn(
-                    "h-1.5 w-1.5 rounded-full",
-                    ahead
-                      ? "bg-[var(--signal)]"
-                      : behind
-                        ? "bg-[var(--fault)]"
-                        : "bg-[var(--trace-cyan)]/80",
-                  )}
-                />
-                {s.label}
-                {delta != null ? (
-                  <span className="font-bold tabular-nums">
-                    {delta > 0 ? "+" : "-"}
-                    {Math.abs(delta / 1000).toFixed(3)}
-                  </span>
-                ) : (
-                  <span className="text-[var(--mute)]">
-                    {Math.round(s.startM)}-{Math.round(s.endM)}
+                {compareLapId && (
+                  <span className="inline-flex items-center gap-2 rounded-sm border border-[var(--hairline)] px-1.5 py-0.5">
+                    <span className="font-mono text-[0.55rem] uppercase tracking-[0.08em] text-[var(--mute)]">
+                      map Δ{mapDeltaLegend.label}
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-[var(--signal)]">
+                      <span className="inline-block h-2 w-2 rounded-sm bg-[var(--signal)] shadow-[0_0_8px_rgba(198,255,74,0.8)]" />
+                      {mapDeltaLegend.ahead}
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-[var(--fault)]">
+                      <span className="inline-block h-2 w-2 rounded-sm bg-[var(--fault)] shadow-[0_0_8px_rgba(255,77,94,0.7)]" />
+                      {mapDeltaLegend.behind}
+                    </span>
                   </span>
                 )}
               </span>
-            );
-          })}
-          {peak && evidence && activeCite?.channelId === peakChannelId && peakCh && (
-            <span
-              className={cn(
-                "rounded-sm px-1.5 py-0.5",
-                peakChannelId === "brake_temp"
-                  ? "bg-[var(--fault)]/15 text-[var(--fault)]"
-                  : "bg-[var(--signal-dim)] text-[var(--signal)]",
+            )}
+            {activeCite && (
+              <span className="font-mono text-[0.68rem] text-[var(--signal)]">
+                {activeCite.label}
+              </span>
+            )}
+            {compareLapId && onOpenCompare && (
+              <button
+                type="button"
+                onClick={onOpenCompare}
+                className="rounded-sm border border-[var(--trace-cyan)]/50 bg-[rgba(58,215,255,0.12)] px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-[var(--trace-cyan)] transition hover:bg-[rgba(58,215,255,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+              >
+                Racer detail
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[0.6rem] text-[var(--mist)]">
+            {sectorChips}
+            {peak &&
+              evidence &&
+              activeCite?.channelId === peakChannelId &&
+              peakCh && (
+                <span
+                  className={cn(
+                    "rounded-sm px-1.5 py-0.5",
+                    peakChannelId === "brake_temp"
+                      ? "bg-[var(--fault)]/15 text-[var(--fault)]"
+                      : "bg-[var(--signal-dim)] text-[var(--signal)]",
+                  )}
+                >
+                  peak {formatChannelValue(peakCh, peak.value)}
+                </span>
               )}
-            >
-              peak {formatChannelValue(peakCh, peak.value)}
-            </span>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       <div
         ref={shellRef}
@@ -879,9 +1062,15 @@ export function TelemetryStage({
                 />
                 <text
                   x={10}
-                  y={y0 + rowH / 2 - (compare ? 2 : 0)}
+                  y={
+                    y0 +
+                    rowH / 2 -
+                    (isExpanded && compare ? 2 : focusMode && !isExpanded ? 0 : compare ? 2 : 0)
+                  }
                   fill={focused ? "var(--chalk)" : "var(--mist)"}
-                  fontSize={isExpanded ? 12 : 10}
+                  fontSize={
+                    isExpanded ? (compact ? 11 : 12) : focusMode ? 8 : 10
+                  }
                   fontFamily="var(--font-mono)"
                   fontWeight={focused ? 700 : 600}
                   className="cursor-pointer"
@@ -898,28 +1087,34 @@ export function TelemetryStage({
                   }}
                 >
                   {ch.displayName ?? ch.name}
-                  {isMapDelta
-                    ? " · MAP Δ"
-                    : isExpanded
-                      ? " · shrink"
-                      : compare
-                        ? " · compare"
-                        : " · enlarge"}
+                  {focusMode && !isExpanded
+                    ? ""
+                    : isMapDelta
+                      ? " · MAP Δ"
+                      : isExpanded
+                        ? " · shrink"
+                        : compare
+                          ? " · compare"
+                          : " · enlarge"}
                 </text>
-                <text
-                  x={10}
-                  y={y0 + rowH / 2 + 11}
-                  fill={
-                    isOverlayChannel(ch) ? "var(--trace-amber)" : "var(--mute)"
-                  }
-                  fontSize="7"
-                  fontFamily="var(--font-mono)"
-                  letterSpacing="0.06em"
-                >
-                  {sourceBadge(ch)}
-                  {ch.unit ? ` · ${ch.unit}` : ""}
-                  {compare ? " · dual" : ""}
-                </text>
+                {!(focusMode && !isExpanded) && (
+                  <text
+                    x={10}
+                    y={y0 + rowH / 2 + 11}
+                    fill={
+                      isOverlayChannel(ch)
+                        ? "var(--trace-amber)"
+                        : "var(--mute)"
+                    }
+                    fontSize="7"
+                    fontFamily="var(--font-mono)"
+                    letterSpacing="0.06em"
+                  >
+                    {sourceBadge(ch)}
+                    {ch.unit ? ` · ${ch.unit}` : ""}
+                    {compare ? " · dual" : ""}
+                  </text>
+                )}
                 {fillBundle &&
                   fillBundle.gain.map((p, gi) => (
                     <path
@@ -969,7 +1164,7 @@ export function TelemetryStage({
                       : undefined
                   }
                 />
-                {compare && liveRef != null ? (
+                {compare && liveRef != null && !(focusMode && !isExpanded) ? (
                   <g>
                     <text
                       x={W - 10}
@@ -1017,8 +1212,18 @@ export function TelemetryStage({
                     x={W - 10}
                     y={y0 + rowH / 2 + 3}
                     textAnchor="end"
-                    fill={focused ? stroke : "var(--chalk)"}
-                    fontSize={rowH >= 44 ? 10 : 9}
+                    fill={
+                      liveDelta != null && liveDelta < 0
+                        ? "var(--fault)"
+                        : liveDelta != null && liveDelta > 0
+                          ? "var(--signal)"
+                          : focused
+                            ? stroke
+                            : "var(--chalk)"
+                    }
+                    fontSize={
+                      isExpanded ? 10 : focusMode ? 8 : rowH >= 44 ? 10 : 9
+                    }
                     fontFamily="var(--font-mono)"
                     fontWeight={600}
                   >

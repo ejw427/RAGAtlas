@@ -90,9 +90,9 @@ The session screen is specified as a pit wall: the COTA map on stage, any car ag
 
 ## Job applications
 
-**Story to lead every email:** Just shipped CiteTrace — a **first stab** built from **public OpenF1** results for the **2026 United States GP · Circuit of the Americas · FP2** (session found online, all 22 drivers). Circuit on stage · any-car compare · cite→playhead lock · labeled ATLAS-shaped overlays (OF1 vs OVL). Independent portfolio prototype — not a team tool.
+**Story to lead every email:** Developed CiteTrace as a **live portfolio demo** for race-ops / telemetry software roles — built from **public OpenF1** for the **2026 United States GP · Circuit of the Americas · FP2** (session found online, all 22 drivers). Circuit on stage · any-car compare · cite→playhead lock · labeled ATLAS-shaped overlays (OF1 vs OVL). Independent portfolio prototype — not a team tool.
 
-Send-ready emails: `D:\welch-website\public\private\ew-f1-20261024\emails.html` (+ `EMAIL-*.txt`). Never send the private GitHub repo.
+Send-ready emails / apply hub (Nov 2026): `D:\welch-website\public\private\ew-race-20261104\` (live once deployed: `https://www.welchsoftware.net/private/ew-race-20261104/`). Never send the private GitHub repo.
 
 | Where | What to paste |
 |-------|----------------|

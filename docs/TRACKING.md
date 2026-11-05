@@ -31,10 +31,15 @@ Canonical builders: `lib/campaign.ts` → `TRACKED.audi`, `TRACKED.mclaren`, …
 | `audi` | Audi email / share |
 | `mclaren` | McLaren email |
 | `williams` | Williams email |
-| `motion` | Motion Applied |
+| `motion` | Motion Applied (fullstack / ai / fae via `utm_content`) |
 | `redbull` | Red Bull |
+| `cadillac` / `gm` | Cadillac house / GM Motorsports |
+| `penske` | Team Penske |
 | `linkedin` | LinkedIn featured |
 | `hybrid` / `generic` | Broad race-ops |
+
+**Nov 2026 pack hub (private):** `https://www.welchsoftware.net/private/ew-race-20261104/`  
+Campaign: `utm_campaign=race-outreach-202611`
 
 Client stores first-touch UTM in `sessionStorage` and POSTs to `/api/track` (Analytics Engine).
 
